@@ -38,9 +38,9 @@ public class SessionUtils {
                 .build();
     }
 
-    public static void saveToken(JSONObject response, SharedPreferences credentials) throws JSONException {
+    public static void saveToken(String token, SharedPreferences credentials) {
         SharedPreferences.Editor editor = credentials.edit();
-        editor.putString("Token", response.getString("api_key"));
+        editor.putString("Token", token);
         editor.commit();
     }
 }

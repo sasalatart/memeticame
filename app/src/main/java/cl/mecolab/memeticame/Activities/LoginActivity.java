@@ -7,6 +7,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.widget.ProgressBar;
+import android.widget.Toast;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -59,9 +60,18 @@ public class LoginActivity extends AppCompatActivity {
             @Override
             public void onResponse(Call call, Response response) throws IOException {
                 try {
-                    SessionUtils.saveToken(new JSONObject(response.body().string()), getSharedPreferences(SessionUtils.PREFERENCES, 0));
-                    Intent intent = new Intent(view.getContext(), MainActivity.class);
-                    startActivity(intent);
+                    JSONObject jsonResponse = new JSONObject(response.body().string());
+                    if (!jsonResponse.getString("api_key").equals("null")) {
+                        SessionUtils.saveToken(jsonResponse.getString("api_key"), getSharedPreferences(SessionUtils.PREFERENCES, 0));
+                        Intent intent = new Intent(view.getContext(), MainActivity.class);
+                        startActivity(intent);
+                    } else {
+                        LoginActivity.this.runOnUiThread(new Runnable() {
+                            public void run() {
+                                Toast.makeText(getApplicationContext(), "Invalid credentials", Toast.LENGTH_SHORT).show();
+                            }
+                        });
+                    }
                 } catch (JSONException e) {
                     Log.e("ERROR", e.toString());
                 }
