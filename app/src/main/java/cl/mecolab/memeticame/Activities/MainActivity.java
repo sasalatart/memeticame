@@ -1,5 +1,6 @@
 package cl.mecolab.memeticame.Activities;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.TabLayout;
 import android.support.v4.view.ViewPager;
@@ -9,6 +10,7 @@ import cl.mecolab.memeticame.Fragments.ChatsFragment;
 import cl.mecolab.memeticame.Fragments.ContactsFragment;
 import cl.mecolab.memeticame.Models.User;
 import cl.mecolab.memeticame.R;
+import cl.mecolab.memeticame.Utils.SessionUtils;
 import cl.mecolab.memeticame.Views.ViewPagerAdapter;
 
 public class MainActivity extends AppCompatActivity implements ContactsFragment.OnContactSelected {
@@ -17,6 +19,11 @@ public class MainActivity extends AppCompatActivity implements ContactsFragment.
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        if (SessionUtils.getToken(getSharedPreferences(SessionUtils.PREFERENCES, 0)).equals("")) {
+            Intent intent = new Intent(this, LoginActivity.class);
+            startActivity(intent);
+        }
 
         ViewPager viewPager = (ViewPager) findViewById(R.id.viewpager);
         setupViewPager(viewPager);
