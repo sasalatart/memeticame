@@ -20,6 +20,7 @@ import java.io.IOException;
 import cl.mecolab.memeticame.Models.LoginForm;
 import cl.mecolab.memeticame.R;
 import cl.mecolab.memeticame.Utils.HttpClient;
+import cl.mecolab.memeticame.Utils.Routes;
 import cl.mecolab.memeticame.Utils.SessionUtils;
 import cl.mecolab.memeticame.databinding.ActivityLoginBinding;
 import okhttp3.Call;
@@ -71,7 +72,7 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     public void login(final View view) {
-        Request request = SessionUtils.buildLoginRequest(mLoginForm.getPhoneNumber(), mLoginForm.getPassword());
+        Request request = Routes.buildLoginRequest(mLoginForm.getPhoneNumber(), mLoginForm.getPassword());
 
         progressBar.setVisibility(View.VISIBLE);
 

@@ -10,6 +10,7 @@ import android.os.Bundle;
 import android.provider.ContactsContract;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -19,12 +20,23 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ListView;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+
+import java.io.IOException;
 import java.util.ArrayList;
 
 import cl.mecolab.memeticame.Models.User;
 import cl.mecolab.memeticame.R;
 import cl.mecolab.memeticame.Utils.ContactsUtils;
+import cl.mecolab.memeticame.Utils.HttpClient;
+import cl.mecolab.memeticame.Utils.Routes;
+import cl.mecolab.memeticame.Utils.SessionUtils;
 import cl.mecolab.memeticame.Views.ContactsAdapter;
+import okhttp3.Call;
+import okhttp3.Callback;
+import okhttp3.Request;
+import okhttp3.Response;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -81,10 +93,31 @@ public class ContactsFragment extends Fragment {
             // Android version is lower than 6.0 or the permission is already granted.
             ContactsUtils.getContacts(getContext(), new ContactsUtils.ContactsProviderListener() {
                 @Override
-                public void OnContactsReady(ArrayList<User> contacts) {
-                    mContacts = contacts;
-                    mAdapter = new ContactsAdapter(getContext(), R.layout.contact_list_item, mContacts);
-                    mContactsListView.setAdapter(mAdapter);
+                public void OnContactsReady(final ArrayList<User> contacts) {
+
+                    Request request = Routes.buildAllUsersRequest(SessionUtils.getToken(getActivity().getSharedPreferences(SessionUtils.PREFERENCES, 0)));
+                    HttpClient.getInstance().newCall(request).enqueue(new Callback() {
+                        @Override
+                        public void onFailure(Call call, IOException e) {
+                            Log.e("ERROR", e.toString());
+                        }
+
+                        @Override
+                        public void onResponse(Call call, final Response response) throws IOException {
+
+                            getActivity().runOnUiThread(new Runnable() {
+                                public void run() {
+                                    try {
+                                        mContacts = User.intersect(contacts, User.fromJsonArray(new JSONArray(response.body().string())));
+                                        mAdapter = new ContactsAdapter(getContext(), R.layout.contact_list_item, mContacts);
+                                        mContactsListView.setAdapter(mAdapter);
+                                    } catch (JSONException | IOException e) {
+                                        Log.e("ERROR", e.toString());
+                                    }
+                                }
+                            });
+                        }
+                    });
                 }
             });
         }

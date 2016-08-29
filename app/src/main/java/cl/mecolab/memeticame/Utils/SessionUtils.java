@@ -22,21 +22,6 @@ public class SessionUtils {
         return credentials.getString("Token", "");
     }
 
-    public static Request buildLoginRequest(String phoneNumber, String password) {
-        MediaType JSON = MediaType.parse("application/json; charset=utf-8");
-        Map<String, String> params = new HashMap<String, String>();
-        params.put("phone_number", phoneNumber);
-        params.put("password", password);
-
-        RequestBody body = RequestBody.create(JSON, new JSONObject(params).toString());
-
-        return new Request.Builder()
-                .url(Routes.LOGIN_URL)
-                .addHeader("content-type", "application/json")
-                .post(body)
-                .build();
-    }
-
     public static void saveToken(String token, SharedPreferences credentials) {
         SharedPreferences.Editor editor = credentials.edit();
         editor.putString("Token", token);

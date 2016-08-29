@@ -41,8 +41,8 @@ public class ContactsAdapter extends ArrayAdapter<User> {
         TextView nameView = (TextView) view.findViewById(R.id.contact_name);
         TextView phoneView = (TextView) view.findViewById(R.id.contact_phone_number);
 
-        nameView.setText(user.mName);
-        phoneView.setText(user.mPhoneNumber);
+        nameView.setText(user.getName());
+        phoneView.setText(user.getPhoneNumber());
 
         return view;
     }

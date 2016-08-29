@@ -18,7 +18,7 @@ import java.io.IOException;
 import cl.mecolab.memeticame.Models.SignupForm;
 import cl.mecolab.memeticame.R;
 import cl.mecolab.memeticame.Utils.HttpClient;
-import cl.mecolab.memeticame.Utils.RegistrationsUtils;
+import cl.mecolab.memeticame.Utils.Routes;
 import cl.mecolab.memeticame.Utils.SessionUtils;
 import cl.mecolab.memeticame.databinding.ActivitySignupBinding;
 import okhttp3.Call;
@@ -67,7 +67,7 @@ public class SignupActivity extends AppCompatActivity {
             return;
         }
 
-        Request request = RegistrationsUtils.buildSignupRequest(mSignupForm.getName(), mSignupForm.getPhoneNumber(), mSignupForm.getPassword());
+        Request request = Routes.buildSignupRequest(mSignupForm.getName(), mSignupForm.getPhoneNumber(), mSignupForm.getPassword());
 
         HttpClient.getInstance().newCall(request).enqueue(new Callback() {
             @Override

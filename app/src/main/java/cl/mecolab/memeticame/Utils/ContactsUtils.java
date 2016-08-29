@@ -86,7 +86,7 @@ public class ContactsUtils {
                             ContactsContract.CommonDataKinds.Phone.NUMBER));
                     String name = c.getString(c.getColumnIndex(
                             ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME));
-                    contact = new User.Builder().name(name).phoneNumber(phoneNumber).build();
+                    contact = new User(name, phoneNumber);
                     c.close();
                 }
             }
