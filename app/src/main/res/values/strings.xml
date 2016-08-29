@@ -4,4 +4,8 @@
     <string name="password">Password</string>
     <string name="login">Login</string>
     <string name="hello_blank_fragment">Hello world</string>
+    <string name="create_chat">Create chat</string>
+    <string name="signup">Signup</string>
+    <string name="name">Name</string>
+    <string name="password_confirmation">Password Conf.</string>
 </resources>

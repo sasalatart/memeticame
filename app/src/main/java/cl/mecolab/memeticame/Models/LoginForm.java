@@ -8,11 +8,11 @@ import cl.mecolab.memeticame.BR;
 /**
  * Created by sasalatart on 8/27/16.
  */
-public class Credentials extends BaseObservable {
+public class LoginForm extends BaseObservable {
     private String mPhoneNumber;
     private String mPassword;
 
-    public Credentials(String phoneNumber, String password) {
+    public LoginForm(String phoneNumber, String password) {
         this.mPhoneNumber = phoneNumber;
         this.mPassword = password;
     }

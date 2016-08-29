@@ -1,7 +1,5 @@
 package cl.mecolab.memeticame.Utils;
 
-import android.content.SharedPreferences;
-
 import org.json.JSONObject;
 
 import java.util.HashMap;
@@ -12,34 +10,22 @@ import okhttp3.Request;
 import okhttp3.RequestBody;
 
 /**
- * Created by sasalatart on 8/27/16.
+ * Created by sasalatart on 8/28/16.
  */
-public class SessionUtils {
-
-    public static String PREFERENCES = "SESSION";
-
-    public static String getToken(SharedPreferences credentials) {
-        return credentials.getString("Token", "");
-    }
-
-    public static Request buildLoginRequest(String phoneNumber, String password) {
+public class RegistrationsUtils {
+    public static Request buildSignupRequest(String name, String phoneNumber, String password) {
         MediaType JSON = MediaType.parse("application/json; charset=utf-8");
         Map<String, String> params = new HashMap<String, String>();
+        params.put("name", name);
         params.put("phone_number", phoneNumber);
         params.put("password", password);
 
         RequestBody body = RequestBody.create(JSON, new JSONObject(params).toString());
 
         return new Request.Builder()
-                .url(Routes.LOGIN_URL)
+                .url(Routes.SIGNUP_URL)
                 .addHeader("content-type", "application/json")
                 .post(body)
                 .build();
-    }
-
-    public static void saveToken(String token, SharedPreferences credentials) {
-        SharedPreferences.Editor editor = credentials.edit();
-        editor.putString("Token", token);
-        editor.commit();
     }
 }

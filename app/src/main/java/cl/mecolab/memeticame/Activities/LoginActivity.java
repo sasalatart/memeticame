@@ -5,6 +5,9 @@ import android.databinding.DataBindingUtil;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.ProgressBar;
 import android.widget.Toast;
@@ -14,7 +17,7 @@ import org.json.JSONObject;
 
 import java.io.IOException;
 
-import cl.mecolab.memeticame.Models.Credentials;
+import cl.mecolab.memeticame.Models.LoginForm;
 import cl.mecolab.memeticame.R;
 import cl.mecolab.memeticame.Utils.HttpClient;
 import cl.mecolab.memeticame.Utils.SessionUtils;
@@ -26,7 +29,7 @@ import okhttp3.Response;
 
 public class LoginActivity extends AppCompatActivity {
 
-    private Credentials mCredentials;
+    private LoginForm mLoginForm;
     private ProgressBar progressBar;
 
     @Override
@@ -42,12 +45,33 @@ public class LoginActivity extends AppCompatActivity {
         progressBar = (ProgressBar) findViewById(R.id.progressBar);
 
         ActivityLoginBinding binding = DataBindingUtil.setContentView(this, R.layout.activity_login);
-        mCredentials = new Credentials("", "");
-        binding.setCredentials(mCredentials);
+        mLoginForm = new LoginForm("", "");
+        binding.setLoginForm(mLoginForm);
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        super.onCreateOptionsMenu(menu);
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.login_menu, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+
+        if (id == R.id.action_signup) {
+            Intent intent = new Intent(this, SignupActivity.class);
+            startActivity(intent);
+            return true;
+        }
+
+        return super.onOptionsItemSelected(item);
     }
 
     public void login(final View view) {
-        Request request = SessionUtils.buildLoginRequest(mCredentials.getPhoneNumber(), mCredentials.getPassword());
+        Request request = SessionUtils.buildLoginRequest(mLoginForm.getPhoneNumber(), mLoginForm.getPassword());
 
         progressBar.setVisibility(View.VISIBLE);
 

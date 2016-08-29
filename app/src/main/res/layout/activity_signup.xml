@@ -5,8 +5,8 @@
     <data>
 
         <variable
-            name="loginForm"
-            type="cl.mecolab.memeticame.Models.LoginForm" />
+            name="signupForm"
+            type="cl.mecolab.memeticame.Models.SignupForm" />
     </data>
 
     <RelativeLayout
@@ -16,7 +16,7 @@
         android:paddingLeft="@dimen/activity_horizontal_margin"
         android:paddingRight="@dimen/activity_horizontal_margin"
         android:paddingTop="@dimen/activity_vertical_margin"
-        tools:context=".Activities.LoginActivity">
+        tools:context=".Activities.SignupActivity">
 
         <ProgressBar
             android:id="@+id/progressBar"
@@ -32,12 +32,12 @@
             android:orientation="vertical">
 
             <TextView
-                android:id="@+id/loginTitle"
+                android:id="@+id/signupTitle"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:gravity="center"
-                android:text="@string/login"
+                android:text="@string/signup"
                 android:textAppearance="?android:attr/textAppearanceLarge"
                 android:textSize="48sp" />
 
@@ -46,6 +46,27 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:gravity="bottom">
+
+                <TextView
+                    android:id="@+id/labelName"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/name"
+                    android:textAppearance="?android:attr/textAppearanceLarge" />
+
+                <EditText
+                    android:id="@+id/inputName"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="text"
+                    android:text="@={signupForm.name}" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:gravity="top">
 
                 <TextView
                     android:id="@+id/labelPhoneNumber"
@@ -59,14 +80,14 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:inputType="phone"
-                    android:text="@={loginForm.phoneNumber}" />
+                    android:text="@={signupForm.phoneNumber}" />
             </LinearLayout>
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:gravity="top">
+                android:gravity="bottom">
 
                 <TextView
                     android:id="@+id/labelPassword"
@@ -80,16 +101,37 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:inputType="textPassword"
-                    android:text="@={loginForm.password}" />
+                    android:text="@={signupForm.password}" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:gravity="top">
+
+                <TextView
+                    android:id="@+id/labelPasswordConfirmation"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/password_confirmation"
+                    android:textAppearance="?android:attr/textAppearanceLarge" />
+
+                <EditText
+                    android:id="@+id/inputPasswordConfirmation"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="textPassword"
+                    android:text="@={signupForm.passwordConfirmation}" />
             </LinearLayout>
 
             <Button
-                android:id="@+id/buttonLogin"
+                android:id="@+id/buttonSignup"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
-                android:onClick="login"
-                android:text="@string/login" />
+                android:onClick="signup"
+                android:text="@string/signup" />
         </LinearLayout>
     </RelativeLayout>
 </layout>
