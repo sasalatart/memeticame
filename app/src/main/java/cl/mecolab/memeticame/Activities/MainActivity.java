@@ -15,12 +15,15 @@ import cl.mecolab.memeticame.Views.ViewPagerAdapter;
 
 public class MainActivity extends AppCompatActivity implements ContactsFragment.OnContactSelected {
 
+    private ChatsFragment mChatsFragments;
+    private ContactsFragment mContactsFragments;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        if (SessionUtils.getToken(getSharedPreferences(SessionUtils.PREFERENCES, 0)).equals("")) {
+        if (SessionUtils.getToken(getApplicationContext()).isEmpty()) {
             Intent intent = new Intent(this, LoginActivity.class);
             startActivity(intent);
         }
@@ -34,13 +37,23 @@ public class MainActivity extends AppCompatActivity implements ContactsFragment.
 
     private void setupViewPager(ViewPager viewPager) {
         ViewPagerAdapter adapter = new ViewPagerAdapter(getSupportFragmentManager());
-        adapter.addFragment(new ContactsFragment(), "Contacts");
-        adapter.addFragment(new ChatsFragment(), "Chats");
+
+        this.mChatsFragments = new ChatsFragment();
+        this.mContactsFragments = new ContactsFragment();
+        adapter.addFragment(this.mChatsFragments, "Chats");
+        adapter.addFragment(this.mContactsFragments, "Contacts");
+
         viewPager.setAdapter(adapter);
     }
 
     @Override
     public void onContactSelected(User user) {
+        if (user.findChat(this.mChatsFragments.getChats()) != null) {
 
+        } else {
+            Intent intent = new Intent(this, NewChatActivity.class);
+            intent.putExtra("participant", user);
+            startActivity(intent);
+        }
     }
 }

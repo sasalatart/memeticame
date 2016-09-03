@@ -47,8 +47,8 @@ public class ContactsFragment extends Fragment {
     public static final int PERMISSIONS_REQUEST_READ_CONTACTS = 101;
 
     private ArrayList<User> mContacts;
-    private OnContactSelected mListener;
     private ContactsAdapter mAdapter;
+    private OnContactSelected mListener;
     private ListView mContactsListView;
 
     public ContactsFragment() {
@@ -95,7 +95,7 @@ public class ContactsFragment extends Fragment {
                 @Override
                 public void OnContactsReady(final ArrayList<User> contacts) {
 
-                    Request request = Routes.buildAllUsersRequest(SessionUtils.getToken(getActivity().getSharedPreferences(SessionUtils.PREFERENCES, 0)));
+                    Request request = Routes.buildUserIndexRequest(getActivity());
                     HttpClient.getInstance().newCall(request).enqueue(new Callback() {
                         @Override
                         public void onFailure(Call call, IOException e) {

@@ -79,7 +79,8 @@ public class SignupActivity extends AppCompatActivity {
             public void onResponse(Call call, Response response) throws IOException {
                 try {
                     JSONObject jsonResponse = new JSONObject(response.body().string());
-                    SessionUtils.saveToken(jsonResponse.getString("api_key"), getSharedPreferences(SessionUtils.PREFERENCES, 0));
+                    SessionUtils.saveToken(jsonResponse.getString("api_key"), getApplicationContext());
+                    SessionUtils.savePhoneNumber(mSignupForm.getPhoneNumber(), getApplicationContext());
                     Intent intent = new Intent(view.getContext(), MainActivity.class);
                     startActivity(intent);
                 } catch (Exception e) {

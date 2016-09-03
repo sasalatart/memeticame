@@ -19,7 +19,8 @@
             </intent-filter>
         </activity>
         <activity android:name=".Activities.LoginActivity" />
-        <activity android:name=".Activities.SignupActivity"></activity>
+        <activity android:name=".Activities.SignupActivity" />
+        <activity android:name=".Activities.NewChatActivity"></activity>
     </application>
 
 </manifest>

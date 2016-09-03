@@ -1,5 +1,7 @@
 package cl.mecolab.memeticame.Models;
 
+import android.os.Parcel;
+import android.os.Parcelable;
 import android.util.Log;
 
 import org.json.JSONArray;
@@ -11,13 +13,49 @@ import java.util.ArrayList;
 /**
  * Created by Andres Matte on 8/10/2016.
  */
-public class User {
+public class User implements Parcelable {
     private String mName;
     private String mPhoneNumber;
 
     public User(String name, String phoneNumber) {
-        mName = name;
-        mPhoneNumber = phoneNumber;
+        this.mName = name;
+        this.mPhoneNumber = phoneNumber;
+    }
+
+    public User(Parcel in) {
+        String[] data = new String[2];
+
+        in.readStringArray(data);
+        this.mName = data[0];
+        this.mPhoneNumber = data[1];
+    }
+
+    public static ArrayList<User> fromJsonArray(JSONArray jsonResponse) throws JSONException {
+        ArrayList<User> users = new ArrayList<>();
+
+        for (int i = 0; i < jsonResponse.length(); i++) {
+            JSONObject jsonUser = jsonResponse.getJSONObject(i);
+            users.add(new User(jsonUser.getString("name"), jsonUser.getString("phone_number")));
+        }
+
+        return users;
+    }
+
+    public static ArrayList<User> intersect(ArrayList<User> localUsers, ArrayList<User> externalUsers) {
+        ArrayList<User> users = new ArrayList<>();
+
+        for (User lU : localUsers) {
+            String lUPhoneNumber = lU.getPhoneNumber().replaceAll("[^\\d.]", "");
+            for (User eU : externalUsers) {
+                String eUPhoneNumber = eU.getPhoneNumber().replaceAll("[^\\d.]", "");
+                if (lUPhoneNumber.equals(eUPhoneNumber)) {
+                    users.add(eU);
+                    break;
+                }
+            }
+        }
+
+        return users;
     }
 
     public String getName() {
@@ -36,31 +74,43 @@ public class User {
         this.mPhoneNumber = phoneNumber;
     }
 
-    public static ArrayList<User> fromJsonArray(JSONArray jsonResponse) throws JSONException {
-        ArrayList<User> users = new ArrayList<>();
-
-        for (int i = 0; i < jsonResponse.length(); i++) {
-            JSONObject jsonUser = jsonResponse.getJSONObject(i);
-            users.add(new User(jsonUser.getString("name"), jsonUser.getString("phone_number")));
+    public Chat findChat(ArrayList<Chat> chats) {
+        if (chats == null) {
+            return null;
         }
 
-        return users;
-    }
+        for (Chat chat : chats) {
+            if (chat.isGroup()) {
+                continue;
+            }
 
-    public static ArrayList<User> intersect(ArrayList<User> localUsers, ArrayList<User> externalUsers) {
-        ArrayList<User> users = new ArrayList<>();
-
-        for (User lU: localUsers) {
-            String luPhoneNumber = lU.getPhoneNumber().replace(" ", "").replace("-", "");
-            for (User eU: externalUsers) {
-                String eUPhoneNumber = eU.getPhoneNumber().replace(" ", "").replace("-", "");
-                if (luPhoneNumber.equals(eUPhoneNumber)) {
-                    users.add(lU);
-                    break;
+            for (User participant : chat.getParticipants()) {
+                if (this.mPhoneNumber.equals(participant.getPhoneNumber())) {
+                    return chat;
                 }
             }
         }
 
-        return users;
+        return null;
     }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeStringArray(new String[]{this.mName, this.mPhoneNumber});
+    }
+
+    public static final Parcelable.Creator CREATOR = new Parcelable.Creator() {
+        public User createFromParcel(Parcel in) {
+            return new User(in);
+        }
+
+        public User[] newArray(int size) {
+            return new User[size];
+        }
+    };
 }

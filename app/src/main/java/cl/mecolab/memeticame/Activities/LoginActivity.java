@@ -38,7 +38,7 @@ public class LoginActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
 
-        if (!SessionUtils.getToken(getSharedPreferences(SessionUtils.PREFERENCES, 0)).equals("")) {
+        if (!SessionUtils.getToken(getApplicationContext()).isEmpty()) {
             Intent intent = new Intent(this, MainActivity.class);
             startActivity(intent);
         }
@@ -87,7 +87,8 @@ public class LoginActivity extends AppCompatActivity {
                 try {
                     JSONObject jsonResponse = new JSONObject(response.body().string());
                     if (!jsonResponse.getString("api_key").equals("null")) {
-                        SessionUtils.saveToken(jsonResponse.getString("api_key"), getSharedPreferences(SessionUtils.PREFERENCES, 0));
+                        SessionUtils.saveToken(jsonResponse.getString("api_key"), getApplicationContext());
+                        SessionUtils.savePhoneNumber(mLoginForm.getPhoneNumber(), getApplicationContext());
                         Intent intent = new Intent(view.getContext(), MainActivity.class);
                         startActivity(intent);
                     } else {
