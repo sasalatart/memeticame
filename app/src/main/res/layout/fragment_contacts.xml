@@ -5,8 +5,8 @@
     tools:context="cl.mecolab.memeticame.Fragments.ContactsFragment">
 
     <ListView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
         android:id="@+id/contacts_list_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
         android:layout_gravity="center" />
 </FrameLayout>
