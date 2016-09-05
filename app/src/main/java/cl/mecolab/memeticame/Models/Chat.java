@@ -8,6 +8,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 /**
  * Created by sasalatart on 8/29/16.
@@ -20,6 +21,7 @@ public class Chat implements Parcelable {
     private boolean mIsGroup;
     private String mCreatedAt;
     private ArrayList<User> mParticipants;
+    private HashMap<String, String> mParticipantsHash;
 
     public Chat(int mId, String mTitle, boolean mIsGroup, String mCreatedAt, ArrayList<User> participants) {
         this.mId = mId;
@@ -27,6 +29,7 @@ public class Chat implements Parcelable {
         this.mIsGroup = mIsGroup;
         this.mCreatedAt = mCreatedAt;
         this.mParticipants = participants;
+        setParticipantsHash();
     }
 
     public Chat(Parcel in) {
@@ -36,6 +39,7 @@ public class Chat implements Parcelable {
         this.mCreatedAt = in.readString();
         this.mParticipants = new ArrayList<>();
         in.readTypedList(this.mParticipants, User.CREATOR);
+        setParticipantsHash();
     }
 
     public int getId() {
@@ -56,6 +60,14 @@ public class Chat implements Parcelable {
 
     public String getCreatedAt() {
         return mCreatedAt;
+    }
+
+    public HashMap<String, String> getParticipantsHash() {
+        return mParticipantsHash;
+    }
+
+    public ArrayList<User> getParticipants() {
+        return mParticipants;
     }
 
     public static ArrayList<Chat> fromJsonArray(JSONArray jsonResponse) throws JSONException {
@@ -81,8 +93,11 @@ public class Chat implements Parcelable {
         return chats;
     }
 
-    public ArrayList<User> getParticipants() {
-        return mParticipants;
+    private void setParticipantsHash() {
+        mParticipantsHash = new HashMap<>();
+        for (User user: mParticipants) {
+            mParticipantsHash.put(user.getPhoneNumber(), user.getName());
+        }
     }
 
     @Override

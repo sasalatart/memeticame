@@ -75,7 +75,7 @@ public class ChatActivity extends AppCompatActivity {
                     public void run() {
                         try {
                             mMessages = Message.fromJsonArray(new JSONArray(response.body().string()));
-                            mAdapter = new MessagesAdapter(getApplicationContext(), R.layout.message_in_list_item, mMessages);
+                            mAdapter = new MessagesAdapter(getApplicationContext(), R.layout.message_in_list_item, mMessages, mChat);
                             mMessagesListView.setAdapter(mAdapter);
                         } catch (IOException | JSONException e) {
                             Log.e("ERROR", e.toString());

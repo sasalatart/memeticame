@@ -9,6 +9,7 @@ import android.widget.TextView;
 
 import java.util.ArrayList;
 
+import cl.mecolab.memeticame.Models.Chat;
 import cl.mecolab.memeticame.Models.Message;
 import cl.mecolab.memeticame.R;
 import cl.mecolab.memeticame.Utils.SessionUtils;
@@ -17,13 +18,15 @@ import cl.mecolab.memeticame.Utils.SessionUtils;
  * Created by sasalatart on 9/4/16.
  */
 public class MessagesAdapter extends ArrayAdapter<Message> {
+    private Chat mParentChat;
     private ArrayList<Message> mMessages;
     private LayoutInflater mLayoutInflater;
 
-    public MessagesAdapter(Context context, int resource, ArrayList<Message> messages) {
+    public MessagesAdapter(Context context, int resource, ArrayList<Message> messages, Chat parentChat) {
         super(context, resource, messages);
         mMessages = messages;
         mLayoutInflater = (LayoutInflater)context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        mParentChat = parentChat;
     }
 
     @Override
@@ -46,7 +49,7 @@ public class MessagesAdapter extends ArrayAdapter<Message> {
         if (message.getSenderPhone().equals(SessionUtils.getPhoneNumber(getContext()))) {
             senderLabel.setText(R.string.me);
         } else {
-            senderLabel.setText(message.getSenderPhone());
+            senderLabel.setText(mParentChat.getParticipantsHash().get(message.getSenderPhone()));
         }
 
         timestampLabel.setText(message.getCreatedAt());
