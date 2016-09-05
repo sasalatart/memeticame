@@ -8,12 +8,13 @@ import android.support.v7.app.AppCompatActivity;
 
 import cl.mecolab.memeticame.Fragments.ChatsFragment;
 import cl.mecolab.memeticame.Fragments.ContactsFragment;
+import cl.mecolab.memeticame.Models.Chat;
 import cl.mecolab.memeticame.Models.User;
 import cl.mecolab.memeticame.R;
 import cl.mecolab.memeticame.Utils.SessionUtils;
 import cl.mecolab.memeticame.Views.ViewPagerAdapter;
 
-public class MainActivity extends AppCompatActivity implements ContactsFragment.OnContactSelected {
+public class MainActivity extends AppCompatActivity implements ChatsFragment.OnChatSelected, ContactsFragment.OnContactSelected {
 
     private ChatsFragment mChatsFragments;
     private ContactsFragment mContactsFragments;
@@ -52,8 +53,15 @@ public class MainActivity extends AppCompatActivity implements ContactsFragment.
 
         } else {
             Intent intent = new Intent(this, NewChatActivity.class);
-            intent.putExtra("participant", user);
+            intent.putExtra(User.PARCELABLE_KEY, user);
             startActivity(intent);
         }
+    }
+
+    @Override
+    public void OnChatSelected(Chat chat) {
+        Intent intent = new Intent(this, ChatActivity.class);
+        intent.putExtra(Chat.PARCELABLE_KEY, chat);
+        startActivity(intent);
     }
 }

@@ -31,7 +31,6 @@ import cl.mecolab.memeticame.R;
 import cl.mecolab.memeticame.Utils.ContactsUtils;
 import cl.mecolab.memeticame.Utils.HttpClient;
 import cl.mecolab.memeticame.Utils.Routes;
-import cl.mecolab.memeticame.Utils.SessionUtils;
 import cl.mecolab.memeticame.Views.ContactsAdapter;
 import okhttp3.Call;
 import okhttp3.Callback;

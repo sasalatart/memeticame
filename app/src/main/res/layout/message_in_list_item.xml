@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="@dimen/message_padding">
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="end"
+        android:orientation="horizontal">
+
+        <TextView
+            android:id="@+id/senderLabel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/sender_label"
+            android:textAppearance="?android:attr/textAppearanceSmall"
+            android:textColor="@color/inMessageColor" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/at"
+            android:textAppearance="?android:attr/textAppearanceSmall"
+            android:textColor="@color/outMessageColor"
+            android:paddingLeft="2dp"
+            android:paddingRight="2dp"/>
+
+        <TextView
+            android:id="@+id/timestampLabel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/timestamp_label"
+            android:textAppearance="?android:attr/textAppearanceSmall"
+            android:textColor="@color/inMessageColor" />
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/messageLabel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="end"
+        android:text="@string/message_label"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:textColor="@color/inMessageColor" />
+</LinearLayout>

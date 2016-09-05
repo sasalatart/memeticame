@@ -1,6 +1,7 @@
 package cl.mecolab.memeticame.Models;
 
-import android.util.Log;
+import android.os.Parcel;
+import android.os.Parcelable;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -11,7 +12,9 @@ import java.util.ArrayList;
 /**
  * Created by sasalatart on 8/29/16.
  */
-public class Chat {
+public class Chat implements Parcelable {
+    public static String PARCELABLE_KEY = "cl.mecolab.memeticame.Models.Chat";
+
     private final int mId;
     private String mTitle;
     private boolean mIsGroup;
@@ -24,6 +27,15 @@ public class Chat {
         this.mIsGroup = mIsGroup;
         this.mCreatedAt = mCreatedAt;
         this.mParticipants = participants;
+    }
+
+    public Chat(Parcel in) {
+        this.mId = in.readInt();
+        this.mTitle = in.readString();
+        this.mIsGroup = in.readByte() != 0;
+        this.mCreatedAt = in.readString();
+        this.mParticipants = new ArrayList<>();
+        in.readTypedList(this.mParticipants, User.CREATOR);
     }
 
     public int getId() {
@@ -42,16 +54,8 @@ public class Chat {
         return mIsGroup;
     }
 
-    public void setIsGroup(boolean isGroup) {
-        this.mIsGroup = isGroup;
-    }
-
     public String getCreatedAt() {
         return mCreatedAt;
-    }
-
-    public void setCreatedAt(String createdAt) {
-        this.mCreatedAt = createdAt;
     }
 
     public static ArrayList<Chat> fromJsonArray(JSONArray jsonResponse) throws JSONException {
@@ -80,4 +84,29 @@ public class Chat {
     public ArrayList<User> getParticipants() {
         return mParticipants;
     }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeInt(mId);
+        dest.writeString(mTitle);
+        dest.writeByte((byte) (mIsGroup ? 1 : 0));
+        dest.writeString(mCreatedAt);
+        dest.writeTypedList(mParticipants);
+    }
+
+    public static final Parcelable.Creator<Chat> CREATOR = new Parcelable.Creator<Chat>() {
+
+        public Chat createFromParcel(Parcel in) {
+            return new Chat(in);
+        }
+
+        public Chat[] newArray(int size) {
+            return new Chat[size];
+        }
+    };
 }

@@ -20,7 +20,8 @@
         </activity>
         <activity android:name=".Activities.LoginActivity" />
         <activity android:name=".Activities.SignupActivity" />
-        <activity android:name=".Activities.NewChatActivity"></activity>
+        <activity android:name=".Activities.NewChatActivity" />
+        <activity android:name=".Activities.ChatActivity"></activity>
     </application>
 
 </manifest>

@@ -22,7 +22,7 @@ public class ChatsAdapter extends ArrayAdapter<Chat> {
     public ChatsAdapter(Context context, int resource, ArrayList<Chat> chats) {
         super(context, resource, chats);
         mChats = chats;
-        mLayoutInflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        mLayoutInflater = (LayoutInflater)context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
     }
 
     /**

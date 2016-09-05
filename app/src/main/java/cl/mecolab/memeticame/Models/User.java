@@ -2,7 +2,6 @@ package cl.mecolab.memeticame.Models;
 
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.util.Log;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -14,6 +13,7 @@ import java.util.ArrayList;
  * Created by Andres Matte on 8/10/2016.
  */
 public class User implements Parcelable {
+    public static String PARCELABLE_KEY = "cl.mecolab.memeticame.Models.User";
     private String mName;
     private String mPhoneNumber;
 

@@ -9,4 +9,10 @@
     <string name="name">Name</string>
     <string name="password_confirmation">Password Conf.</string>
     <string name="chat_name">Chat name</string>
+    <string name="send">Send</string>
+    <string name="sender_label">sender</string>
+    <string name="timestamp_label">timestamp label</string>
+    <string name="message_label">message label</string>
+    <string name="me">Me</string>
+    <string name="at">at</string>
 </resources>

@@ -14,7 +14,6 @@ import android.widget.Toast;
 import java.io.IOException;
 import java.util.ArrayList;
 
-import cl.mecolab.memeticame.Activities.MainActivity;
 import cl.mecolab.memeticame.Models.User;
 import cl.mecolab.memeticame.R;
 import cl.mecolab.memeticame.Utils.HttpClient;
@@ -28,7 +27,7 @@ import okhttp3.Response;
 public class NewChatActivity extends AppCompatActivity {
 
     private ArrayList<User> mParticipants = new ArrayList<>();
-    private EditText mChatNameinput;
+    private EditText mChatNameInput;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -39,11 +38,11 @@ public class NewChatActivity extends AppCompatActivity {
         actionBar.setDisplayHomeAsUpEnabled(true);
 
         Bundle data = getIntent().getExtras();
-        User user = (User) data.getParcelable("participant");
+        User user = data.getParcelable(User.PARCELABLE_KEY);
         this.mParticipants.add(user);
 
-        this.mChatNameinput = (EditText)findViewById(R.id.chatNameInput);
-        this.mChatNameinput.setText("Chat with " + user.getName(), TextView.BufferType.EDITABLE);
+        this.mChatNameInput = (EditText)findViewById(R.id.chatNameInput);
+        this.mChatNameInput.setText("Chat with " + user.getName(), TextView.BufferType.EDITABLE);
     }
 
     public boolean onOptionsItemSelected(MenuItem item) {
@@ -53,7 +52,7 @@ public class NewChatActivity extends AppCompatActivity {
     }
 
     public void createChat(View view) {
-        String title = this.mChatNameinput.getText().toString();
+        String title = this.mChatNameInput.getText().toString();
 
         if (title.isEmpty()) {
             Toast.makeText(getApplicationContext(), "Title can't be blank", Toast.LENGTH_SHORT).show();

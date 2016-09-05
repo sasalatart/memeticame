@@ -26,6 +26,8 @@ public class Routes {
     public static String USERS_INDEX_URL = "http://mcctrack4.ing.puc.cl/api/v2/users";
     public static String CONVERSATIONS_INDEX_URL = "http://mcctrack4.ing.puc.cl/api/v2/users/get_conversations";
     public static String CONVERSATIONS_CREATE_URL = "http://mcctrack4.ing.puc.cl/api/v2/conversations/";
+    public static String CONVERSATION_MESSAGES_URL = "http://mcctrack4.ing.puc.cl/api/v2/conversations/get_messages";
+    public static String MESSAGES_CREATE_URL = "http://mcctrack4.ing.puc.cl/api/v2/conversations/send_message";
     public static MediaType JSON = MediaType.parse("application/json; charset=utf-8");
 
     public static Request buildLoginRequest(String phoneNumber, String password) {
@@ -95,6 +97,33 @@ public class Routes {
                 .addHeader("content-type", "application/json")
                 .addHeader("authorization", "Token token=" + SessionUtils.getToken(context))
                 .post(formBuilder.build())
+                .build();
+    }
+
+    public static Request buildConversationMessagesRequest(Context context, int conversationId) {
+        HttpUrl.Builder urlBuilder = HttpUrl.parse(CONVERSATION_MESSAGES_URL).newBuilder();
+        urlBuilder.addQueryParameter("conversation_id", Integer.toString(conversationId));
+
+        return new Request.Builder()
+                .url(urlBuilder.build().toString())
+                .addHeader("content-type", "application/json")
+                .addHeader("authorization", "Token token=" + SessionUtils.getToken(context))
+                .build();
+    }
+
+    public static Request buildMessagesCreateRequest(Context context, int conversationId, String content) {
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("conversation_id", Integer.toString(conversationId));
+        params.put("sender", SessionUtils.getPhoneNumber(context));
+        params.put("content", content);
+
+        RequestBody body = RequestBody.create(JSON, new JSONObject(params).toString());
+
+        return new Request.Builder()
+                .url(MESSAGES_CREATE_URL)
+                .addHeader("content-type", "application/json")
+                .addHeader("authorization", "Token token=" + SessionUtils.getToken(context))
+                .post(body)
                 .build();
     }
 
