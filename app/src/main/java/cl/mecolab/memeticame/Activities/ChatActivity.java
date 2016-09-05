@@ -48,6 +48,8 @@ public class ChatActivity extends AppCompatActivity {
         Bundle data = getIntent().getExtras();
         mChat = data.getParcelable(Chat.PARCELABLE_KEY);
 
+        setTitle(mChat.getTitle());
+
         mMessagesListView = (ListView)findViewById(R.id.messagesListView);
         mMessageInput = (EditText)findViewById(R.id.messageInput);
 
