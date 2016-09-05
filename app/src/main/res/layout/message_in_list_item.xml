@@ -24,7 +24,7 @@
             android:layout_height="wrap_content"
             android:text="@string/at"
             android:textAppearance="?android:attr/textAppearanceSmall"
-            android:textColor="@color/outMessageColor"
+            android:textColor="@color/inMessageColor"
             android:paddingLeft="2dp"
             android:paddingRight="2dp"/>
 

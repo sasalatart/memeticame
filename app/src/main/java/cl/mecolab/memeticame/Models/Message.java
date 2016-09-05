@@ -9,6 +9,7 @@ import org.json.JSONObject;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
 
@@ -27,14 +28,7 @@ public class Message {
         this.mSenderPhone = senderPhone;
         this.mContent = content;
         this.mConversationId = conversationId;
-        this.mCreatedAt = createdAt;
-
-        try {
-            Date date = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss").parse(createdAt);
-            this.mCreatedAt = date.toString();
-        } catch(ParseException e) {
-            Log.e("ERROR", e.toString());
-        }
+        this.mCreatedAt = parseISODate(createdAt);
     }
 
     public int getId() {
@@ -55,6 +49,23 @@ public class Message {
 
     public String getCreatedAt() {
         return mCreatedAt;
+    }
+
+    private String parseISODate(String createdAt) {
+        try {
+            Date date = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss").parse(createdAt);
+            Calendar calendar = Calendar.getInstance();
+            calendar.setTime(date);
+            int hod = calendar.get(Calendar.HOUR_OF_DAY);
+            int min = calendar.get(Calendar.MINUTE);
+            int dom = calendar.get(Calendar.DAY_OF_MONTH);
+            int mon = calendar.get(Calendar.MONTH);
+            int year = calendar.get(Calendar.YEAR);
+            return String.format("%02d:%02d %02d/%02d/%d", hod, min, dom, mon, year);
+        } catch(ParseException e) {
+            Log.e("ERROR", e.toString());
+            return null;
+        }
     }
 
     public static ArrayList<Message> fromJsonArray(JSONArray jsonResponse) throws JSONException {
