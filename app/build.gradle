@@ -1,11 +1,12 @@
 apply plugin: 'com.android.application'
+apply plugin: 'com.google.gms.google-services'
 
 android {
     compileSdkVersion 23
     buildToolsVersion "23.0.3"
 
     defaultConfig {
-        applicationId "cl.mecolab.memeticame"
+        applicationId "com.mecolab.memeticameandroid"
         minSdkVersion 16
         targetSdkVersion 23
         versionCode 1
@@ -29,4 +30,5 @@ dependencies {
     compile 'com.android.support:support-v4:23.4.0'
     compile 'com.android.support:design:23.4.0'
     compile 'com.squareup.okhttp3:okhttp:3.4.1'
+    compile "com.google.android.gms:play-services-gcm:8.3.0"
 }
