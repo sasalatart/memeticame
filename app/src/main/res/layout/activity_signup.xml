@@ -6,7 +6,7 @@
 
         <variable
             name="signupForm"
-            type="com.mecolab.memeticameandroid.Models.SignupForm" />
+            type="com.salatart.memeticame.Models.SignupForm" />
     </data>
 
     <RelativeLayout

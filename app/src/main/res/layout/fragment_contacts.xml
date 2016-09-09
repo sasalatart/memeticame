@@ -2,7 +2,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.mecolab.memeticameandroid.Fragments.ContactsFragment">
+    tools:context="com.salatart.memeticame.Fragments.ContactsFragment">
 
     <ListView
         android:id="@+id/contacts_list_view"
