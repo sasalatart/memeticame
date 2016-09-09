@@ -83,7 +83,7 @@ public class LoginActivity extends AppCompatActivity {
             }
 
             @Override
-            public void onResponse(Call call, Response response) throws IOException {
+            public void onResponse(Call call, final Response response) throws IOException {
                 try {
                     JSONObject jsonResponse = new JSONObject(response.body().string());
                     if (!jsonResponse.getString("api_key").equals("null")) {
@@ -100,6 +100,8 @@ public class LoginActivity extends AppCompatActivity {
                     }
                 } catch (JSONException e) {
                     Log.e("ERROR", e.toString());
+                } finally {
+                    response.body().close();
                 }
             }
         });

@@ -1,8 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:orientation="vertical"
     android:paddingBottom="@dimen/activity_vertical_margin"
     android:paddingLeft="@dimen/activity_horizontal_margin"
     android:paddingRight="@dimen/activity_horizontal_margin"
@@ -13,7 +14,6 @@
         android:id="@+id/chatName"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_centerVertical="true"
         android:orientation="horizontal">
 
         <TextView
@@ -30,12 +30,33 @@
     </LinearLayout>
 
     <Button
-        android:id="@+id/button"
+        android:id="@+id/newChatSubmit"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@id/chatName"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="50dp"
-        android:text="@string/create_chat"
-        android:onClick="createChat" />
-</RelativeLayout>
+        android:layout_gravity="center"
+        android:onClick="createChat"
+        android:text="@string/create_chat" />
+
+    <LinearLayout
+        android:id="@+id/existingChats"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:paddingTop="32dp"
+        android:visibility="gone" >
+
+        <TextView
+            android:id="@+id/existingChatsLabel"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/chats_shared_with_user"
+            android:textAlignment="center"
+            android:textAppearance="?android:attr/textAppearanceLarge"
+            android:paddingBottom="16dp" />
+
+        <ListView
+            android:id="@+id/existingChatsListView"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent" />
+    </LinearLayout>
+</LinearLayout>

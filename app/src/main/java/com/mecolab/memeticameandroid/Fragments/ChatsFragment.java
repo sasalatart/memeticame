@@ -96,6 +96,8 @@ public class ChatsFragment extends Fragment {
                             mChatsListView.setAdapter(mAdapter);
                         } catch (JSONException | IOException e) {
                             Log.e("ERROR", e.toString());
+                        } finally {
+                            response.body().close();
                         }
                     }
                 });

@@ -74,24 +74,22 @@ public class User implements Parcelable {
         this.mPhoneNumber = phoneNumber;
     }
 
-    public Chat findChat(ArrayList<Chat> chats) {
-        if (chats == null) {
+    public ArrayList<Chat> findChats(ArrayList<Chat> allChats) {
+        if (allChats == null) {
             return null;
         }
 
-        for (Chat chat : chats) {
-            if (chat.isGroup()) {
-                continue;
-            }
 
+        ArrayList<Chat> chats = new ArrayList<>();
+        for (Chat chat : allChats) {
             for (User participant : chat.getParticipants()) {
-                if (this.mPhoneNumber.equals(participant.getPhoneNumber())) {
-                    return chat;
+                if (mPhoneNumber.equals(participant.getPhoneNumber())) {
+                    chats.add(chat);
                 }
             }
         }
 
-        return null;
+        return chats;
     }
 
     @Override

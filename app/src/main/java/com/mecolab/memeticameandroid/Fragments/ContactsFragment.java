@@ -103,7 +103,6 @@ public class ContactsFragment extends Fragment {
 
                         @Override
                         public void onResponse(Call call, final Response response) throws IOException {
-
                             getActivity().runOnUiThread(new Runnable() {
                                 public void run() {
                                     try {
@@ -112,6 +111,8 @@ public class ContactsFragment extends Fragment {
                                         mContactsListView.setAdapter(mAdapter);
                                     } catch (JSONException | IOException e) {
                                         Log.e("ERROR", e.toString());
+                                    } finally {
+                                        response.body().close();
                                     }
                                 }
                             });

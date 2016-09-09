@@ -12,7 +12,10 @@ import com.mecolab.memeticameandroid.Utils.Routes;
 
 import java.io.IOException;
 
+import okhttp3.Call;
+import okhttp3.Callback;
 import okhttp3.Request;
+import okhttp3.Response;
 
 /**
  * Created by sasalatart on 9/5/16.
@@ -30,7 +33,18 @@ public class IDListenerService extends IntentService {
             String token = instanceID.getToken(getApplicationContext().getString(R.string.gcm_defaultSenderId), GoogleCloudMessaging.INSTANCE_ID_SCOPE, null);
 
             Request request = Routes.buildPushNotificationRegisterRequest(getApplicationContext(), token);
-            HttpClient.getInstance().newCall(request).execute();
+            HttpClient.getInstance().newCall(request).enqueue(new Callback() {
+                @Override
+                public void onFailure(Call call, IOException e) {
+                    Log.e("ERROR", e.toString());
+                }
+
+                @Override
+                public void onResponse(Call call, Response response) throws IOException {
+                    Log.i("INFO", response.body().string());
+                    response.body().close();
+                }
+            });
         } catch (IOException e) {
             Log.e("ERROR", e.toString());
         }

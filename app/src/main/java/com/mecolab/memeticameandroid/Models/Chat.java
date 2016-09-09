@@ -15,6 +15,7 @@ import java.util.HashMap;
  */
 public class Chat implements Parcelable {
     public static String PARCELABLE_KEY = "com.mecolab.memeticameandroid.Models.Chat";
+    public static String PARCELABLE_ARRAY_KEY = "com.mecolab.memeticameandroid.Models.ChatArrayList";
 
     private final int mId;
     private String mTitle;
@@ -70,24 +71,27 @@ public class Chat implements Parcelable {
         return mParticipants;
     }
 
+    public static Chat fromJson(JSONObject jsonResponse) throws JSONException {
+        ArrayList<User> users = new ArrayList<>();
+        JSONArray jsonUsers = new JSONArray(jsonResponse.getString("users"));
+        for (int j = 0; j < jsonUsers.length(); j++) {
+            JSONObject jsonParticipant = jsonUsers.getJSONObject(j);
+            users.add(new User(jsonParticipant.getString("name"), jsonParticipant.getString("phone_number")));
+        }
+
+        return new Chat(Integer.parseInt(jsonResponse.getString("id")),
+                jsonResponse.getString("title"),
+                Boolean.parseBoolean(jsonResponse.getString("group")),
+                jsonResponse.getString("created_at"),
+                users);
+    }
+
     public static ArrayList<Chat> fromJsonArray(JSONArray jsonResponse) throws JSONException {
         ArrayList<Chat> chats = new ArrayList<>();
 
         for (int i = 0; i < jsonResponse.length(); i++) {
             JSONObject jsonChat = jsonResponse.getJSONObject(i);
-
-            ArrayList<User> users = new ArrayList<>();
-            JSONArray jsonUsers = new JSONArray(jsonChat.getString("users"));
-            for (int j = 0; j < jsonUsers.length(); j++) {
-                JSONObject jsonParticipant = jsonUsers.getJSONObject(j);
-                users.add(new User(jsonParticipant.getString("name"), jsonParticipant.getString("phone_number")));
-            }
-
-            chats.add(new Chat(Integer.parseInt(jsonChat.getString("id")),
-                    jsonChat.getString("title"),
-                    Boolean.parseBoolean(jsonChat.getString("group")),
-                    jsonChat.getString("created_at"),
-                    users));
+            chats.add(Chat.fromJson(jsonChat));
         }
 
         return chats;

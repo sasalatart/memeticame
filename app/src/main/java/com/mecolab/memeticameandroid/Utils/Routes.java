@@ -80,6 +80,12 @@ public class Routes {
                 .build();
     }
 
+    public static Request buildConversationsCreateRequest(Context context, String admin, User participant, String title) {
+        ArrayList<User> participants = new ArrayList<>();
+        participants.add(participant);
+        return Routes.buildConversationsCreateRequest(context, admin, participants, false, title);
+    }
+
     public static Request buildConversationsCreateRequest(Context context, String admin, ArrayList<User> participants, boolean isGroup, String title) {
         ArrayList<String> phoneNumbers = new ArrayList<>();
         for (User u: participants) { phoneNumbers.add(u.getPhoneNumber()); }

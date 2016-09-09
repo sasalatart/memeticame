@@ -118,6 +118,8 @@ public class ChatActivity extends AppCompatActivity {
                             mMessagesListView.setAdapter(mAdapter);
                         } catch (IOException | JSONException e) {
                             Log.e("ERROR", e.toString());
+                        } finally {
+                            response.body().close();
                         }
                     }
                 });
@@ -142,6 +144,7 @@ public class ChatActivity extends AppCompatActivity {
 
             @Override
             public void onResponse(Call call, final Response response) throws IOException {
+                response.body().close();
                 ChatActivity.this.runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
@@ -150,5 +153,11 @@ public class ChatActivity extends AppCompatActivity {
                 });
             }
         });
+    }
+
+    public static Intent getIntent(Context context, Chat chat) {
+        Intent intent = new Intent(context, ChatActivity.class);
+        intent.putExtra(Chat.PARCELABLE_KEY, chat);
+        return intent;
     }
 }

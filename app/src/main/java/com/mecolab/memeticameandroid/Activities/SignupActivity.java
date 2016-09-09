@@ -85,6 +85,8 @@ public class SignupActivity extends AppCompatActivity {
                     startActivity(intent);
                 } catch (Exception e) {
                     Log.e("ERROR", e.toString());
+                } finally {
+                    response.body().close();
                 }
             }
         });
