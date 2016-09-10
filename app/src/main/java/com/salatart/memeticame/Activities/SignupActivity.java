@@ -1,7 +1,6 @@
 package com.salatart.memeticame.Activities;
 
 import android.content.Intent;
-import android.content.pm.PackageInstaller;
 import android.databinding.DataBindingUtil;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
@@ -54,8 +53,7 @@ public class SignupActivity extends AppCompatActivity {
         int id = item.getItemId();
 
         if (id == R.id.action_login) {
-            Intent intent = new Intent(this, LoginActivity.class);
-            startActivity(intent);
+            startActivity(new Intent(this, LoginActivity.class));
             return true;
         }
 
@@ -68,7 +66,7 @@ public class SignupActivity extends AppCompatActivity {
             return;
         }
 
-        Request request = Routes.buildSignupRequest(mSignupForm.getName(),
+        Request request = Routes.signupRequest(mSignupForm.getName(),
                 mSignupForm.getPhoneNumber(),
                 mSignupForm.getPassword(),
                 mSignupForm.getPasswordConfirmation());

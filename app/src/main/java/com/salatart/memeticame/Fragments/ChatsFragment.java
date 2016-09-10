@@ -37,7 +37,8 @@ public class ChatsFragment extends Fragment {
     private ArrayList<Chat> mChats;
     private ChatsAdapter mAdapter;
     private ListView mChatsListView;
-    private OnChatSelected mListener;
+    private OnChatSelected mChatSelectedListener;
+    private Routes.OnLogout mOnLogoutListener;
 
     public ChatsFragment() {
         // Required empty public constructor
@@ -56,7 +57,7 @@ public class ChatsFragment extends Fragment {
         mChatsListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                mListener.OnChatSelected(mChats.get(position));
+                mChatSelectedListener.OnChatSelected(mChats.get(position));
             }
         });
 
@@ -74,11 +75,18 @@ public class ChatsFragment extends Fragment {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        return false;
+        int id = item.getItemId();
+
+        if (id == R.id.action_logout) {
+            mOnLogoutListener.OnLogout();
+            return true;
+        }
+
+        return super.onOptionsItemSelected(item);
     }
 
     public void showChats() {
-        Request request = Routes.buildChatsIndexRequest(getActivity());
+        Request request = Routes.chatsIndexRequest(getActivity());
         HttpClient.getInstance().newCall(request).enqueue(new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
@@ -113,7 +121,8 @@ public class ChatsFragment extends Fragment {
     public void onAttach(Context context) {
         super.onAttach(context);
         try {
-            mListener = (OnChatSelected) context;
+            mChatSelectedListener = (OnChatSelected) context;
+            mOnLogoutListener = (Routes.OnLogout) context;
         } catch (ClassCastException e) {
             throw new ClassCastException(context.toString() + " must implement onChatSelected");
         }

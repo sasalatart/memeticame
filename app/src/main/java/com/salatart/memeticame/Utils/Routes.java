@@ -23,13 +23,18 @@ public class Routes {
     public static String DOMAIN = "http://10.0.2.2:3000";
     public static String LOGIN_PATH = "/login";
     public static String SIGNUP_PATH = "/signup";
+    public static String LOGOUT_PATH = "/logout";
     public static String USERS_INDEX_PATH = "/users";
     public static String CHATS_INDEX_PATH = "/chats";
     public static String CHATS_CREATE_PATH = "/chats";
     public static String FCM_REGISTRATION_PATH = "/fcm_register";
     public static MediaType JSON = MediaType.parse("application/json; charset=utf-8");
 
-    public static Request buildLoginRequest(String phoneNumber, String password) {
+    public interface OnLogout {
+        void OnLogout();
+    }
+
+    public static Request loginRequest(String phoneNumber, String password) {
         Map<String, String> params = new HashMap<String, String>();
         params.put("phone_number", phoneNumber);
         params.put("password", password);
@@ -43,7 +48,7 @@ public class Routes {
                 .build();
     }
 
-    public static Request buildSignupRequest(String name, String phoneNumber, String password, String passwordConfirmation) {
+    public static Request signupRequest(String name, String phoneNumber, String password, String passwordConfirmation) {
         Map<String, String> params = new HashMap<String, String>();
         params.put("name", name);
         params.put("phone_number", phoneNumber);
@@ -60,7 +65,7 @@ public class Routes {
                 .build();
     }
 
-    public static Request buildUserIndexRequest(Context context) {
+    public static Request userIndexRequest(Context context) {
         return new Request.Builder()
                 .url(DOMAIN + USERS_INDEX_PATH)
                 .addHeader("content-type", "application/json")
@@ -68,7 +73,7 @@ public class Routes {
                 .build();
     }
 
-    public static Request buildChatsIndexRequest(Context context) {
+    public static Request chatsIndexRequest(Context context) {
         return new Request.Builder()
                 .url(DOMAIN + CHATS_INDEX_PATH)
                 .addHeader("content-type", "application/json")
@@ -76,13 +81,13 @@ public class Routes {
                 .build();
     }
 
-    public static Request buildChatsCreateRequest(Context context, String admin, User participant, String title) {
+    public static Request chatsCreateRequest(Context context, String admin, User participant, String title) {
         ArrayList<User> participants = new ArrayList<>();
         participants.add(participant);
-        return Routes.buildChatsCreateRequest(context, admin, participants, false, title);
+        return Routes.chatsCreateRequest(context, admin, participants, false, title);
     }
 
-    public static Request buildChatsCreateRequest(Context context, String admin, ArrayList<User> participants, boolean isGroup, String title) {
+    public static Request chatsCreateRequest(Context context, String admin, ArrayList<User> participants, boolean isGroup, String title) {
         ArrayList<String> phoneNumbers = new ArrayList<>();
         for (User u: participants) { phoneNumbers.add(u.getPhoneNumber()); }
 
@@ -103,7 +108,7 @@ public class Routes {
                 .build();
     }
 
-    public static Request buildChatMessagesRequest(Context context, int chatId) {
+    public static Request chatMessagesRequest(Context context, int chatId) {
         return new Request.Builder()
                 .url(DOMAIN + "/chats/" + chatId + "/messages")
                 .addHeader("content-type", "application/json")
@@ -111,7 +116,7 @@ public class Routes {
                 .build();
     }
 
-    public static Request buildMessagesCreateRequest(Context context, int chatId, String content) {
+    public static Request messagesCreateRequest(Context context, int chatId, String content) {
         Map<String, String> params = new HashMap<String, String>();
         params.put("content", content);
 
@@ -125,7 +130,7 @@ public class Routes {
                 .build();
     }
 
-    public static Request buildPushNotificationRegisterRequest(Context context, String token) {
+    public static Request fcmRegisterRequest(Context context, String token) {
         Map<String, String> params = new HashMap<String, String>();
         params.put("registration_token", token);
 
@@ -139,8 +144,15 @@ public class Routes {
                 .build();
     }
 
-    public static String bodyToString(final Request request){
+    public static Request logoutRequest(Context context) {
+        return new Request.Builder()
+                .url(DOMAIN + LOGOUT_PATH)
+                .addHeader("content-type", "application/json")
+                .addHeader("authorization", "Token token=" + SessionUtils.getToken(context))
+                .build();
+    }
 
+    public static String bodyToString(final Request request){
         try {
             final Request copy = request.newBuilder().build();
             final Buffer buffer = new Buffer();

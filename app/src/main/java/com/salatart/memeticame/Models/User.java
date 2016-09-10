@@ -70,10 +70,6 @@ public class User implements Parcelable {
         return mPhoneNumber;
     }
 
-    public void setPhoneNumber(String phoneNumber) {
-        this.mPhoneNumber = phoneNumber;
-    }
-
     public ArrayList<Chat> findChats(ArrayList<Chat> allChats) {
         if (allChats == null) {
             return null;

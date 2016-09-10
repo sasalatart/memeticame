@@ -100,7 +100,7 @@ public class ChatActivity extends AppCompatActivity {
     }
 
     public void getMessages() {
-        final Request request = Routes.buildChatMessagesRequest(getApplicationContext(), mChat.getId());
+        final Request request = Routes.chatMessagesRequest(getApplicationContext(), mChat.getId());
         ChatActivity.this.runOnUiThread(new Runnable() {
             @Override
             public void run() {
@@ -135,7 +135,7 @@ public class ChatActivity extends AppCompatActivity {
             return;
         }
 
-        Request request = Routes.buildMessagesCreateRequest(getApplicationContext(), mChat.getId(), content);
+        Request request = Routes.messagesCreateRequest(getApplicationContext(), mChat.getId(), content);
         HttpClient.getInstance().newCall(request).enqueue(new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {

@@ -49,7 +49,7 @@ public class SessionUtils {
     }
 
     public static void registerFCMToken(Context context) {
-        Request request = Routes.buildPushNotificationRegisterRequest(context, getFCMToken(context));
+        Request request = Routes.fcmRegisterRequest(context, getFCMToken(context));
         HttpClient.getInstance().newCall(request).enqueue(new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
@@ -62,5 +62,12 @@ public class SessionUtils {
                 response.body().close();
             }
         });
+    }
+
+    public static void logout(Context context) {
+        SharedPreferences.Editor editor = context.getSharedPreferences(PREFERENCES, 0).edit();
+        editor.remove("Token");
+        editor.remove("PhoneNumber");
+        editor.commit();
     }
 }

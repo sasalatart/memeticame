@@ -84,7 +84,7 @@ public class NewChatActivity extends AppCompatActivity {
             return;
         }
 
-        Request request = Routes.buildChatsCreateRequest(getApplicationContext(),
+        Request request = Routes.chatsCreateRequest(getApplicationContext(),
                 SessionUtils.getPhoneNumber(getApplicationContext()),
                 mUser,
                 title);

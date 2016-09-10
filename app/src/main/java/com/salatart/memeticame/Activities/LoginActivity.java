@@ -63,8 +63,7 @@ public class LoginActivity extends AppCompatActivity {
         int id = item.getItemId();
 
         if (id == R.id.action_signup) {
-            Intent intent = new Intent(this, SignupActivity.class);
-            startActivity(intent);
+            startActivity(new Intent(this, SignupActivity.class));
             return true;
         }
 
@@ -72,7 +71,7 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     public void login(final View view) {
-        Request request = Routes.buildLoginRequest(mLoginForm.getPhoneNumber(), mLoginForm.getPassword());
+        Request request = Routes.loginRequest(mLoginForm.getPhoneNumber(), mLoginForm.getPassword());
 
         progressBar.setVisibility(View.VISIBLE);
 

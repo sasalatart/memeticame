@@ -47,8 +47,9 @@ public class ContactsFragment extends Fragment {
 
     private ArrayList<User> mContacts;
     private ContactsAdapter mAdapter;
-    private OnContactSelected mListener;
     private ListView mContactsListView;
+    private OnContactSelected mContactSelectedListener;
+    private Routes.OnLogout mOnLogoutListener;
 
     public ContactsFragment() {
         // Required empty public constructor
@@ -63,7 +64,7 @@ public class ContactsFragment extends Fragment {
         mContactsListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                mListener.onContactSelected(mContacts.get(position));
+                mContactSelectedListener.onContactSelected(mContacts.get(position));
             }
         });
 
@@ -94,7 +95,7 @@ public class ContactsFragment extends Fragment {
                 @Override
                 public void OnContactsReady(final ArrayList<User> contacts) {
 
-                    Request request = Routes.buildUserIndexRequest(getActivity());
+                    Request request = Routes.userIndexRequest(getActivity());
                     HttpClient.getInstance().newCall(request).enqueue(new Callback() {
                         @Override
                         public void onFailure(Call call, IOException e) {
@@ -152,8 +153,10 @@ public class ContactsFragment extends Fragment {
         int id = item.getItemId();
 
         if (id == R.id.action_add_contact) {
-            Intent intent = new Intent(Intent.ACTION_INSERT, ContactsContract.Contacts.CONTENT_URI);
-            startActivity(intent);
+            startActivity(new Intent(Intent.ACTION_INSERT, ContactsContract.Contacts.CONTENT_URI));
+            return true;
+        } else if (id == R.id.action_logout) {
+            mOnLogoutListener.OnLogout();
             return true;
         }
 
@@ -164,7 +167,8 @@ public class ContactsFragment extends Fragment {
     public void onAttach(Context context) {
         super.onAttach(context);
         try {
-            mListener = (OnContactSelected) context;
+            mContactSelectedListener = (OnContactSelected) context;
+            mOnLogoutListener = (Routes.OnLogout) context;
         } catch (ClassCastException e) {
             throw new ClassCastException(context.toString() + " must implement onViewSelected");
         }
