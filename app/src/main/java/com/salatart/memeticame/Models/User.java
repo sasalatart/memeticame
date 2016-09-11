@@ -23,11 +23,8 @@ public class User implements Parcelable {
     }
 
     public User(Parcel in) {
-        String[] data = new String[2];
-
-        in.readStringArray(data);
-        this.mName = data[0];
-        this.mPhoneNumber = data[1];
+        this.mName = in.readString();
+        this.mPhoneNumber = in.readString();
     }
 
     public static ArrayList<User> fromJsonArray(JSONArray jsonResponse) throws JSONException {
@@ -95,7 +92,8 @@ public class User implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
-        dest.writeStringArray(new String[]{this.mName, this.mPhoneNumber});
+        dest.writeString(mName);
+        dest.writeString(mPhoneNumber);
     }
 
     public static final Parcelable.Creator CREATOR = new Parcelable.Creator() {

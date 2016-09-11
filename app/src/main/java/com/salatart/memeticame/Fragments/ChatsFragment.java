@@ -1,6 +1,9 @@
 package com.salatart.memeticame.Fragments;
 
+import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.util.Log;
@@ -33,12 +36,21 @@ import okhttp3.Response;
  * A simple {@link Fragment} subclass.
  */
 public class ChatsFragment extends Fragment {
+    public static final String NEW_CHAT_FILTER = "newChatFilter";
 
     private ArrayList<Chat> mChats;
     private ChatsAdapter mAdapter;
     private ListView mChatsListView;
     private OnChatSelected mChatSelectedListener;
     private Routes.OnLogout mOnLogoutListener;
+    private BroadcastReceiver mChatsReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            Chat chat = intent.getParcelableExtra(Chat.PARCELABLE_KEY);
+            mChats.add(chat);
+            mAdapter.notifyDataSetChanged();
+        }
+    };
 
     public ChatsFragment() {
         // Required empty public constructor
@@ -47,6 +59,18 @@ public class ChatsFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        getActivity().registerReceiver(mChatsReceiver, new IntentFilter(NEW_CHAT_FILTER));
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        getActivity().unregisterReceiver(mChatsReceiver);
     }
 
     @Override
@@ -95,20 +119,20 @@ public class ChatsFragment extends Fragment {
 
             @Override
             public void onResponse(Call call, final Response response) throws IOException {
-                getActivity().runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        try {
-                            mChats = Chat.fromJsonArray(new JSONArray(response.body().string()));
-                            mAdapter = new ChatsAdapter(getContext(), R.layout.contact_list_item, mChats);
+                try {
+                    mChats = Chat.fromJsonArray(new JSONArray(response.body().string()));
+                    mAdapter = new ChatsAdapter(getContext(), R.layout.contact_list_item, mChats);
+                    getActivity().runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
                             mChatsListView.setAdapter(mAdapter);
-                        } catch (JSONException | IOException e) {
-                            Log.e("ERROR", e.toString());
-                        } finally {
-                            response.body().close();
                         }
-                    }
-                });
+                    });
+                } catch(JSONException e) {
+                    Log.e("ERROR", e.toString());
+                } finally {
+                    response.body().close();
+                }
             }
         });
     }

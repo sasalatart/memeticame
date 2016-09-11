@@ -33,12 +33,7 @@ import okhttp3.Request;
 import okhttp3.Response;
 
 public class ChatActivity extends AppCompatActivity {
-
-    public static final String CHAT_MESSAGE_FILTER = "chatMessageFilter";
-    public static final String IF_CHAT_ID = "chat_id";
-    public static final String IF_MESSAGE_ID = "id";
-    public static final String IF_MESSAGE_SENDER_PHONE = "sender_phone";
-    public static final String IF_MESSAGE_CONTENT = "message";
+    public static final String NEW_MESSAGE_FILTER = "newMessageFilter";
 
     private Chat mChat;
     private EditText mMessageInput;
@@ -48,16 +43,12 @@ public class ChatActivity extends AppCompatActivity {
     private BroadcastReceiver mMessageReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            int chatId = Integer.parseInt(intent.getStringExtra(ChatActivity.IF_CHAT_ID));
-            if (mChat.getId() != chatId) {
+            Message newMessage = intent.getParcelableExtra(Message.PARCELABLE_KEY);
+            if (mChat.getId() != newMessage.getChatId()) {
                 return;
             }
 
-            int id = Integer.parseInt(intent.getStringExtra(ChatActivity.IF_MESSAGE_ID));
-            String senderPhone = intent.getStringExtra(ChatActivity.IF_MESSAGE_SENDER_PHONE);
-            String content = intent.getStringExtra(ChatActivity.IF_MESSAGE_CONTENT);
-
-            mMessages.add(new Message(id, senderPhone, content, chatId));
+            mMessages.add(newMessage);
             mAdapter.notifyDataSetChanged();
         }
     };
@@ -84,7 +75,7 @@ public class ChatActivity extends AppCompatActivity {
     @Override
     public void onResume() {
         super.onResume();
-        getApplicationContext().registerReceiver(mMessageReceiver, new IntentFilter(ChatActivity.CHAT_MESSAGE_FILTER));
+        getApplicationContext().registerReceiver(mMessageReceiver, new IntentFilter(ChatActivity.NEW_MESSAGE_FILTER));
     }
 
     @Override

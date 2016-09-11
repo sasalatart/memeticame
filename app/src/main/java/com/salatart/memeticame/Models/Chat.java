@@ -14,8 +14,8 @@ import java.util.HashMap;
  * Created by sasalatart on 8/29/16.
  */
 public class Chat implements Parcelable {
-    public static String PARCELABLE_KEY = "com.salatart.memeticamea.Models.Chat";
-    public static String PARCELABLE_ARRAY_KEY = "com.salatart.memeticamea.Models.ChatArrayList";
+    public static String PARCELABLE_KEY = "com.salatart.memeticame.Models.Chat";
+    public static String PARCELABLE_ARRAY_KEY = "com.salatart.memeticame.Models.ChatArrayList";
 
     private final int mId;
     private String mTitle;
@@ -119,7 +119,6 @@ public class Chat implements Parcelable {
     }
 
     public static final Parcelable.Creator<Chat> CREATOR = new Parcelable.Creator<Chat>() {
-
         public Chat createFromParcel(Parcel in) {
             return new Chat(in);
         }

@@ -44,8 +44,6 @@ public class MainActivity extends AppCompatActivity implements ChatsFragment.OnC
 
             TabLayout tabLayout = (TabLayout) findViewById(R.id.tabs);
             tabLayout.setupWithViewPager(viewPager);
-
-            //startService(new Intent(getBaseContext(), IDListenerService.class));
         }
     }
 

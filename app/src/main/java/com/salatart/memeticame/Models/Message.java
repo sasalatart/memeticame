@@ -1,24 +1,25 @@
 package com.salatart.memeticame.Models;
 
+import android.os.Parcel;
+import android.os.Parcelable;
 import android.util.Log;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Collections;
 import java.util.Date;
-import java.util.TimeZone;
 
 /**
  * Created by sasalatart on 9/4/16.
  */
-public class Message {
+public class Message implements Parcelable {
+    public static String PARCELABLE_KEY = "com.salatart.memeticame.Models.Message";
+
     private final int mId;
     private final String mSenderPhone;
     private final String mContent;
@@ -33,12 +34,12 @@ public class Message {
         this.mCreatedAt = parseISODate(createdAt);
     }
 
-    public Message(int mId, String senderPhone, String content, int chatId) {
-        this.mId = mId;
-        this.mSenderPhone = senderPhone;
-        this.mContent = content;
-        this.mChatId = chatId;
-        this.mCreatedAt = parseISODate(currentISODate());
+    public Message(Parcel in) {
+        this.mId = in.readInt();
+        this.mSenderPhone = in.readString();
+        this.mContent = in.readString();
+        this.mChatId = in.readInt();
+        this.mCreatedAt = in.readString();
     }
 
     public static ArrayList<Message> fromJsonArray(JSONArray jsonResponse) throws JSONException {
@@ -68,6 +69,10 @@ public class Message {
         return mContent;
     }
 
+    public int getChatId() {
+        return mChatId;
+    }
+
     public String getCreatedAt() {
         return mCreatedAt;
     }
@@ -89,10 +94,27 @@ public class Message {
         }
     }
 
-    private String currentISODate() {
-        TimeZone timeZone = TimeZone.getTimeZone("UTC");
-        DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
-        dateFormat.setTimeZone(timeZone);
-        return dateFormat.format(new Date());
+    @Override
+    public int describeContents() {
+        return 0;
     }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeInt(mId);
+        dest.writeString(mSenderPhone);
+        dest.writeString(mContent);
+        dest.writeInt(mChatId);
+        dest.writeString(mCreatedAt);
+    }
+
+    public static final Parcelable.Creator CREATOR = new Parcelable.Creator() {
+        public Message createFromParcel(Parcel in) {
+            return new Message(in);
+        }
+
+        public Message[] newArray(int size) {
+            return new Message[size];
+        }
+    };
 }

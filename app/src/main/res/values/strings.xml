@@ -18,4 +18,5 @@
     <string name="chats_shared_with_user">Existing chats with this user:</string>
     <string name="logout">Logout</string>
     <string name="add_contact">Add contact</string>
+    <string name="create_chat">Create chat</string>
 </resources>
