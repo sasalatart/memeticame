@@ -1,7 +1,9 @@
 package com.salatart.memeticame.Fragments;
 
+import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
@@ -15,6 +17,13 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ListView;
+import android.widget.Toast;
+
+import com.salatart.memeticame.Models.Chat;
+import com.salatart.memeticame.R;
+import com.salatart.memeticame.Utils.HttpClient;
+import com.salatart.memeticame.Utils.Routes;
+import com.salatart.memeticame.Views.ChatsAdapter;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -22,11 +31,6 @@ import org.json.JSONException;
 import java.io.IOException;
 import java.util.ArrayList;
 
-import com.salatart.memeticame.Models.Chat;
-import com.salatart.memeticame.R;
-import com.salatart.memeticame.Utils.HttpClient;
-import com.salatart.memeticame.Utils.Routes;
-import com.salatart.memeticame.Views.ChatsAdapter;
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.Request;
@@ -82,6 +86,13 @@ public class ChatsFragment extends Fragment {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 mChatSelectedListener.OnChatSelected(mChats.get(position));
+            }
+        });
+        mChatsListView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
+            @Override
+            public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
+                onChatLongClick(mChats.get(position));
+                return true;
             }
         });
 
@@ -151,6 +162,41 @@ public class ChatsFragment extends Fragment {
             throw new ClassCastException(context.toString() + " must implement onChatSelected");
         }
 
+    }
+
+    public void onChatLongClick(final Chat chat) {
+        new AlertDialog.Builder(getActivity())
+                .setTitle("Leave chat")
+                .setMessage("Do you really want to leave this chat?")
+                .setIcon(android.R.drawable.ic_dialog_alert)
+                .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int whichButton) {
+                        Request request = Routes.chatLeaveRequest(getActivity(), chat.getId());
+                        HttpClient.getInstance().newCall(request).enqueue(new Callback() {
+                            @Override
+                            public void onFailure(Call call, IOException e) {
+                                Log.e("ERROR", e.toString());
+                            }
+
+                            @Override
+                            public void onResponse(Call call, final Response response) throws IOException {
+                                getActivity().runOnUiThread(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        if (response.isSuccessful()) {
+                                            mChats.remove(chat);
+                                            mAdapter.notifyDataSetChanged();
+                                            Toast.makeText(getActivity(), "You have left the chat", Toast.LENGTH_SHORT).show();
+                                        } else {
+                                            Toast.makeText(getActivity(), "Could not leave the chat", Toast.LENGTH_SHORT).show();
+                                        }
+                                    }
+                                });
+                                response.body().close();
+                            }
+                        });
+                    }})
+                .setNegativeButton(android.R.string.no, null).show();
     }
 
     public interface OnChatSelected {

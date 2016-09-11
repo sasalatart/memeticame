@@ -130,6 +130,23 @@ public class Routes {
                 .build();
     }
 
+    public static Request chatLeaveRequest(Context context, int chatId) {
+        return new Request.Builder()
+                .url(DOMAIN + "/chats/" + chatId + "/leave")
+                .addHeader("content-type", "application/json")
+                .addHeader("authorization", "Token token=" + SessionUtils.getToken(context))
+                .post(new FormBody.Builder().build())
+                .build();
+    }
+
+    public static Request logoutRequest(Context context) {
+        return new Request.Builder()
+                .url(DOMAIN + LOGOUT_PATH)
+                .addHeader("content-type", "application/json")
+                .addHeader("authorization", "Token token=" + SessionUtils.getToken(context))
+                .build();
+    }
+
     public static Request fcmRegisterRequest(Context context, String token) {
         Map<String, String> params = new HashMap<String, String>();
         params.put("registration_token", token);
@@ -141,14 +158,6 @@ public class Routes {
                 .addHeader("content-type", "application/json")
                 .addHeader("authorization", "Token token=" + SessionUtils.getToken(context))
                 .post(body)
-                .build();
-    }
-
-    public static Request logoutRequest(Context context) {
-        return new Request.Builder()
-                .url(DOMAIN + LOGOUT_PATH)
-                .addHeader("content-type", "application/json")
-                .addHeader("authorization", "Token token=" + SessionUtils.getToken(context))
                 .build();
     }
 
