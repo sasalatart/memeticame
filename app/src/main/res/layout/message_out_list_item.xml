@@ -35,6 +35,20 @@
             android:text="@string/timestamp_label"
             android:textAppearance="?android:attr/textAppearanceSmall"
             android:textColor="@color/outMessageColor" />
+
+        <ImageView
+            android:id="@+id/messageStatusCheck"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:src="@drawable/ic_check_black_24dp"
+            android:visibility="visible" />
+
+        <ImageView
+            android:id="@+id/messageStatusWaiting"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:src="@drawable/ic_access_time_black_24dp"
+            android:visibility="gone" />
     </LinearLayout>
 
     <TextView

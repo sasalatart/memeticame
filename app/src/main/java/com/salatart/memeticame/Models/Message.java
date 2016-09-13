@@ -1,18 +1,17 @@
 package com.salatart.memeticame.Models;
 
+import android.content.Context;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.util.Log;
+
+import com.salatart.memeticame.Utils.SessionUtils;
+import com.salatart.memeticame.Utils.Time;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
 
 /**
  * Created by sasalatart on 9/4/16.
@@ -31,7 +30,7 @@ public class Message implements Parcelable {
         this.mSenderPhone = senderPhone;
         this.mContent = content;
         this.mChatId = chatId;
-        this.mCreatedAt = parseISODate(createdAt);
+        this.mCreatedAt = Time.parseISODate(createdAt);
     }
 
     public Message(Parcel in) {
@@ -42,16 +41,19 @@ public class Message implements Parcelable {
         this.mCreatedAt = in.readString();
     }
 
+    public static Message fromJson(JSONObject jsonMessage) throws JSONException {
+        return new Message(jsonMessage.getInt("id"),
+                jsonMessage.getString("sender_phone"),
+                jsonMessage.getString("content"),
+                jsonMessage.getInt("chat_id"),
+                jsonMessage.getString("created_at"));
+    }
+
     public static ArrayList<Message> fromJsonArray(JSONArray jsonResponse) throws JSONException {
         ArrayList<Message> messages = new ArrayList<>();
 
         for (int i = 0; i < jsonResponse.length(); i++) {
-            JSONObject jsonMessage = jsonResponse.getJSONObject(i);
-            messages.add(new Message(jsonMessage.getInt("id"),
-                    jsonMessage.getString("sender_phone"),
-                    jsonMessage.getString("content"),
-                    jsonMessage.getInt("chat_id"),
-                    jsonMessage.getString("created_at")));
+            messages.add(Message.fromJson(jsonResponse.getJSONObject(i)));
         }
 
         return messages;
@@ -77,21 +79,8 @@ public class Message implements Parcelable {
         return mCreatedAt;
     }
 
-    private String parseISODate(String dateString) {
-        try {
-            Date date = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss").parse(dateString);
-            Calendar calendar = Calendar.getInstance();
-            calendar.setTime(date);
-            int hod = calendar.get(Calendar.HOUR_OF_DAY);
-            int min = calendar.get(Calendar.MINUTE);
-            int dom = calendar.get(Calendar.DAY_OF_MONTH);
-            int mon = calendar.get(Calendar.MONTH);
-            int year = calendar.get(Calendar.YEAR);
-            return String.format("%02d:%02d %02d/%02d/%d", hod, min, dom, mon, year);
-        } catch (ParseException e) {
-            Log.e("ERROR", e.toString());
-            return null;
-        }
+    public boolean isMine(Context context) {
+        return mSenderPhone.equals(SessionUtils.getPhoneNumber(context));
     }
 
     @Override

@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.salatart.memeticame.Models.Message;
 import com.salatart.memeticame.Models.User;
 import okhttp3.FormBody;
 import okhttp3.MediaType;
@@ -20,7 +21,7 @@ import okio.Buffer;
  * Created by sasalatart on 8/27/16.
  */
 public class Routes {
-    public static String DOMAIN = "http://10.0.2.2:3000";
+    public static String DOMAIN = "https:memeticame.salatart.com";
     public static String LOGIN_PATH = "/login";
     public static String SIGNUP_PATH = "/signup";
     public static String LOGOUT_PATH = "/logout";
@@ -116,14 +117,14 @@ public class Routes {
                 .build();
     }
 
-    public static Request messagesCreateRequest(Context context, int chatId, String content) {
+    public static Request messagesCreateRequest(Context context, Message message) {
         Map<String, String> params = new HashMap<String, String>();
-        params.put("content", content);
+        params.put("content", message.getContent());
 
         RequestBody body = RequestBody.create(JSON, new JSONObject(params).toString());
 
         return new Request.Builder()
-                .url(DOMAIN + "/chats/" + chatId + "/messages")
+                .url(DOMAIN + "/chats/" + message.getChatId() + "/messages")
                 .addHeader("content-type", "application/json")
                 .addHeader("authorization", "Token token=" + SessionUtils.getToken(context))
                 .post(body)

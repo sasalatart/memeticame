@@ -16,13 +16,17 @@ import android.widget.Toast;
 
 import com.salatart.memeticame.Models.Chat;
 import com.salatart.memeticame.Models.Message;
+import com.salatart.memeticame.Models.User;
 import com.salatart.memeticame.R;
 import com.salatart.memeticame.Utils.HttpClient;
 import com.salatart.memeticame.Utils.Routes;
+import com.salatart.memeticame.Utils.SessionUtils;
+import com.salatart.memeticame.Utils.Time;
 import com.salatart.memeticame.Views.MessagesAdapter;
 
 import org.json.JSONArray;
 import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -44,11 +48,15 @@ public class ChatActivity extends AppCompatActivity {
         @Override
         public void onReceive(Context context, Intent intent) {
             Message newMessage = intent.getParcelableExtra(Message.PARCELABLE_KEY);
+
             if (mChat.getId() != newMessage.getChatId()) {
                 return;
             }
 
-            mMessages.add(newMessage);
+            if (!newMessage.isMine(getApplicationContext())) {
+                mMessages.add(newMessage);
+            }
+
             mAdapter.notifyDataSetChanged();
         }
     };
@@ -91,42 +99,7 @@ public class ChatActivity extends AppCompatActivity {
     }
 
     public void getMessages() {
-        final Request request = Routes.chatMessagesRequest(getApplicationContext(), mChat.getId());
-        ChatActivity.this.runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                HttpClient.getInstance().newCall(request).enqueue(new Callback() {
-                    @Override
-                    public void onFailure(Call call, IOException e) {
-                        Log.e("ERROR", e.toString());
-                    }
-
-                    @Override
-                    public void onResponse(Call call, final Response response) throws IOException {
-                        try {
-                            mMessages = Message.fromJsonArray(new JSONArray(response.body().string()));
-                            mAdapter = new MessagesAdapter(getApplicationContext(), R.layout.message_in_list_item, mMessages, mChat);
-                            mMessagesListView.setAdapter(mAdapter);
-                        } catch (IOException | JSONException e) {
-                            Log.e("ERROR", e.toString());
-                        } finally {
-                            response.body().close();
-                        }
-                    }
-                });
-            }
-        });
-    }
-
-    public void sendMessage(View view) {
-        String content = mMessageInput.getText().toString();
-
-        if (content.isEmpty()) {
-            Toast.makeText(getApplicationContext(), "Can't send empty messages.", Toast.LENGTH_SHORT).show();
-            return;
-        }
-
-        Request request = Routes.messagesCreateRequest(getApplicationContext(), mChat.getId(), content);
+        Request request = Routes.chatMessagesRequest(getApplicationContext(), mChat.getId());
         HttpClient.getInstance().newCall(request).enqueue(new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
@@ -135,13 +108,73 @@ public class ChatActivity extends AppCompatActivity {
 
             @Override
             public void onResponse(Call call, final Response response) throws IOException {
-                response.body().close();
-                ChatActivity.this.runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        mMessageInput.setText("");
+                try {
+                    mMessages = Message.fromJsonArray(new JSONArray(response.body().string()));
+                    mAdapter = new MessagesAdapter(getApplicationContext(), R.layout.message_in_list_item, mMessages, mChat);
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            mMessagesListView.setAdapter(mAdapter);
+                        }
+                    });
+                } catch (IOException | JSONException e) {
+                    Log.e("ERROR", e.toString());
+                } finally {
+                    response.body().close();
+                }
+            }
+        });
+    }
+
+    public void sendMessage(View view) {
+        final String content = mMessageInput.getText().toString();
+        if (content.isEmpty()) {
+            Toast.makeText(getApplicationContext(), "Can't send empty messages.", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        final Message message = new Message(-1, SessionUtils.getPhoneNumber(getApplicationContext()), content, mChat.getId(), Time.currentISODate());
+        mMessages.add(message);
+        mAdapter.notifyDataSetChanged();
+        ChatActivity.this.runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                mMessageInput.setText("");
+            }
+        });
+
+        Request request = Routes.messagesCreateRequest(getApplicationContext(), message);
+        HttpClient.getInstance().newCall(request).enqueue(new Callback() {
+            @Override
+            public void onFailure(Call call, IOException e) {
+                onSendFailure(message);
+            }
+
+            @Override
+            public void onResponse(Call call, final Response response) throws IOException {
+                if (response.isSuccessful()) {
+                    try {
+                        mMessages.remove(message);
+                        mMessages.add(Message.fromJson(new JSONObject(response.body().string())));
+                    } catch (IOException | JSONException e) {
+                        Log.e("ERROR", e.toString());
                     }
-                });
+                } else {
+                    onSendFailure(message);
+                }
+                response.body().close();
+            }
+        });
+    }
+
+    public void onSendFailure(final Message message) {
+        ChatActivity.this.runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                mMessages.remove(message);
+                mAdapter.notifyDataSetChanged();
+                mMessageInput.setText(message.getContent());
+                Toast.makeText(getApplicationContext(), "Could not send message", Toast.LENGTH_LONG).show();
             }
         });
     }

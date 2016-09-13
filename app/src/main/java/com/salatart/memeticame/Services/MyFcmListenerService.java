@@ -10,6 +10,7 @@ import com.salatart.memeticame.Fragments.ChatsFragment;
 import com.salatart.memeticame.Models.Chat;
 import com.salatart.memeticame.Models.Message;
 import com.salatart.memeticame.Models.User;
+import com.salatart.memeticame.Utils.SessionUtils;
 
 import org.json.JSONArray;
 import org.json.JSONException;

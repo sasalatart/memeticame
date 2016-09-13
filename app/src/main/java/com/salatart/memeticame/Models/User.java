@@ -1,7 +1,10 @@
 package com.salatart.memeticame.Models;
 
+import android.content.Context;
 import android.os.Parcel;
 import android.os.Parcelable;
+
+import com.salatart.memeticame.Utils.SessionUtils;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -42,10 +45,8 @@ public class User implements Parcelable {
         ArrayList<User> users = new ArrayList<>();
 
         for (User lU : localUsers) {
-            String lUPhoneNumber = lU.getPhoneNumber().replaceAll("[^\\d.]", "");
             for (User eU : externalUsers) {
-                String eUPhoneNumber = eU.getPhoneNumber().replaceAll("[^\\d.]", "");
-                if (lUPhoneNumber.equals(eUPhoneNumber)) {
+                if (User.comparePhones(lU.getPhoneNumber(), eU.getPhoneNumber())) {
                     users.add(eU);
                     break;
                 }
@@ -83,6 +84,10 @@ public class User implements Parcelable {
         }
 
         return chats;
+    }
+
+    public static boolean comparePhones(String phone1, String phone2) {
+        return phone1.replaceAll("[^\\d.]", "").equals(phone2.replaceAll("[^\\d.]", ""));
     }
 
     @Override

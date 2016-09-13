@@ -5,14 +5,15 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.ImageView;
 import android.widget.TextView;
-
-import java.util.ArrayList;
 
 import com.salatart.memeticame.Models.Chat;
 import com.salatart.memeticame.Models.Message;
 import com.salatart.memeticame.R;
 import com.salatart.memeticame.Utils.SessionUtils;
+
+import java.util.ArrayList;
 
 /**
  * Created by sasalatart on 9/4/16.
@@ -35,7 +36,7 @@ public class MessagesAdapter extends ArrayAdapter<Message> {
         Message message = mMessages.get(position);
 
         if (view == null) {
-            if (message.getSenderPhone().equals(SessionUtils.getPhoneNumber(getContext()))) {
+            if (message.isMine(getContext())) {
                 view = mLayoutInflater.inflate(R.layout.message_out_list_item, parent, false);
             } else {
                 view = mLayoutInflater.inflate(R.layout.message_in_list_item, parent, false);
@@ -43,17 +44,22 @@ public class MessagesAdapter extends ArrayAdapter<Message> {
         }
 
         TextView senderLabel = (TextView)view.findViewById(R.id.senderLabel);
-        TextView timestampLabel = (TextView)view.findViewById(R.id.timestampLabel);
-        TextView messageLabel = (TextView)view.findViewById(R.id.messageLabel);
-
-        if (message.getSenderPhone().equals(SessionUtils.getPhoneNumber(getContext()))) {
+        if (message.isMine(getContext())) {
             senderLabel.setText(R.string.me);
         } else {
             senderLabel.setText(mParentChat.getParticipantsHash().get(message.getSenderPhone()));
         }
 
-        timestampLabel.setText(message.getCreatedAt());
-        messageLabel.setText(message.getContent());
+        if (message.getId() == -1) {
+            view.findViewById(R.id.messageStatusCheck).setVisibility(View.GONE);
+            view.findViewById(R.id.messageStatusWaiting).setVisibility(View.VISIBLE);
+        } else {
+            view.findViewById(R.id.messageStatusWaiting).setVisibility(View.GONE);
+            view.findViewById(R.id.messageStatusCheck).setVisibility(View.VISIBLE);
+        }
+
+        ((TextView)view.findViewById(R.id.timestampLabel)).setText(message.getCreatedAt());
+        ((TextView)view.findViewById(R.id.messageLabel)).setText(message.getContent());
 
         return view;
     }
@@ -67,7 +73,7 @@ public class MessagesAdapter extends ArrayAdapter<Message> {
     public int getItemViewType(int position) {
         Message message = getItem(position);
 
-        if (message.getSenderPhone().equals(SessionUtils.getPhoneNumber(getContext()))) {
+        if (message.isMine(getContext())) {
             return 0;
         } else {
             return 1;
