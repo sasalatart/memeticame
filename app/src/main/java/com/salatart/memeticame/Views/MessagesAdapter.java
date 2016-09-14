@@ -11,7 +11,8 @@ import android.widget.TextView;
 import com.salatart.memeticame.Models.Chat;
 import com.salatart.memeticame.Models.Message;
 import com.salatart.memeticame.R;
-import com.salatart.memeticame.Utils.SessionUtils;
+import com.salatart.memeticame.Utils.Routes;
+import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
 
@@ -26,7 +27,7 @@ public class MessagesAdapter extends ArrayAdapter<Message> {
     public MessagesAdapter(Context context, int resource, ArrayList<Message> messages, Chat parentChat) {
         super(context, resource, messages);
         mMessages = messages;
-        mLayoutInflater = (LayoutInflater)context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        mLayoutInflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         mParentChat = parentChat;
     }
 
@@ -36,14 +37,18 @@ public class MessagesAdapter extends ArrayAdapter<Message> {
         Message message = mMessages.get(position);
 
         if (view == null) {
-            if (message.isMine(getContext())) {
-                view = mLayoutInflater.inflate(R.layout.message_out_list_item, parent, false);
-            } else {
-                view = mLayoutInflater.inflate(R.layout.message_in_list_item, parent, false);
+            if (message.isMine(getContext()) && message.getAttachment() == null) {
+                view = mLayoutInflater.inflate(R.layout.message_out_text_list_item, parent, false);
+            } else if (message.isMine(getContext())) {
+                view = mLayoutInflater.inflate(R.layout.message_out_image_list_item, parent, false);
+            } else if (!message.isMine(getContext()) && message.getAttachment() == null) {
+                view = mLayoutInflater.inflate(R.layout.message_in_text_list_item, parent, false);
+            } else if (!message.isMine(getContext())) {
+                view = mLayoutInflater.inflate(R.layout.message_in_image_list_item, parent, false);
             }
         }
 
-        TextView senderLabel = (TextView)view.findViewById(R.id.senderLabel);
+        TextView senderLabel = (TextView) view.findViewById(R.id.senderLabel);
         if (message.isMine(getContext())) {
             senderLabel.setText(R.string.me);
         } else {
@@ -58,25 +63,37 @@ public class MessagesAdapter extends ArrayAdapter<Message> {
             view.findViewById(R.id.messageStatusCheck).setVisibility(View.VISIBLE);
         }
 
-        ((TextView)view.findViewById(R.id.timestampLabel)).setText(message.getCreatedAt());
-        ((TextView)view.findViewById(R.id.messageLabel)).setText(message.getContent());
+        ((TextView) view.findViewById(R.id.timestampLabel)).setText(message.getCreatedAt());
+        ((TextView) view.findViewById(R.id.messageLabel)).setText(message.getContent());
+
+        if (message.getAttachment() != null) {
+            ImageView attachedImage = (ImageView) view.findViewById(R.id.attachedImage);
+            Picasso.with(getContext())
+                    .load(Routes.DOMAIN + "/" + message.getAttachment().getUrl())
+                    .resize(480, 480)
+                    .into(attachedImage);
+        }
 
         return view;
     }
 
     @Override
     public int getViewTypeCount() {
-        return 2;
+        return 4;
     }
 
     @Override
     public int getItemViewType(int position) {
         Message message = getItem(position);
 
-        if (message.isMine(getContext())) {
+        if (message.isMine(getContext()) && message.getAttachment() == null) {
             return 0;
-        } else {
+        } else if (message.isMine(getContext())) {
             return 1;
+        } else if (!message.isMine(getContext()) && message.getAttachment() == null) {
+            return 2;
+        } else {
+            return 3;
         }
     }
 }

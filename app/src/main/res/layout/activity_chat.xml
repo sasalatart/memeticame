@@ -17,6 +17,15 @@
         android:layout_weight="9"
         android:transcriptMode="alwaysScroll" />
 
+    <ImageButton
+        android:id="@+id/selectResource"
+        android:layout_width="42dp"
+        android:layout_height="42dp"
+        android:layout_gravity="end"
+        android:layout_margin="4dp"
+        android:onClick="selectResource"
+        android:src="@drawable/ic_attach_file_black_24dp" />
+
     <LinearLayout
         android:id="@+id/newMessageForm"
         android:layout_width="match_parent"
@@ -26,6 +35,13 @@
         android:orientation="horizontal"
         android:padding="1dp">
 
+        <ImageView
+            android:id="@+id/attachment"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="4"
+            android:visibility="gone" />
+
         <EditText
             android:id="@+id/messageInput"
             android:layout_width="0dp"
@@ -33,12 +49,20 @@
             android:layout_weight="8"
             android:inputType="textMultiLine" />
 
-        <Button
-            android:id="@+id/messageSubmit"
+        <ImageButton
             android:layout_width="0dp"
             android:layout_height="match_parent"
-            android:layout_weight="2"
+            android:layout_weight="3"
             android:onClick="sendMessage"
-            android:text="@string/send" />
+            android:src="@drawable/ic_send_black_24dp" />
+
+        <ImageButton
+            android:id="@+id/cancelAttachmentButton"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="3"
+            android:onClick="cancelAttachment"
+            android:src="@drawable/ic_delete_black_24dp"
+            android:visibility="gone" />
     </LinearLayout>
 </LinearLayout>

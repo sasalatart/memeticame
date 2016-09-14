@@ -17,13 +17,22 @@ import java.util.ArrayList;
  * Created by sasalatart on 9/4/16.
  */
 public class Message implements Parcelable {
-    public static String PARCELABLE_KEY = "com.salatart.memeticame.Models.Message";
+    public static final Parcelable.Creator CREATOR = new Parcelable.Creator() {
+        public Message createFromParcel(Parcel in) {
+            return new Message(in);
+        }
 
+        public Message[] newArray(int size) {
+            return new Message[size];
+        }
+    };
+    public static String PARCELABLE_KEY = "com.salatart.memeticame.Models.Message";
     private final int mId;
     private final String mSenderPhone;
     private final String mContent;
     private final int mChatId;
     private String mCreatedAt;
+    private Attachment mAttachment;
 
     public Message(int mId, String senderPhone, String content, int chatId, String createdAt) {
         this.mId = mId;
@@ -42,21 +51,34 @@ public class Message implements Parcelable {
     }
 
     public static Message fromJson(JSONObject jsonMessage) throws JSONException {
-        return new Message(jsonMessage.getInt("id"),
+        Message message = new Message(jsonMessage.getInt("id"),
                 jsonMessage.getString("sender_phone"),
                 jsonMessage.getString("content"),
                 jsonMessage.getInt("chat_id"),
                 jsonMessage.getString("created_at"));
+
+        JSONObject jsonAttachment = jsonMessage.getJSONObject("attachment_link");
+        if (!jsonAttachment.getString("name").equals("null")) {
+            message.setAttachment(new Attachment(jsonAttachment.getString("name"),
+                    jsonAttachment.getString("mime_type"),
+                    null,
+                    jsonAttachment.getString("url")));
+        }
+
+        return message;
     }
 
     public static ArrayList<Message> fromJsonArray(JSONArray jsonResponse) throws JSONException {
         ArrayList<Message> messages = new ArrayList<>();
-
         for (int i = 0; i < jsonResponse.length(); i++) {
             messages.add(Message.fromJson(jsonResponse.getJSONObject(i)));
         }
 
         return messages;
+    }
+
+    public static Message createFake(Context context, String content, int chatId) {
+        return new Message(-1, SessionUtils.getPhoneNumber(context), content, chatId, Time.currentISODate());
     }
 
     public int getId() {
@@ -79,6 +101,14 @@ public class Message implements Parcelable {
         return mCreatedAt;
     }
 
+    public Attachment getAttachment() {
+        return mAttachment;
+    }
+
+    public void setAttachment(Attachment mAttachment) {
+        this.mAttachment = mAttachment;
+    }
+
     public boolean isMine(Context context) {
         return mSenderPhone.equals(SessionUtils.getPhoneNumber(context));
     }
@@ -96,14 +126,4 @@ public class Message implements Parcelable {
         dest.writeInt(mChatId);
         dest.writeString(mCreatedAt);
     }
-
-    public static final Parcelable.Creator CREATOR = new Parcelable.Creator() {
-        public Message createFromParcel(Parcel in) {
-            return new Message(in);
-        }
-
-        public Message[] newArray(int size) {
-            return new Message[size];
-        }
-    };
 }

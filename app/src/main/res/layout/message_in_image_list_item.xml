@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="@dimen/message_padding">
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="end"
+        android:orientation="horizontal">
+
+        <ImageView
+            android:id="@+id/messageStatusCheck"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:src="@drawable/ic_check_black_24dp"
+            android:visibility="visible" />
+
+        <ImageView
+            android:id="@+id/messageStatusWaiting"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:src="@drawable/ic_access_time_black_24dp"
+            android:visibility="gone" />
+
+        <TextView
+            android:id="@+id/senderLabel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/sender_label"
+            android:textAppearance="?android:attr/textAppearanceSmall"
+            android:textColor="@color/inMessageColor" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:paddingLeft="2dp"
+            android:paddingRight="2dp"
+            android:text="@string/at"
+            android:textAppearance="?android:attr/textAppearanceSmall"
+            android:textColor="@color/inMessageColor" />
+
+        <TextView
+            android:id="@+id/timestampLabel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/timestamp_label"
+            android:textAppearance="?android:attr/textAppearanceSmall"
+            android:textColor="@color/inMessageColor" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="end"
+        android:orientation="vertical">
+
+        <ImageView
+            android:id="@+id/attachedImage"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:src="@drawable/ic_image_black_24dp" />
+
+        <TextView
+            android:id="@+id/messageLabel"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:gravity="center"
+            android:text="@string/message_label"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:textColor="@color/inMessageColor" />
+    </LinearLayout>
+</LinearLayout>

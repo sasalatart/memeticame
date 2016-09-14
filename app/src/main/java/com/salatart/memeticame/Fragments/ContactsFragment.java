@@ -20,18 +20,19 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ListView;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-
-import java.io.IOException;
-import java.util.ArrayList;
-
 import com.salatart.memeticame.Models.User;
 import com.salatart.memeticame.R;
 import com.salatart.memeticame.Utils.ContactsUtils;
 import com.salatart.memeticame.Utils.HttpClient;
 import com.salatart.memeticame.Utils.Routes;
 import com.salatart.memeticame.Views.ContactsAdapter;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+
+import java.io.IOException;
+import java.util.ArrayList;
+
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.Request;
@@ -104,19 +105,19 @@ public class ContactsFragment extends Fragment {
 
                         @Override
                         public void onResponse(Call call, final Response response) throws IOException {
-                            getActivity().runOnUiThread(new Runnable() {
-                                public void run() {
-                                    try {
-                                        mContacts = User.intersect(contacts, User.fromJsonArray(new JSONArray(response.body().string())));
-                                        mAdapter = new ContactsAdapter(getContext(), R.layout.contact_list_item, mContacts);
+                            try {
+                                mContacts = User.intersect(contacts, User.fromJsonArray(new JSONArray(response.body().string())));
+                                mAdapter = new ContactsAdapter(getContext(), R.layout.contact_list_item, mContacts);
+                                getActivity().runOnUiThread(new Runnable() {
+                                    public void run() {
                                         mContactsListView.setAdapter(mAdapter);
-                                    } catch (JSONException | IOException e) {
-                                        Log.e("ERROR", e.toString());
-                                    } finally {
-                                        response.body().close();
                                     }
-                                }
-                            });
+                                });
+                            } catch (JSONException | IOException e) {
+                                Log.e("ERROR", e.toString());
+                            } finally {
+                                response.body().close();
+                            }
                         }
                     });
                 }

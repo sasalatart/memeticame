@@ -4,6 +4,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
@@ -11,17 +12,18 @@ import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
+import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.Toast;
 
+import com.salatart.memeticame.Models.Attachment;
 import com.salatart.memeticame.Models.Chat;
 import com.salatart.memeticame.Models.Message;
-import com.salatart.memeticame.Models.User;
 import com.salatart.memeticame.R;
+import com.salatart.memeticame.Utils.FileUtils;
 import com.salatart.memeticame.Utils.HttpClient;
 import com.salatart.memeticame.Utils.Routes;
-import com.salatart.memeticame.Utils.SessionUtils;
-import com.salatart.memeticame.Utils.Time;
 import com.salatart.memeticame.Views.MessagesAdapter;
 
 import org.json.JSONArray;
@@ -38,11 +40,17 @@ import okhttp3.Response;
 
 public class ChatActivity extends AppCompatActivity {
     public static final String NEW_MESSAGE_FILTER = "newMessageFilter";
+    public static final int PICK_FILE_REQUEST = 1;
 
     private Chat mChat;
-    private EditText mMessageInput;
     private ArrayList<Message> mMessages;
     private MessagesAdapter mAdapter;
+
+    private Attachment mCurrentAttachment;
+
+    private EditText mMessageInput;
+    private ImageView mAttachmentImageView;
+    private ImageButton mCancelButton;
     private ListView mMessagesListView;
     private BroadcastReceiver mMessageReceiver = new BroadcastReceiver() {
         @Override
@@ -55,11 +63,16 @@ public class ChatActivity extends AppCompatActivity {
 
             if (!newMessage.isMine(getApplicationContext())) {
                 mMessages.add(newMessage);
+                mAdapter.notifyDataSetChanged();
             }
-
-            mAdapter.notifyDataSetChanged();
         }
     };
+
+    public static Intent getIntent(Context context, Chat chat) {
+        Intent intent = new Intent(context, ChatActivity.class);
+        intent.putExtra(Chat.PARCELABLE_KEY, chat);
+        return intent;
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -76,6 +89,8 @@ public class ChatActivity extends AppCompatActivity {
 
         mMessagesListView = (ListView) findViewById(R.id.messagesListView);
         mMessageInput = (EditText) findViewById(R.id.messageInput);
+        mAttachmentImageView = (ImageView) findViewById(R.id.attachment);
+        mCancelButton = (ImageButton) findViewById(R.id.cancelAttachmentButton);
 
         getMessages();
     }
@@ -110,7 +125,7 @@ public class ChatActivity extends AppCompatActivity {
             public void onResponse(Call call, final Response response) throws IOException {
                 try {
                     mMessages = Message.fromJsonArray(new JSONArray(response.body().string()));
-                    mAdapter = new MessagesAdapter(getApplicationContext(), R.layout.message_in_list_item, mMessages, mChat);
+                    mAdapter = new MessagesAdapter(getApplicationContext(), R.layout.message_in_text_list_item, mMessages, mChat);
                     runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
@@ -133,9 +148,7 @@ public class ChatActivity extends AppCompatActivity {
             return;
         }
 
-        final Message message = new Message(-1, SessionUtils.getPhoneNumber(getApplicationContext()), content, mChat.getId(), Time.currentISODate());
-        mMessages.add(message);
-        mAdapter.notifyDataSetChanged();
+        final Message message = createFakeMessage(content);
         ChatActivity.this.runOnUiThread(new Runnable() {
             @Override
             public void run() {
@@ -156,6 +169,12 @@ public class ChatActivity extends AppCompatActivity {
                     try {
                         mMessages.remove(message);
                         mMessages.add(Message.fromJson(new JSONObject(response.body().string())));
+                        ChatActivity.this.runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                mAdapter.notifyDataSetChanged();
+                            }
+                        });
                     } catch (IOException | JSONException e) {
                         Log.e("ERROR", e.toString());
                     }
@@ -179,9 +198,51 @@ public class ChatActivity extends AppCompatActivity {
         });
     }
 
-    public static Intent getIntent(Context context, Chat chat) {
-        Intent intent = new Intent(context, ChatActivity.class);
-        intent.putExtra(Chat.PARCELABLE_KEY, chat);
-        return intent;
+    private Message createFakeMessage(String content) {
+        Message message = Message.createFake(getApplicationContext(), content, mChat.getId());
+        if (mCurrentAttachment != null) {
+            message.setAttachment(mCurrentAttachment.clone());
+            toggleButtonVisibilities();
+            mCurrentAttachment = null;
+        }
+
+        mMessages.add(message);
+        mAdapter.notifyDataSetChanged();
+        return message;
+    }
+
+    public void cancelAttachment(View view) {
+        toggleButtonVisibilities();
+    }
+
+    public void toggleButtonVisibilities() {
+        mCancelButton.setVisibility(mCancelButton.getVisibility() == View.GONE ? View.VISIBLE : View.GONE);
+        mAttachmentImageView.setVisibility(mAttachmentImageView.getVisibility() == View.GONE ? View.VISIBLE : View.GONE);
+        mAttachmentImageView.setImageResource(R.drawable.ic_image_black_24dp);
+    }
+
+    public void selectResource(View view) {
+        Intent intent = new Intent();
+        intent.setType("image/* video/*");
+        intent.setAction(Intent.ACTION_GET_CONTENT);
+        startActivityForResult(Intent.createChooser(intent, "Select file"), PICK_FILE_REQUEST);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (requestCode == PICK_FILE_REQUEST && resultCode == RESULT_OK && data != null && data.getData() != null) {
+            Uri uri = data.getData();
+            try {
+                mCurrentAttachment = new Attachment(FileUtils.getName(getApplicationContext(), uri),
+                        FileUtils.getMimeType(getApplicationContext(), uri),
+                        FileUtils.encodeToBase64(getApplicationContext(), uri),
+                        null);
+                toggleButtonVisibilities();
+            } catch (IOException e) {
+                Log.e("ERROR", e.toString());
+            }
+        }
     }
 }

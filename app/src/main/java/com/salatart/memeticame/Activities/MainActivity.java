@@ -82,13 +82,9 @@ public class MainActivity extends AppCompatActivity implements ChatsFragment.OnC
 
             @Override
             public void onResponse(Call call, Response response) throws IOException {
-                if (response.isSuccessful()) {
-                    SessionUtils.logout(getApplicationContext());
-                    startActivity(new Intent(getApplicationContext(), LoginActivity.class));
-                    finish();
-                } else {
-                    Log.e("ERROR", "Failed to logout");
-                }
+                SessionUtils.logout(getApplicationContext());
+                startActivity(new Intent(getApplicationContext(), LoginActivity.class));
+                finish();
             }
         });
     }

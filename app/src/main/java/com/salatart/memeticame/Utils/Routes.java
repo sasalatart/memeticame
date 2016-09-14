@@ -1,7 +1,13 @@
 package com.salatart.memeticame.Utils;
 
 import android.content.Context;
+import android.util.Log;
 
+import com.salatart.memeticame.Models.Attachment;
+import com.salatart.memeticame.Models.Message;
+import com.salatart.memeticame.Models.User;
+
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
@@ -9,8 +15,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.salatart.memeticame.Models.Message;
-import com.salatart.memeticame.Models.User;
 import okhttp3.FormBody;
 import okhttp3.MediaType;
 import okhttp3.Request;
@@ -21,7 +25,7 @@ import okio.Buffer;
  * Created by sasalatart on 8/27/16.
  */
 public class Routes {
-    public static String DOMAIN = "https:memeticame.salatart.com";
+    public static String DOMAIN = "http://10.0.2.2:3000";
     public static String LOGIN_PATH = "/login";
     public static String SIGNUP_PATH = "/signup";
     public static String LOGOUT_PATH = "/logout";
@@ -30,10 +34,6 @@ public class Routes {
     public static String CHATS_CREATE_PATH = "/chats";
     public static String FCM_REGISTRATION_PATH = "/fcm_register";
     public static MediaType JSON = MediaType.parse("application/json; charset=utf-8");
-
-    public interface OnLogout {
-        void OnLogout();
-    }
 
     public static Request loginRequest(String phoneNumber, String password) {
         Map<String, String> params = new HashMap<String, String>();
@@ -90,7 +90,9 @@ public class Routes {
 
     public static Request chatsCreateRequest(Context context, String admin, ArrayList<User> participants, boolean isGroup, String title) {
         ArrayList<String> phoneNumbers = new ArrayList<>();
-        for (User u: participants) { phoneNumbers.add(u.getPhoneNumber()); }
+        for (User u : participants) {
+            phoneNumbers.add(u.getPhoneNumber());
+        }
 
         FormBody.Builder formBuilder = new FormBody.Builder();
         formBuilder.add("admin", admin);
@@ -118,11 +120,24 @@ public class Routes {
     }
 
     public static Request messagesCreateRequest(Context context, Message message) {
-        Map<String, String> params = new HashMap<String, String>();
-        params.put("content", message.getContent());
 
-        RequestBody body = RequestBody.create(JSON, new JSONObject(params).toString());
+        JSONObject params = new JSONObject();
+        try {
+            params.put("content", message.getContent());
 
+            if (message.getAttachment() != null) {
+                Attachment attachment = message.getAttachment();
+                JSONObject jsonAttachment = new JSONObject();
+                jsonAttachment.put("name", attachment.getName());
+                jsonAttachment.put("mime_type", attachment.getMimeType());
+                jsonAttachment.put("base64", attachment.getBase64Content());
+                params.put("attachment", jsonAttachment);
+            }
+        } catch (JSONException e) {
+            Log.e("ERROR", e.toString());
+        }
+
+        RequestBody body = RequestBody.create(JSON, params.toString());
         return new Request.Builder()
                 .url(DOMAIN + "/chats/" + message.getChatId() + "/messages")
                 .addHeader("content-type", "application/json")
@@ -162,7 +177,7 @@ public class Routes {
                 .build();
     }
 
-    public static String bodyToString(final Request request){
+    public static String bodyToString(final Request request) {
         try {
             final Request copy = request.newBuilder().build();
             final Buffer buffer = new Buffer();
@@ -171,5 +186,9 @@ public class Routes {
         } catch (final IOException e) {
             return "Could not parse the body to a String";
         }
+    }
+
+    public interface OnLogout {
+        void OnLogout();
     }
 }
