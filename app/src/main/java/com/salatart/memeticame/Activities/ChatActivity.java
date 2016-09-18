@@ -6,6 +6,8 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.net.Uri;
 import android.os.Bundle;
+import android.provider.MediaStore;
+import android.support.v4.content.FileProvider;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -31,6 +33,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 
@@ -41,13 +44,15 @@ import okhttp3.Response;
 
 public class ChatActivity extends AppCompatActivity {
     public static final String NEW_MESSAGE_FILTER = "newMessageFilter";
-    public static final int PICK_FILE_REQUEST = 1;
+    public static final int REQUEST_PICK_FILE = 1;
+    public static final int REQUEST_IMAGE_CAPTURE = 1;
 
     private Chat mChat;
     private ArrayList<Message> mMessages;
     private MessagesAdapter mAdapter;
 
     private Attachment mCurrentAttachment;
+    private Uri mCurrentUri;
 
     private EditText mMessageInput;
     private ImageView mAttachmentImageView;
@@ -234,23 +239,48 @@ public class ChatActivity extends AppCompatActivity {
     }
 
     public void selectResource(View view) {
-        startActivityForResult(Attachment.getIntent(), PICK_FILE_REQUEST);
+        startActivityForResult(FileUtils.getSelectFileIntent(), REQUEST_PICK_FILE);
     }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
-        if (requestCode == PICK_FILE_REQUEST && resultCode == RESULT_OK && data != null && data.getData() != null) {
+        if (requestCode == REQUEST_PICK_FILE && resultCode == RESULT_OK && data != null && data.getData() != null) {
             Uri uri = data.getData();
+            setCurrentAttachmentFromUri(uri);
+        } else if (requestCode == REQUEST_IMAGE_CAPTURE && resultCode == RESULT_OK) {
+            setCurrentAttachmentFromUri(mCurrentUri);
+        }
+    }
+
+    private void setCurrentAttachmentFromUri(Uri uri) {
+        try {
+            mCurrentAttachment = new Attachment(FileUtils.getName(getApplicationContext(), uri),
+                    FileUtils.getMimeType(getApplicationContext(), uri),
+                    FileUtils.encodeToBase64FromUri(getApplicationContext(), uri),
+                    uri.toString());
+            toggleButtonVisibilities();
+        } catch (IOException e) {
+            Log.e("ERROR", e.toString());
+        }
+    }
+
+    public void dispatchTakePictureIntent(View view) {
+        Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+        if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
+            File photoFile = null;
             try {
-                mCurrentAttachment = new Attachment(FileUtils.getName(getApplicationContext(), uri),
-                        FileUtils.getMimeType(getApplicationContext(), uri),
-                        FileUtils.encodeToBase64(getApplicationContext(), uri),
-                        uri.toString());
-                toggleButtonVisibilities();
+                photoFile = FileUtils.createImageFile(getApplicationContext());
             } catch (IOException e) {
                 Log.e("ERROR", e.toString());
+            }
+
+            if (photoFile != null) {
+                Uri photoURI = FileProvider.getUriForFile(this, "com.salatart.memeticame.fileprovider", photoFile);
+                mCurrentUri = photoURI;
+                takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI);
+                startActivityForResult(takePictureIntent, REQUEST_IMAGE_CAPTURE);
             }
         }
     }

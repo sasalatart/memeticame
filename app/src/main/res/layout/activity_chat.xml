@@ -17,14 +17,28 @@
         android:layout_weight="9"
         android:transcriptMode="alwaysScroll" />
 
-    <ImageButton
-        android:id="@+id/selectResource"
-        android:layout_width="42dp"
-        android:layout_height="42dp"
-        android:layout_gravity="end"
-        android:layout_margin="4dp"
-        android:onClick="selectResource"
-        android:src="@drawable/ic_attach_file_black_24dp" />
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_gravity="end">
+
+        <ImageButton
+            android:id="@+id/takePicture"
+            android:layout_width="42dp"
+            android:layout_height="42dp"
+            android:layout_margin="4dp"
+            android:onClick="dispatchTakePictureIntent"
+            android:src="@drawable/ic_camera_alt_black_24dp" />
+
+        <ImageButton
+            android:id="@+id/selectResource"
+            android:layout_width="42dp"
+            android:layout_height="42dp"
+            android:layout_margin="4dp"
+            android:onClick="selectResource"
+            android:src="@drawable/ic_attach_file_black_24dp" />
+    </LinearLayout>
 
     <LinearLayout
         android:id="@+id/newMessageForm"

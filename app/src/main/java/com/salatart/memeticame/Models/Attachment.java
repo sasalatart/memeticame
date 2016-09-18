@@ -1,6 +1,5 @@
 package com.salatart.memeticame.Models;
 
-import android.content.Intent;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -36,15 +35,6 @@ public class Attachment implements Parcelable {
         this.mMimeType = in.readString();
         this.mBase64Content = in.readString();
         this.mUri = in.readString();
-    }
-
-    public static Intent getIntent() {
-        Intent intent = new Intent();
-        intent.setType("image/* video/* audio/*");
-        String[] mimetypes = {"image/*", "video/*", "audio/*"};
-        intent.putExtra(Intent.EXTRA_MIME_TYPES, mimetypes);
-        intent.setAction(Intent.ACTION_GET_CONTENT);
-        return Intent.createChooser(intent, "Select file");
     }
 
     public Attachment clone() {

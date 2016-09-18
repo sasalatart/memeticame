@@ -2,14 +2,19 @@ package com.salatart.memeticame.Utils;
 
 import android.content.ContentResolver;
 import android.content.Context;
+import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
+import android.os.Environment;
 import android.provider.OpenableColumns;
 import android.util.Base64;
 
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 /**
  * Created by sasalatart on 9/13/16.
@@ -27,10 +32,19 @@ public class FileUtils {
         return cR.getType(uri);
     }
 
-    public static String encodeToBase64(Context context, Uri uri) throws IOException {
+    public static String encodeToBase64FromUri(Context context, Uri uri) throws IOException {
         InputStream inputStream = context.getContentResolver().openInputStream(uri);
         byte[] file = getBytes(inputStream);
         return Base64.encodeToString(file, Base64.NO_WRAP);
+    }
+
+    public static Intent getSelectFileIntent() {
+        Intent intent = new Intent();
+        intent.setType("image/* video/* audio/*");
+        String[] mimetypes = {"image/*", "video/*", "audio/*"};
+        intent.putExtra(Intent.EXTRA_MIME_TYPES, mimetypes);
+        intent.setAction(Intent.ACTION_GET_CONTENT);
+        return Intent.createChooser(intent, "Select file");
     }
 
     public static byte[] getBytes(InputStream inputStream) throws IOException {
@@ -43,5 +57,18 @@ public class FileUtils {
         }
 
         return byteBuffer.toByteArray();
+    }
+
+    public static File createImageFile(Context context) throws IOException {
+        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
+        String imageFileName = "JPEG_" + timeStamp + "_";
+        File storageDir = context.getExternalFilesDir(Environment.DIRECTORY_PICTURES);
+        File image = File.createTempFile(
+                imageFileName,  /* prefix */
+                ".jpg",         /* suffix */
+                storageDir      /* directory */
+        );
+
+        return image;
     }
 }
