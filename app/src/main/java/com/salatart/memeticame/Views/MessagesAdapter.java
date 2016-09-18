@@ -8,11 +8,11 @@ import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.bumptech.glide.Glide;
+import com.salatart.memeticame.Models.Attachment;
 import com.salatart.memeticame.Models.Chat;
 import com.salatart.memeticame.Models.Message;
 import com.salatart.memeticame.R;
-import com.salatart.memeticame.Utils.Routes;
-import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
 
@@ -40,39 +40,16 @@ public class MessagesAdapter extends ArrayAdapter<Message> {
             if (message.isMine(getContext()) && message.getAttachment() == null) {
                 view = mLayoutInflater.inflate(R.layout.message_out_text_list_item, parent, false);
             } else if (message.isMine(getContext())) {
-                view = mLayoutInflater.inflate(R.layout.message_out_image_list_item, parent, false);
+                view = mLayoutInflater.inflate(R.layout.message_out_image_video_list_item, parent, false);
             } else if (!message.isMine(getContext()) && message.getAttachment() == null) {
                 view = mLayoutInflater.inflate(R.layout.message_in_text_list_item, parent, false);
             } else if (!message.isMine(getContext())) {
-                view = mLayoutInflater.inflate(R.layout.message_in_image_list_item, parent, false);
+                view = mLayoutInflater.inflate(R.layout.message_in_image_video_list_item, parent, false);
             }
         }
 
-        TextView senderLabel = (TextView) view.findViewById(R.id.senderLabel);
-        if (message.isMine(getContext())) {
-            senderLabel.setText(R.string.me);
-        } else {
-            senderLabel.setText(mParentChat.getParticipantsHash().get(message.getSenderPhone()));
-        }
-
-        if (message.getId() == -1) {
-            view.findViewById(R.id.messageStatusCheck).setVisibility(View.GONE);
-            view.findViewById(R.id.messageStatusWaiting).setVisibility(View.VISIBLE);
-        } else {
-            view.findViewById(R.id.messageStatusWaiting).setVisibility(View.GONE);
-            view.findViewById(R.id.messageStatusCheck).setVisibility(View.VISIBLE);
-        }
-
-        ((TextView) view.findViewById(R.id.timestampLabel)).setText(message.getCreatedAt());
-        ((TextView) view.findViewById(R.id.messageLabel)).setText(message.getContent());
-
-        if (message.getAttachment() != null) {
-            ImageView attachedImage = (ImageView) view.findViewById(R.id.attachedImage);
-            Picasso.with(getContext())
-                    .load(Routes.DOMAIN + "/" + message.getAttachment().getUrl())
-                    .resize(480, 480)
-                    .into(attachedImage);
-        }
+        setTextViews(view, message);
+        setAttachment(view, message);
 
         return view;
     }
@@ -94,6 +71,54 @@ public class MessagesAdapter extends ArrayAdapter<Message> {
             return 2;
         } else {
             return 3;
+        }
+    }
+
+    public void setTextViews(View view, Message message) {
+        TextView senderLabel = (TextView) view.findViewById(R.id.senderLabel);
+        if (message.isMine(getContext())) {
+            senderLabel.setText(R.string.me);
+        } else {
+            senderLabel.setText(mParentChat.getParticipantsHash().get(message.getSenderPhone()));
+        }
+
+        if (message.getId() == -1) {
+            view.findViewById(R.id.messageStatusCheck).setVisibility(View.GONE);
+            view.findViewById(R.id.messageStatusWaiting).setVisibility(View.VISIBLE);
+        } else {
+            view.findViewById(R.id.messageStatusWaiting).setVisibility(View.GONE);
+            view.findViewById(R.id.messageStatusCheck).setVisibility(View.VISIBLE);
+        }
+
+        ((TextView) view.findViewById(R.id.timestampLabel)).setText(message.getCreatedAt());
+        ((TextView) view.findViewById(R.id.messageLabel)).setText(message.getContent());
+    }
+
+    public void setAttachment(View view, Message message) {
+        Attachment attachment = message.getAttachment();
+
+        if (attachment == null) {
+            return;
+        }
+
+        String mimeType = attachment.getMimeType();
+
+        int drawablePlaceholder = R.drawable.ic_image_black_24dp;
+        if (mimeType.contains("video")) {
+            drawablePlaceholder = R.drawable.ic_videocam_black_24dp;
+        } else if (mimeType.contains("audio")) {
+            drawablePlaceholder = R.drawable.ic_record_voice_over_black_24dp;
+        }
+
+        ImageView thumbnail = (ImageView) view.findViewById(R.id.thumbnail);
+        if (mimeType.contains("image")) {
+            Glide.with(getContext())
+                    .load(message.getAttachment().getUri())
+                    .placeholder(drawablePlaceholder)
+                    .override(Attachment.IMAGE_SIZE, Attachment.IMAGE_SIZE)
+                    .into(thumbnail);
+        } else if (mimeType.contains("video") || mimeType.contains("audio")) {
+            thumbnail.setImageResource(drawablePlaceholder);
         }
     }
 }

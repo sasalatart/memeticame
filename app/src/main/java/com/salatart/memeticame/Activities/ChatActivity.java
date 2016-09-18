@@ -17,6 +17,7 @@ import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.Toast;
 
+import com.bumptech.glide.Glide;
 import com.salatart.memeticame.Models.Attachment;
 import com.salatart.memeticame.Models.Chat;
 import com.salatart.memeticame.Models.Message;
@@ -218,14 +219,22 @@ public class ChatActivity extends AppCompatActivity {
     public void toggleButtonVisibilities() {
         mCancelButton.setVisibility(mCancelButton.getVisibility() == View.GONE ? View.VISIBLE : View.GONE);
         mAttachmentImageView.setVisibility(mAttachmentImageView.getVisibility() == View.GONE ? View.VISIBLE : View.GONE);
-        mAttachmentImageView.setImageResource(R.drawable.ic_image_black_24dp);
+
+        if (mAttachmentImageView.getVisibility() == View.VISIBLE) {
+            String mimeType = mCurrentAttachment.getMimeType();
+            if (mimeType.contains("image") || mimeType.contains("video")) {
+                Glide.with(getApplicationContext())
+                        .load(mCurrentAttachment.getUri())
+                        .override(Attachment.IMAGE_THUMB_SIZE, Attachment.IMAGE_THUMB_SIZE)
+                        .into(mAttachmentImageView);
+            } else if (mimeType.contains("audio")) {
+                mAttachmentImageView.setImageResource(R.drawable.ic_record_voice_over_black_24dp);
+            }
+        }
     }
 
     public void selectResource(View view) {
-        Intent intent = new Intent();
-        intent.setType("image/* video/*");
-        intent.setAction(Intent.ACTION_GET_CONTENT);
-        startActivityForResult(Intent.createChooser(intent, "Select file"), PICK_FILE_REQUEST);
+        startActivityForResult(Attachment.getIntent(), PICK_FILE_REQUEST);
     }
 
     @Override
@@ -238,7 +247,7 @@ public class ChatActivity extends AppCompatActivity {
                 mCurrentAttachment = new Attachment(FileUtils.getName(getApplicationContext(), uri),
                         FileUtils.getMimeType(getApplicationContext(), uri),
                         FileUtils.encodeToBase64(getApplicationContext(), uri),
-                        null);
+                        uri.toString());
                 toggleButtonVisibilities();
             } catch (IOException e) {
                 Log.e("ERROR", e.toString());

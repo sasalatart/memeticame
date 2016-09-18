@@ -1,5 +1,7 @@
 package com.salatart.memeticame.Utils;
 
+import java.util.concurrent.TimeUnit;
+
 import okhttp3.OkHttpClient;
 
 /**
@@ -14,7 +16,11 @@ public class HttpClient {
 
     public static OkHttpClient getInstance() {
         if (instance == null) {
-            instance = new OkHttpClient();
+            instance = new OkHttpClient.Builder()
+                    .connectTimeout(600, TimeUnit.SECONDS)
+                    .writeTimeout(600, TimeUnit.SECONDS)
+                    .readTimeout(600, TimeUnit.SECONDS)
+                    .build();
         }
 
         return instance;

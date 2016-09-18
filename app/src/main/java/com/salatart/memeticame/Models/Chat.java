@@ -9,14 +9,23 @@ import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Created by sasalatart on 8/29/16.
  */
 public class Chat implements Parcelable {
+    public static final Parcelable.Creator<Chat> CREATOR = new Parcelable.Creator<Chat>() {
+        public Chat createFromParcel(Parcel in) {
+            return new Chat(in);
+        }
+
+        public Chat[] newArray(int size) {
+            return new Chat[size];
+        }
+    };
     public static String PARCELABLE_KEY = "com.salatart.memeticame.Models.Chat";
     public static String PARCELABLE_ARRAY_KEY = "com.salatart.memeticame.Models.ChatArrayList";
-
     private final int mId;
     private String mTitle;
     private boolean mIsGroup;
@@ -41,6 +50,37 @@ public class Chat implements Parcelable {
         this.mParticipants = new ArrayList<>();
         in.readTypedList(this.mParticipants, User.CREATOR);
         setParticipantsHash();
+    }
+
+    public static Chat fromJson(JSONObject jsonResponse) throws JSONException {
+        ArrayList<User> users = User.fromJsonArray(new JSONArray(jsonResponse.getString("users")));
+
+        return new Chat(Integer.parseInt(jsonResponse.getString("id")),
+                jsonResponse.getString("title"),
+                Boolean.parseBoolean(jsonResponse.getString("group")),
+                jsonResponse.getString("created_at"),
+                users);
+    }
+
+    public static ArrayList<Chat> fromJsonArray(JSONArray jsonResponse) throws JSONException {
+        ArrayList<Chat> chats = new ArrayList<>();
+
+        for (int i = 0; i < jsonResponse.length(); i++) {
+            JSONObject jsonChat = jsonResponse.getJSONObject(i);
+            chats.add(Chat.fromJson(jsonChat));
+        }
+
+        return chats;
+    }
+
+    public static Chat fromMap(Map mapChat) throws JSONException {
+        ArrayList<User> users = User.fromJsonArray(new JSONArray(mapChat.get("users").toString()));
+
+        return new Chat(Integer.parseInt(mapChat.get("id").toString()),
+                mapChat.get("title").toString(),
+                Boolean.parseBoolean(mapChat.get("group").toString()),
+                mapChat.get("created_at").toString(),
+                users);
     }
 
     public int getId() {
@@ -71,35 +111,9 @@ public class Chat implements Parcelable {
         return mParticipants;
     }
 
-    public static Chat fromJson(JSONObject jsonResponse) throws JSONException {
-        ArrayList<User> users = new ArrayList<>();
-        JSONArray jsonUsers = new JSONArray(jsonResponse.getString("users"));
-        for (int j = 0; j < jsonUsers.length(); j++) {
-            JSONObject jsonParticipant = jsonUsers.getJSONObject(j);
-            users.add(new User(jsonParticipant.getString("name"), jsonParticipant.getString("phone_number")));
-        }
-
-        return new Chat(Integer.parseInt(jsonResponse.getString("id")),
-                jsonResponse.getString("title"),
-                Boolean.parseBoolean(jsonResponse.getString("group")),
-                jsonResponse.getString("created_at"),
-                users);
-    }
-
-    public static ArrayList<Chat> fromJsonArray(JSONArray jsonResponse) throws JSONException {
-        ArrayList<Chat> chats = new ArrayList<>();
-
-        for (int i = 0; i < jsonResponse.length(); i++) {
-            JSONObject jsonChat = jsonResponse.getJSONObject(i);
-            chats.add(Chat.fromJson(jsonChat));
-        }
-
-        return chats;
-    }
-
     private void setParticipantsHash() {
         mParticipantsHash = new HashMap<>();
-        for (User user: mParticipants) {
+        for (User user : mParticipants) {
             mParticipantsHash.put(user.getPhoneNumber(), user.getName());
         }
     }
@@ -117,14 +131,4 @@ public class Chat implements Parcelable {
         dest.writeString(mCreatedAt);
         dest.writeTypedList(mParticipants);
     }
-
-    public static final Parcelable.Creator<Chat> CREATOR = new Parcelable.Creator<Chat>() {
-        public Chat createFromParcel(Parcel in) {
-            return new Chat(in);
-        }
-
-        public Chat[] newArray(int size) {
-            return new Chat[size];
-        }
-    };
 }

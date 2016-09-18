@@ -10,7 +10,6 @@ import com.salatart.memeticame.Models.User;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -19,13 +18,12 @@ import okhttp3.FormBody;
 import okhttp3.MediaType;
 import okhttp3.Request;
 import okhttp3.RequestBody;
-import okio.Buffer;
 
 /**
  * Created by sasalatart on 8/27/16.
  */
 public class Routes {
-    public static String DOMAIN = "http://10.0.2.2:3000";
+    public static String DOMAIN = "https://memeticame.salatart.com";
     public static String LOGIN_PATH = "/login";
     public static String SIGNUP_PATH = "/signup";
     public static String LOGOUT_PATH = "/logout";
@@ -41,7 +39,6 @@ public class Routes {
         params.put("password", password);
 
         RequestBody body = RequestBody.create(JSON, new JSONObject(params).toString());
-
         return new Request.Builder()
                 .url(DOMAIN + LOGIN_PATH)
                 .addHeader("content-type", "application/json")
@@ -57,10 +54,8 @@ public class Routes {
         params.put("password_confirmation", passwordConfirmation);
 
         RequestBody body = RequestBody.create(JSON, new JSONObject(params).toString());
-        String url = DOMAIN + SIGNUP_PATH;
-
         return new Request.Builder()
-                .url(url)
+                .url(DOMAIN + SIGNUP_PATH)
                 .addHeader("content-type", "application/json")
                 .post(body)
                 .build();
@@ -128,9 +123,9 @@ public class Routes {
             if (message.getAttachment() != null) {
                 Attachment attachment = message.getAttachment();
                 JSONObject jsonAttachment = new JSONObject();
-                jsonAttachment.put("name", attachment.getName());
-                jsonAttachment.put("mime_type", attachment.getMimeType());
                 jsonAttachment.put("base64", attachment.getBase64Content());
+                jsonAttachment.put("mime_type", attachment.getMimeType());
+                jsonAttachment.put("name", attachment.getName());
                 params.put("attachment", jsonAttachment);
             }
         } catch (JSONException e) {
@@ -168,24 +163,12 @@ public class Routes {
         params.put("registration_token", token);
 
         RequestBody body = RequestBody.create(JSON, new JSONObject(params).toString());
-
         return new Request.Builder()
                 .url(DOMAIN + FCM_REGISTRATION_PATH)
                 .addHeader("content-type", "application/json")
                 .addHeader("authorization", "Token token=" + SessionUtils.getToken(context))
                 .post(body)
                 .build();
-    }
-
-    public static String bodyToString(final Request request) {
-        try {
-            final Request copy = request.newBuilder().build();
-            final Buffer buffer = new Buffer();
-            copy.body().writeTo(buffer);
-            return buffer.readUtf8();
-        } catch (final IOException e) {
-            return "Could not parse the body to a String";
-        }
     }
 
     public interface OnLogout {

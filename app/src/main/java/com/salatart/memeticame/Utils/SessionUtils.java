@@ -58,7 +58,6 @@ public class SessionUtils {
 
             @Override
             public void onResponse(Call call, Response response) throws IOException {
-                Log.i("INFO", response.body().string());
                 response.body().close();
             }
         });
