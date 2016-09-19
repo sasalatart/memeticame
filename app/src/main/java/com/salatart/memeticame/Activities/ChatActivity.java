@@ -5,6 +5,7 @@ import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
@@ -19,10 +20,13 @@ import android.support.annotation.NonNull;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.FileProvider;
 import android.support.v7.app.ActionBar;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
+import android.webkit.URLUtil;
+import android.widget.AdapterView;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
@@ -128,6 +132,13 @@ public class ChatActivity extends AppCompatActivity {
         mRecordButton = (ImageButton) findViewById(R.id.takeAudio);
 
         getMessages();
+
+        mMessagesListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                downloadAttachment(mAdapter.getItem(position).getAttachment());
+            }
+        });
 
         mCurrentlyRecording = false;
     }
@@ -380,6 +391,23 @@ public class ChatActivity extends AppCompatActivity {
         if (!mPermissionToRecordAudio || !mPermissionToUseCamera || !mPermissionToWrite) {
             ChatActivity.super.finish();
         }
+    }
+
+    public void downloadAttachment(final Attachment attachment) {
+        if (attachment == null || !URLUtil.isValidUrl(attachment.getUri())) {
+            return;
+        }
+
+        new AlertDialog.Builder(ChatActivity.this)
+                .setTitle("Download file")
+                .setMessage("Do you really want to download this file (" + attachment.getName() + ")?")
+                .setIcon(android.R.drawable.ic_dialog_alert)
+                .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int whichButton) {
+                        FileUtils.downloadFile(getApplicationContext(), attachment);
+                    }
+                })
+                .setNegativeButton(android.R.string.no, null).show();
     }
 
     private boolean hasMediaPermissions() {

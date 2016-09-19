@@ -1,6 +1,7 @@
 package com.salatart.memeticame.Views;
 
 import android.content.Context;
+import android.net.Uri;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -13,7 +14,9 @@ import com.salatart.memeticame.Models.Attachment;
 import com.salatart.memeticame.Models.Chat;
 import com.salatart.memeticame.Models.Message;
 import com.salatart.memeticame.R;
+import com.salatart.memeticame.Utils.FileUtils;
 
+import java.io.File;
 import java.util.ArrayList;
 
 /**
@@ -40,11 +43,11 @@ public class MessagesAdapter extends ArrayAdapter<Message> {
             if (message.isMine(getContext()) && message.getAttachment() == null) {
                 view = mLayoutInflater.inflate(R.layout.message_out_text_list_item, parent, false);
             } else if (message.isMine(getContext())) {
-                view = mLayoutInflater.inflate(R.layout.message_out_image_video_list_item, parent, false);
+                view = mLayoutInflater.inflate(R.layout.message_out_media_list_item, parent, false);
             } else if (!message.isMine(getContext()) && message.getAttachment() == null) {
                 view = mLayoutInflater.inflate(R.layout.message_in_text_list_item, parent, false);
             } else if (!message.isMine(getContext())) {
-                view = mLayoutInflater.inflate(R.layout.message_in_image_video_list_item, parent, false);
+                view = mLayoutInflater.inflate(R.layout.message_in_media_list_item, parent, false);
             }
         }
 
@@ -101,24 +104,27 @@ public class MessagesAdapter extends ArrayAdapter<Message> {
             return;
         }
 
-        String mimeType = attachment.getMimeType();
+        boolean fileExists = FileUtils.checkFileExistence(getContext(), attachment.getName());
 
-        int drawablePlaceholder = R.drawable.ic_image_black_24dp;
-        if (mimeType.contains("video")) {
-            drawablePlaceholder = R.drawable.ic_videocam_black_24dp;
-        } else if (mimeType.contains("audio")) {
-            drawablePlaceholder = R.drawable.ic_record_voice_over_black_24dp;
+        if (fileExists) {
+            File file = FileUtils.getFile(attachment.getName());
+            attachment.setUri(Uri.fromFile(file).toString());
         }
 
+        String mimeType = attachment.getMimeType();
+
         ImageView thumbnail = (ImageView) view.findViewById(R.id.thumbnail);
-        if (mimeType.contains("image")) {
+        if (mimeType.contains("image") || (mimeType.contains("video") && fileExists)) {
             Glide.with(getContext())
                     .load(message.getAttachment().getUri())
-                    .placeholder(drawablePlaceholder)
+                    .placeholder(R.drawable.ic_access_time_black_24dp)
+                    .crossFade()
                     .override(Attachment.IMAGE_SIZE, Attachment.IMAGE_SIZE)
                     .into(thumbnail);
-        } else if (mimeType.contains("video") || mimeType.contains("audio")) {
-            thumbnail.setImageResource(drawablePlaceholder);
+        } else if (mimeType.contains("video")) {
+            thumbnail.setImageResource(R.drawable.ic_videocam_black_24dp);
+        } else {
+            thumbnail.setImageResource(R.drawable.ic_record_voice_over_black_24dp);
         }
     }
 }

@@ -57,6 +57,10 @@ public class Attachment implements Parcelable {
         return mUri;
     }
 
+    public void setUri(String uri) {
+        mUri = uri;
+    }
+
     @Override
     public int describeContents() {
         return 0;

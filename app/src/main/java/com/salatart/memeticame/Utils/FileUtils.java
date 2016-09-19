@@ -1,5 +1,6 @@
 package com.salatart.memeticame.Utils;
 
+import android.app.DownloadManager;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
@@ -9,6 +10,10 @@ import android.os.Environment;
 import android.provider.OpenableColumns;
 import android.util.Base64;
 import android.util.Log;
+import android.webkit.URLUtil;
+
+import com.salatart.memeticame.Models.Attachment;
+import com.salatart.memeticame.R;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -61,8 +66,7 @@ public class FileUtils {
     }
 
     public static File createMediaFile(Context context, String extension) {
-        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
-        String fileName = extension + "_" + timeStamp + "_";
+        String fileName = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
         File storageDir = context.getExternalFilesDir(Environment.DIRECTORY_PICTURES);
 
         File file = null;
@@ -77,5 +81,40 @@ public class FileUtils {
         }
 
         return file;
+    }
+
+    public static boolean checkFileExistence(Context context, String name) {
+        File fileExternal = new File(Environment.getExternalStorageDirectory() + "/" + R.string.app_name + "/" + name);
+        File fileInternal = context.getFileStreamPath(name);
+
+        return fileExternal.exists() || fileInternal.exists();
+    }
+
+    public static File getFile(String name) {
+        return new File(Environment.getExternalStorageDirectory() + "/" + R.string.app_name + "/" + name);
+    }
+
+    public static void downloadFile(Context context, Attachment attachment) {
+        if (!URLUtil.isValidUrl(attachment.getUri())) {
+            return;
+        }
+
+        File dir = new File(Environment.getExternalStorageDirectory() + "/" + R.string.app_name);
+
+        if (!dir.exists()) {
+            dir.mkdirs();
+        }
+
+        DownloadManager downloadManager = (DownloadManager) context.getSystemService(Context.DOWNLOAD_SERVICE);
+
+        Uri downloadUri = Uri.parse(attachment.getUri());
+        DownloadManager.Request request = new DownloadManager.Request(downloadUri);
+        request.setAllowedNetworkTypes(
+                DownloadManager.Request.NETWORK_WIFI | DownloadManager.Request.NETWORK_MOBILE)
+                .setAllowedOverRoaming(false).setTitle(R.string.app_name + "")
+                .setDescription("Something useful. No, really.")
+                .setDestinationInExternalPublicDir("/" + R.string.app_name, attachment.getName());
+
+        downloadManager.enqueue(request);
     }
 }
