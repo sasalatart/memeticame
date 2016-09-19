@@ -6,7 +6,7 @@ import android.os.Parcelable;
 
 import com.salatart.memeticame.Utils.Routes;
 import com.salatart.memeticame.Utils.SessionUtils;
-import com.salatart.memeticame.Utils.Time;
+import com.salatart.memeticame.Utils.TimeUtils;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -41,7 +41,7 @@ public class Message implements Parcelable {
         this.mSenderPhone = senderPhone;
         this.mContent = content;
         this.mChatId = chatId;
-        this.mCreatedAt = Time.parseISODate(createdAt);
+        this.mCreatedAt = TimeUtils.parseISODate(createdAt);
     }
 
     public Message(Parcel in) {
@@ -99,7 +99,7 @@ public class Message implements Parcelable {
     }
 
     public static Message createFake(Context context, String content, int chatId) {
-        return new Message(-1, SessionUtils.getPhoneNumber(context), content, chatId, Time.currentISODate());
+        return new Message(-1, SessionUtils.getPhoneNumber(context), content, chatId, TimeUtils.currentISODate());
     }
 
     public int getId() {

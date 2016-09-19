@@ -12,7 +12,7 @@ import java.util.TimeZone;
 /**
  * Created by sasalatart on 9/12/16.
  */
-public class Time {
+public class TimeUtils {
     public static String parseISODate(String dateString) {
         try {
             Date date = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss").parse(dateString);
