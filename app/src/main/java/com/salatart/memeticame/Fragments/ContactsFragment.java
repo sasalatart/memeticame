@@ -44,6 +44,7 @@ import okhttp3.Response;
 public class ContactsFragment extends Fragment {
 
     public static final String TAG = "contacts_fragment";
+    public static final int REQUEST_NEW_CONTACT = 1;
     public static final int PERMISSIONS_REQUEST_READ_CONTACTS = 101;
 
     private ArrayList<User> mContacts;
@@ -85,17 +86,12 @@ public class ContactsFragment extends Fragment {
     }
 
     private void showContacts() {
-        // Check the SDK version and whether the permission is already granted or not.
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && hasContactsPermissions()) {
             requestPermissions(new String[]{Manifest.permission.READ_CONTACTS}, PERMISSIONS_REQUEST_READ_CONTACTS);
-            // After this point you wait for callback in
-            // onRequestPermissionsResult(int, String[], int[]) overriden method
         } else {
-            // Android version is lower than 6.0 or the permission is already granted.
             ContactsUtils.getContacts(getContext(), new ContactsUtils.ContactsProviderListener() {
                 @Override
                 public void OnContactsReady(final ArrayList<User> contacts) {
-
                     Request request = Routes.userIndexRequest(getActivity());
                     HttpClient.getInstance().newCall(request).enqueue(new Callback() {
                         @Override
@@ -129,18 +125,14 @@ public class ContactsFragment extends Fragment {
     public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
         switch (requestCode) {
             case PERMISSIONS_REQUEST_READ_CONTACTS: {
-                // If request is cancelled, the result arrays are empty.
                 if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     showContacts();
                 } else {
-                    // permission denied, boo! Disable the functionality that depends on this permission.
+                    // Disable the functionality that depends on this permission.
                 }
 
                 return;
             }
-
-            // other 'case' lines to check for other
-            // permissions this app might request
         }
     }
 
@@ -152,9 +144,8 @@ public class ContactsFragment extends Fragment {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
-
         if (id == R.id.action_add_contact) {
-            startActivity(new Intent(Intent.ACTION_INSERT, ContactsContract.Contacts.CONTENT_URI));
+            startActivityForResult(new Intent(Intent.ACTION_INSERT, ContactsContract.Contacts.CONTENT_URI), REQUEST_NEW_CONTACT);
             return true;
         } else if (id == R.id.action_logout) {
             mOnLogoutListener.OnLogout();
@@ -172,6 +163,15 @@ public class ContactsFragment extends Fragment {
             mOnLogoutListener = (Routes.OnLogout) context;
         } catch (ClassCastException e) {
             throw new ClassCastException(context.toString() + " must implement onViewSelected");
+        }
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (requestCode == REQUEST_NEW_CONTACT) {
+            showContacts();
         }
     }
 
