@@ -8,6 +8,7 @@ import android.net.Uri;
 import android.os.Environment;
 import android.provider.OpenableColumns;
 import android.util.Base64;
+import android.util.Log;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -59,16 +60,22 @@ public class FileUtils {
         return byteBuffer.toByteArray();
     }
 
-    public static File createImageFile(Context context) throws IOException {
+    public static File createMediaFile(Context context, String extension) {
         String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
-        String imageFileName = "JPEG_" + timeStamp + "_";
+        String fileName = extension + "_" + timeStamp + "_";
         File storageDir = context.getExternalFilesDir(Environment.DIRECTORY_PICTURES);
-        File image = File.createTempFile(
-                imageFileName,  /* prefix */
-                ".jpg",         /* suffix */
-                storageDir      /* directory */
-        );
 
-        return image;
+        File file = null;
+        try {
+            file = File.createTempFile(
+                    fileName,           /* prefix */
+                    "." + extension,    /* suffix */
+                    storageDir          /* directory */
+            );
+        } catch (IOException e) {
+            Log.e("ERROR", e.toString());
+        }
+
+        return file;
     }
 }

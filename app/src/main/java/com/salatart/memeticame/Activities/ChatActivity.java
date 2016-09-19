@@ -1,12 +1,22 @@
 package com.salatart.memeticame.Activities;
 
+import android.Manifest;
 import android.content.BroadcastReceiver;
+import android.content.ContentResolver;
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.PackageManager;
+import android.graphics.Color;
+import android.media.MediaRecorder;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
 import android.provider.MediaStore;
+import android.support.annotation.NonNull;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.content.FileProvider;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
@@ -35,7 +45,9 @@ import org.json.JSONObject;
 
 import java.io.File;
 import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 
 import okhttp3.Call;
 import okhttp3.Callback;
@@ -45,7 +57,18 @@ import okhttp3.Response;
 public class ChatActivity extends AppCompatActivity {
     public static final String NEW_MESSAGE_FILTER = "newMessageFilter";
     public static final int REQUEST_PICK_FILE = 1;
-    public static final int REQUEST_IMAGE_CAPTURE = 1;
+    public static final int REQUEST_IMAGE_CAPTURE = 2;
+    public static final int REQUEST_VIDEO_CAPTURE = 3;
+    public static final int PERMISSIONS_CODE = 200;
+
+    private boolean mPermissionToRecordAudio = false;
+    private boolean mPermissionToUseCamera = false;
+    private boolean mPermissionToWrite = false;
+    private String[] mPermissions = {"android.permission.RECORD_AUDIO", "android.permission.CAMERA", "android.permission.WRITE_EXTERNAL_STORAGE"};
+
+    private MediaRecorder mAudioRecorder;
+    private boolean mCurrentlyRecording;
+    private File mAudioFile;
 
     private Chat mChat;
     private ArrayList<Message> mMessages;
@@ -57,6 +80,7 @@ public class ChatActivity extends AppCompatActivity {
     private EditText mMessageInput;
     private ImageView mAttachmentImageView;
     private ImageButton mCancelButton;
+    private ImageButton mRecordButton;
     private ListView mMessagesListView;
     private BroadcastReceiver mMessageReceiver = new BroadcastReceiver() {
         @Override
@@ -85,6 +109,10 @@ public class ChatActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_chat);
 
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && !hasMediaPermissions()) {
+            requestPermissions(mPermissions, PERMISSIONS_CODE);
+        }
+
         ActionBar actionBar = getSupportActionBar();
         actionBar.setDisplayHomeAsUpEnabled(true);
 
@@ -97,8 +125,11 @@ public class ChatActivity extends AppCompatActivity {
         mMessageInput = (EditText) findViewById(R.id.messageInput);
         mAttachmentImageView = (ImageView) findViewById(R.id.attachment);
         mCancelButton = (ImageButton) findViewById(R.id.cancelAttachmentButton);
+        mRecordButton = (ImageButton) findViewById(R.id.takeAudio);
 
         getMessages();
+
+        mCurrentlyRecording = false;
     }
 
     @Override
@@ -238,8 +269,32 @@ public class ChatActivity extends AppCompatActivity {
         }
     }
 
-    public void selectResource(View view) {
+    public void selectMediaResource(View view) {
         startActivityForResult(FileUtils.getSelectFileIntent(), REQUEST_PICK_FILE);
+    }
+
+    public void dispatchTakePictureIntent(View view) {
+        Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+        if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
+            File photoFile = FileUtils.createMediaFile(getApplicationContext(), "jpg");
+            if (photoFile != null) {
+                mCurrentUri = FileProvider.getUriForFile(this, "com.salatart.memeticame.fileprovider", photoFile);
+                takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, mCurrentUri);
+                startActivityForResult(takePictureIntent, REQUEST_IMAGE_CAPTURE);
+            }
+        }
+    }
+
+    public void dispatchTakeVideoIntent(View view) {
+        Intent takeVideoIntent = new Intent(MediaStore.ACTION_VIDEO_CAPTURE);
+        if (takeVideoIntent.resolveActivity(getPackageManager()) != null) {
+            File videoFile = FileUtils.createMediaFile(getApplicationContext(), "mp4");
+            if (videoFile != null) {
+                mCurrentUri = FileProvider.getUriForFile(this, "com.salatart.memeticame.fileprovider", videoFile);
+                takeVideoIntent.putExtra(MediaStore.EXTRA_OUTPUT, mCurrentUri);
+                startActivityForResult(takeVideoIntent, REQUEST_IMAGE_CAPTURE);
+            }
+        }
     }
 
     @Override
@@ -250,6 +305,8 @@ public class ChatActivity extends AppCompatActivity {
             Uri uri = data.getData();
             setCurrentAttachmentFromUri(uri);
         } else if (requestCode == REQUEST_IMAGE_CAPTURE && resultCode == RESULT_OK) {
+            setCurrentAttachmentFromUri(mCurrentUri);
+        } else if (requestCode == REQUEST_VIDEO_CAPTURE && resultCode == RESULT_OK) {
             setCurrentAttachmentFromUri(mCurrentUri);
         }
     }
@@ -266,22 +323,83 @@ public class ChatActivity extends AppCompatActivity {
         }
     }
 
-    public void dispatchTakePictureIntent(View view) {
-        Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-        if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
-            File photoFile = null;
-            try {
-                photoFile = FileUtils.createImageFile(getApplicationContext());
-            } catch (IOException e) {
-                Log.e("ERROR", e.toString());
-            }
-
-            if (photoFile != null) {
-                Uri photoURI = FileProvider.getUriForFile(this, "com.salatart.memeticame.fileprovider", photoFile);
-                mCurrentUri = photoURI;
-                takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI);
-                startActivityForResult(takePictureIntent, REQUEST_IMAGE_CAPTURE);
-            }
+    public void toggleRecording(View view) {
+        if (mCurrentlyRecording) {
+            stopAudioRecording();
+            mRecordButton.setColorFilter(Color.BLACK);
+        } else {
+            startAudioRecording();
+            mRecordButton.setColorFilter(Color.RED);
         }
+        mCurrentlyRecording = !mCurrentlyRecording;
+    }
+
+    public void startAudioRecording() {
+        File sampleDir = Environment.getExternalStorageDirectory();
+        try {
+            mAudioFile = File.createTempFile(new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date()), ".mp4", sampleDir);
+        } catch (IOException e) {
+            Log.e("ERROR", e.toString());
+            return;
+        }
+
+        mAudioRecorder = new MediaRecorder();
+        mAudioRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
+        mAudioRecorder.setOutputFormat(MediaRecorder.OutputFormat.MPEG_4);
+        mAudioRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB);
+        mAudioRecorder.setOutputFile(mAudioFile.getAbsolutePath());
+
+        try {
+            mAudioRecorder.prepare();
+        } catch (IOException e) {
+            Log.e("ERROR", e.toString());
+        }
+
+        mAudioRecorder.start();
+    }
+
+    public void stopAudioRecording() {
+        mAudioRecorder.stop();
+        mAudioRecorder.release();
+        addRecordingToMediaLibrary();
+        mAudioRecorder = null;
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+
+        switch (requestCode) {
+            case PERMISSIONS_CODE:
+                mPermissionToRecordAudio = grantResults[0] == PackageManager.PERMISSION_GRANTED;
+                mPermissionToUseCamera = grantResults[1] == PackageManager.PERMISSION_GRANTED;
+                mPermissionToWrite = grantResults[2] == PackageManager.PERMISSION_GRANTED;
+                break;
+        }
+
+        if (!mPermissionToRecordAudio || !mPermissionToUseCamera || !mPermissionToWrite) {
+            ChatActivity.super.finish();
+        }
+    }
+
+    private boolean hasMediaPermissions() {
+        boolean canRecordAudio = ContextCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED;
+        boolean canUseCamera = ContextCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED;
+        boolean canWriteToStorage = ContextCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED;
+        return canRecordAudio && canUseCamera && canWriteToStorage;
+    }
+
+    private void addRecordingToMediaLibrary() {
+        ContentValues values = new ContentValues(4);
+        long current = System.currentTimeMillis();
+        values.put(MediaStore.Audio.Media.TITLE, "audio" + mAudioFile.getName());
+        values.put(MediaStore.Audio.Media.DATE_ADDED, (int) (current / 1000));
+        values.put(MediaStore.Audio.Media.MIME_TYPE, "audio/mp4");
+        values.put(MediaStore.Audio.Media.DATA, mAudioFile.getAbsolutePath());
+        ContentResolver contentResolver = getContentResolver();
+
+        Uri base = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI;
+        mCurrentUri = contentResolver.insert(base, values);
+        setCurrentAttachmentFromUri(mCurrentUri);
     }
 }
