@@ -84,14 +84,23 @@ public class FileUtils {
     }
 
     public static boolean checkFileExistence(Context context, String name) {
-        File fileExternal = new File(Environment.getExternalStorageDirectory() + "/" + R.string.app_name + "/" + name);
-        File fileInternal = context.getFileStreamPath(name);
+        File file1 = new File(Environment.getExternalStorageDirectory() + "/Memeticame/" + name);
+        File file2 = new File(context.getExternalFilesDir(Environment.DIRECTORY_PICTURES) + "/" + name);
 
-        return fileExternal.exists() || fileInternal.exists();
+        return file1.exists() || file2.exists();
     }
 
-    public static File getFile(String name) {
-        return new File(Environment.getExternalStorageDirectory() + "/" + R.string.app_name + "/" + name);
+    public static Uri getUriFromFileName(Context context, String name) {
+        File file1 = new File(Environment.getExternalStorageDirectory() + "/Memeticame/" + name);
+        File file2 = new File(context.getExternalFilesDir(Environment.DIRECTORY_PICTURES) + "/" + name);
+
+        if (file1.exists()) {
+            return Uri.fromFile(file1);
+        } else if (file2.exists()) {
+            return Uri.fromFile(file2);
+        } else {
+            return null;
+        }
     }
 
     public static void downloadFile(Context context, Attachment attachment) {
@@ -99,7 +108,7 @@ public class FileUtils {
             return;
         }
 
-        File dir = new File(Environment.getExternalStorageDirectory() + "/" + R.string.app_name);
+        File dir = new File(Environment.getExternalStorageDirectory() + "/Memeticame");
 
         if (!dir.exists()) {
             dir.mkdirs();
@@ -111,9 +120,10 @@ public class FileUtils {
         DownloadManager.Request request = new DownloadManager.Request(downloadUri);
         request.setAllowedNetworkTypes(
                 DownloadManager.Request.NETWORK_WIFI | DownloadManager.Request.NETWORK_MOBILE)
-                .setAllowedOverRoaming(false).setTitle(R.string.app_name + "")
-                .setDescription("Something useful. No, really.")
-                .setDestinationInExternalPublicDir("/" + R.string.app_name, attachment.getName());
+                .setAllowedOverRoaming(false)
+                .setTitle(attachment.getName())
+                .setDescription("Downloaded with Memeticame")
+                .setDestinationInExternalPublicDir("/Memeticame", attachment.getName());
 
         downloadManager.enqueue(request);
     }

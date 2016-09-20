@@ -1,7 +1,6 @@
 package com.salatart.memeticame.Views;
 
 import android.content.Context;
-import android.net.Uri;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -16,7 +15,6 @@ import com.salatart.memeticame.Models.Message;
 import com.salatart.memeticame.R;
 import com.salatart.memeticame.Utils.FileUtils;
 
-import java.io.File;
 import java.util.ArrayList;
 
 /**
@@ -81,16 +79,15 @@ public class MessagesAdapter extends ArrayAdapter<Message> {
         TextView senderLabel = (TextView) view.findViewById(R.id.senderLabel);
         if (message.isMine(getContext())) {
             senderLabel.setText(R.string.me);
+
+            ImageView statusImageView = (ImageView) view.findViewById(R.id.messageStatusCheck);
+            if (message.getId() == -1) {
+                statusImageView.setImageResource(R.drawable.ic_access_time_black_24dp);
+            } else {
+                statusImageView.setImageResource(R.drawable.ic_check_black_24dp);
+            }
         } else {
             senderLabel.setText(mParentChat.getParticipantsHash().get(message.getSenderPhone()));
-        }
-
-        if (message.getId() == -1) {
-            view.findViewById(R.id.messageStatusCheck).setVisibility(View.GONE);
-            view.findViewById(R.id.messageStatusWaiting).setVisibility(View.VISIBLE);
-        } else {
-            view.findViewById(R.id.messageStatusWaiting).setVisibility(View.GONE);
-            view.findViewById(R.id.messageStatusCheck).setVisibility(View.VISIBLE);
         }
 
         ((TextView) view.findViewById(R.id.timestampLabel)).setText(message.getCreatedAt());
@@ -107,11 +104,19 @@ public class MessagesAdapter extends ArrayAdapter<Message> {
         boolean fileExists = FileUtils.checkFileExistence(getContext(), attachment.getName());
 
         if (fileExists) {
-            File file = FileUtils.getFile(attachment.getName());
-            attachment.setUri(Uri.fromFile(file).toString());
+            attachment.setUri(FileUtils.getUriFromFileName(getContext(), attachment.getName()).toString());
         }
 
         String mimeType = attachment.getMimeType();
+
+        ImageView attachmentType = (ImageView) view.findViewById(R.id.attachmentType);
+        if (mimeType.contains("image")) {
+            attachmentType.setImageResource(R.drawable.ic_image_black_24dp);
+        } else if (mimeType.contains("video")) {
+            attachmentType.setImageResource(R.drawable.ic_videocam_black_24dp);
+        } else {
+            attachmentType.setImageResource(R.drawable.ic_record_voice_over_black_24dp);
+        }
 
         ImageView thumbnail = (ImageView) view.findViewById(R.id.thumbnail);
         if (mimeType.contains("image") || (mimeType.contains("video") && fileExists)) {
@@ -121,10 +126,18 @@ public class MessagesAdapter extends ArrayAdapter<Message> {
                     .crossFade()
                     .override(Attachment.IMAGE_SIZE, Attachment.IMAGE_SIZE)
                     .into(thumbnail);
-        } else if (mimeType.contains("video")) {
-            thumbnail.setImageResource(R.drawable.ic_videocam_black_24dp);
+        } else if (!fileExists) {
+            thumbnail.setImageResource(R.drawable.ic_file_download_black_24dp);
+        } else if (mimeType.contains("audio")) {
+            thumbnail.setImageResource(R.drawable.ic_play_circle_outline_black_24dp);
+        }
+
+        TextView attachmentName = (TextView) view.findViewById(R.id.attachmentName);
+        if (!fileExists && !mimeType.contains("image") || mimeType.contains("audio")) {
+            attachmentName.setVisibility(View.VISIBLE);
+            attachmentName.setText(attachment.getName());
         } else {
-            thumbnail.setImageResource(R.drawable.ic_record_voice_over_black_24dp);
+            attachmentName.setVisibility(View.INVISIBLE);
         }
     }
 }

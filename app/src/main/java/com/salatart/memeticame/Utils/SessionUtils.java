@@ -19,6 +19,10 @@ public class SessionUtils {
     public static String PREFERENCES = "SESSION";
 
     public static String getToken(Context context) {
+        if (context == null) {
+            return "";
+        }
+
         return context.getSharedPreferences(PREFERENCES, 0).getString("Token", "");
     }
 

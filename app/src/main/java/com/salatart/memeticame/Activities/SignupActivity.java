@@ -11,16 +11,17 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Toast;
 
-import org.json.JSONObject;
-
-import java.io.IOException;
-
 import com.salatart.memeticame.Models.SignupForm;
 import com.salatart.memeticame.R;
 import com.salatart.memeticame.Utils.HttpClient;
 import com.salatart.memeticame.Utils.Routes;
 import com.salatart.memeticame.Utils.SessionUtils;
 import com.salatart.memeticame.databinding.ActivitySignupBinding;
+
+import org.json.JSONObject;
+
+import java.io.IOException;
+
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.Request;
@@ -54,6 +55,7 @@ public class SignupActivity extends AppCompatActivity {
 
         if (id == R.id.action_login) {
             startActivity(new Intent(this, LoginActivity.class));
+            SignupActivity.this.finish();
             return true;
         }
 
@@ -85,6 +87,7 @@ public class SignupActivity extends AppCompatActivity {
                     SessionUtils.savePhoneNumber(mSignupForm.getPhoneNumber(), getApplicationContext());
                     SessionUtils.registerFCMToken(getApplicationContext());
                     startActivity(new Intent(view.getContext(), MainActivity.class));
+                    SignupActivity.this.finish();
                 } catch (Exception e) {
                     Log.e("ERROR", e.toString());
                 } finally {

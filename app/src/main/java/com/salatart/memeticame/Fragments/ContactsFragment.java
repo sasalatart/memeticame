@@ -92,7 +92,7 @@ public class ContactsFragment extends Fragment {
             ContactsUtils.getContacts(getContext(), new ContactsUtils.ContactsProviderListener() {
                 @Override
                 public void OnContactsReady(final ArrayList<User> contacts) {
-                    Request request = Routes.userIndexRequest(getActivity());
+                    Request request = Routes.userIndexRequest(getContext());
                     HttpClient.getInstance().newCall(request).enqueue(new Callback() {
                         @Override
                         public void onFailure(Call call, IOException e) {

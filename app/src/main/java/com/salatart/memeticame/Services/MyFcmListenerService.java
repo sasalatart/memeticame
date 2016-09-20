@@ -51,7 +51,5 @@ public class MyFcmListenerService extends FirebaseMessagingService {
         } catch (JSONException e) {
             Log.e("ERROR", e.toString());
         }
-
-        getApplicationContext().sendBroadcast(intent);
     }
 }

@@ -1,6 +1,7 @@
 package com.salatart.memeticame.Activities;
 
 import android.Manifest;
+import android.app.DownloadManager;
 import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
 import android.content.ContentValues;
@@ -41,6 +42,7 @@ import com.salatart.memeticame.R;
 import com.salatart.memeticame.Utils.FileUtils;
 import com.salatart.memeticame.Utils.HttpClient;
 import com.salatart.memeticame.Utils.Routes;
+import com.salatart.memeticame.Utils.SessionUtils;
 import com.salatart.memeticame.Views.MessagesAdapter;
 
 import org.json.JSONArray;
@@ -101,6 +103,12 @@ public class ChatActivity extends AppCompatActivity {
             }
         }
     };
+    private BroadcastReceiver mOnDownloadReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            mAdapter.notifyDataSetChanged();
+        }
+    };
 
     public static Intent getIntent(Context context, Chat chat) {
         Intent intent = new Intent(context, ChatActivity.class);
@@ -112,6 +120,11 @@ public class ChatActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_chat);
+
+        if (SessionUtils.getToken(getApplicationContext()).isEmpty()) {
+            startActivity(new Intent(this, LoginActivity.class));
+            ChatActivity.this.finish();
+        }
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && !hasMediaPermissions()) {
             requestPermissions(mPermissions, PERMISSIONS_CODE);
@@ -136,7 +149,10 @@ public class ChatActivity extends AppCompatActivity {
         mMessagesListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                downloadAttachment(mAdapter.getItem(position).getAttachment());
+                Attachment attachment = mAdapter.getItem(position).getAttachment();
+                if (attachment != null && !FileUtils.checkFileExistence(getApplicationContext(), attachment.getName())) {
+                    downloadAttachment(attachment);
+                }
             }
         });
 
@@ -146,13 +162,15 @@ public class ChatActivity extends AppCompatActivity {
     @Override
     public void onResume() {
         super.onResume();
-        getApplicationContext().registerReceiver(mMessageReceiver, new IntentFilter(ChatActivity.NEW_MESSAGE_FILTER));
+        registerReceiver(mMessageReceiver, new IntentFilter(ChatActivity.NEW_MESSAGE_FILTER));
+        registerReceiver(mOnDownloadReceiver, new IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE));
     }
 
     @Override
     public void onPause() {
         super.onPause();
-        getApplicationContext().unregisterReceiver(mMessageReceiver);
+        unregisterReceiver(mMessageReceiver);
+        unregisterReceiver(mOnDownloadReceiver);
     }
 
     public boolean onOptionsItemSelected(MenuItem item) {

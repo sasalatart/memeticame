@@ -1,9 +1,9 @@
 package com.salatart.memeticame.Activities;
 
 import android.content.Intent;
+import android.os.Bundle;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
@@ -13,9 +13,6 @@ import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
-
-import java.io.IOException;
-import java.util.ArrayList;
 
 import com.salatart.memeticame.Models.Chat;
 import com.salatart.memeticame.Models.User;
@@ -27,6 +24,9 @@ import com.salatart.memeticame.Views.ChatsAdapter;
 
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import java.io.IOException;
+import java.util.ArrayList;
 
 import okhttp3.Call;
 import okhttp3.Callback;
@@ -42,6 +42,11 @@ public class NewChatActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_new_chat);
+
+        if (SessionUtils.getToken(getApplicationContext()).isEmpty()) {
+            startActivity(new Intent(this, LoginActivity.class));
+            NewChatActivity.this.finish();
+        }
 
         ActionBar actionBar = getSupportActionBar();
         actionBar.setDisplayHomeAsUpEnabled(true);
@@ -66,7 +71,7 @@ public class NewChatActivity extends AppCompatActivity {
             });
         }
 
-        mChatNameInput = (EditText)findViewById(R.id.chatNameInput);
+        mChatNameInput = (EditText) findViewById(R.id.chatNameInput);
         mChatNameInput.setText("Chat with " + mUser.getName(), TextView.BufferType.EDITABLE);
     }
 

@@ -40,15 +40,15 @@ public class LoginActivity extends AppCompatActivity {
         setContentView(R.layout.activity_login);
 
         if (!SessionUtils.getToken(getApplicationContext()).isEmpty()) {
-            Intent intent = new Intent(this, MainActivity.class);
-            startActivity(intent);
+            startActivity(new Intent(this, MainActivity.class));
+            LoginActivity.this.finish();
+        } else {
+            progressBar = (ProgressBar) findViewById(R.id.progressBar);
+
+            ActivityLoginBinding binding = DataBindingUtil.setContentView(this, R.layout.activity_login);
+            mLoginForm = new LoginForm("", "");
+            binding.setLoginForm(mLoginForm);
         }
-
-        progressBar = (ProgressBar) findViewById(R.id.progressBar);
-
-        ActivityLoginBinding binding = DataBindingUtil.setContentView(this, R.layout.activity_login);
-        mLoginForm = new LoginForm("", "");
-        binding.setLoginForm(mLoginForm);
     }
 
     @Override
@@ -65,6 +65,7 @@ public class LoginActivity extends AppCompatActivity {
 
         if (id == R.id.action_signup) {
             startActivity(new Intent(this, SignupActivity.class));
+            LoginActivity.this.finish();
             return true;
         }
 
@@ -91,6 +92,7 @@ public class LoginActivity extends AppCompatActivity {
                         SessionUtils.savePhoneNumber(mLoginForm.getPhoneNumber(), getApplicationContext());
                         SessionUtils.registerFCMToken(getApplicationContext());
                         startActivity(new Intent(view.getContext(), MainActivity.class));
+                        LoginActivity.this.finish();
                     } catch (JSONException e) {
                         Log.e("ERROR", e.toString());
                     }

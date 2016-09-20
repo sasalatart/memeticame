@@ -20,4 +20,5 @@
     <string name="add_contact">Add contact</string>
     <string name="create_chat">Create chat</string>
     <string name="cancel">cancel</string>
+    <string name="attachment_name">attachment name</string>
 </resources>

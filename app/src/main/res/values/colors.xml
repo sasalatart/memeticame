@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="colorPrimary">#125688</color>
-    <color name="colorPrimaryDark">#125688</color>
+    <color name="colorPrimary">#009688</color>
+    <color name="colorPrimaryDark">#004D40</color>
     <color name="textColorPrimary">#FFFFFF</color>
     <color name="windowBackground">#FFFFFF</color>
     <color name="navigationBarColor">#000000</color>
-    <color name="colorAccent">#C8E8FF</color>
+    <color name="colorAccent">#E0F2F1</color>
     <color name="transparent">#00000000</color>
     <color name="outMessageColor">#000000</color>
-    <color name="inMessageColor">#125688</color>
+    <color name="inMessageColor">#009688</color>
 </resources>

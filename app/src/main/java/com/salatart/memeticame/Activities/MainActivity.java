@@ -36,8 +36,8 @@ public class MainActivity extends AppCompatActivity implements ChatsFragment.OnC
         setContentView(R.layout.activity_main);
 
         if (SessionUtils.getToken(getApplicationContext()).isEmpty()) {
-            Intent intent = new Intent(this, LoginActivity.class);
-            startActivity(intent);
+            startActivity(new Intent(this, LoginActivity.class));
+            MainActivity.this.finish();
         } else {
             ViewPager viewPager = (ViewPager) findViewById(R.id.viewpager);
             setupViewPager(viewPager);
@@ -84,7 +84,8 @@ public class MainActivity extends AppCompatActivity implements ChatsFragment.OnC
             public void onResponse(Call call, Response response) throws IOException {
                 SessionUtils.logout(getApplicationContext());
                 startActivity(new Intent(getApplicationContext(), LoginActivity.class));
-                finish();
+                MainActivity.this.finish();
+                response.body().close();
             }
         });
     }

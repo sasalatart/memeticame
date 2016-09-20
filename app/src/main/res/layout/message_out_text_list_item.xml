@@ -9,19 +9,29 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="start"
-        android:orientation="horizontal">
+        android:orientation="horizontal"
+        android:paddingTop="@dimen/message_padding"
+        android:paddingBottom="@dimen/message_padding">
+
+        <ImageView
+            android:id="@+id/attachmentType"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/ic_textsms_black_24dp" />
 
         <TextView
             android:id="@+id/senderLabel"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_height="24dp"
+            android:gravity="center"
             android:text="@string/sender_label"
             android:textAppearance="?android:attr/textAppearanceSmall"
             android:textColor="@color/outMessageColor" />
 
         <TextView
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_height="24dp"
+            android:gravity="center"
             android:paddingLeft="2dp"
             android:paddingRight="2dp"
             android:text="@string/at"
@@ -31,7 +41,8 @@
         <TextView
             android:id="@+id/timestampLabel"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_height="24dp"
+            android:gravity="center"
             android:text="@string/timestamp_label"
             android:textAppearance="?android:attr/textAppearanceSmall"
             android:textColor="@color/outMessageColor" />
@@ -40,15 +51,7 @@
             android:id="@+id/messageStatusCheck"
             android:layout_width="fill_parent"
             android:layout_height="fill_parent"
-            android:src="@drawable/ic_check_black_24dp"
-            android:visibility="visible" />
-
-        <ImageView
-            android:id="@+id/messageStatusWaiting"
-            android:layout_width="fill_parent"
-            android:layout_height="fill_parent"
-            android:src="@drawable/ic_access_time_black_24dp"
-            android:visibility="gone" />
+            android:src="@drawable/ic_check_black_24dp" />
     </LinearLayout>
 
     <TextView
