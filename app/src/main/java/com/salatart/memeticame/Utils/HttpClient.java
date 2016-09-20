@@ -17,9 +17,9 @@ public class HttpClient {
     public static OkHttpClient getInstance() {
         if (instance == null) {
             instance = new OkHttpClient.Builder()
-                    .connectTimeout(600, TimeUnit.SECONDS)
-                    .writeTimeout(600, TimeUnit.SECONDS)
-                    .readTimeout(600, TimeUnit.SECONDS)
+                    .connectTimeout(300, TimeUnit.SECONDS)
+                    .writeTimeout(300, TimeUnit.SECONDS)
+                    .readTimeout(300, TimeUnit.SECONDS)
                     .build();
         }
 
