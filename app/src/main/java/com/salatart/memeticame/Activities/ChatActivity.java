@@ -295,6 +295,9 @@ public class ChatActivity extends AppCompatActivity {
             } else if (mimeType.contains("audio")) {
                 mAttachmentImageView.setImageResource(R.drawable.ic_record_voice_over_black_24dp);
             }
+        } else {
+            mCurrentAttachment = null;
+            mCurrentUri = null;
         }
     }
 
