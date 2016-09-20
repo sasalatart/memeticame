@@ -47,6 +47,15 @@ public class MainActivity extends AppCompatActivity implements ChatsFragment.OnC
         }
     }
 
+    @Override
+    public void onResume() {
+        super.onResume();
+
+        if (SessionUtils.getToken(getApplicationContext()).isEmpty()) {
+            MainActivity.this.finish();
+        }
+    }
+
     private void setupViewPager(ViewPager viewPager) {
         ViewPagerAdapter adapter = new ViewPagerAdapter(getSupportFragmentManager());
 

@@ -43,11 +43,6 @@ public class NewChatActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_new_chat);
 
-        if (SessionUtils.getToken(getApplicationContext()).isEmpty()) {
-            startActivity(new Intent(this, LoginActivity.class));
-            NewChatActivity.this.finish();
-        }
-
         ActionBar actionBar = getSupportActionBar();
         actionBar.setDisplayHomeAsUpEnabled(true);
 
@@ -73,6 +68,15 @@ public class NewChatActivity extends AppCompatActivity {
 
         mChatNameInput = (EditText) findViewById(R.id.chatNameInput);
         mChatNameInput.setText("Chat with " + mUser.getName(), TextView.BufferType.EDITABLE);
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+
+        if (SessionUtils.getToken(getApplicationContext()).isEmpty()) {
+            NewChatActivity.this.finish();
+        }
     }
 
     public boolean onOptionsItemSelected(MenuItem item) {

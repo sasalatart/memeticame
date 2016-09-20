@@ -121,11 +121,6 @@ public class ChatActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_chat);
 
-        if (SessionUtils.getToken(getApplicationContext()).isEmpty()) {
-            startActivity(new Intent(this, LoginActivity.class));
-            ChatActivity.this.finish();
-        }
-
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && !hasMediaPermissions()) {
             requestPermissions(mPermissions, PERMISSIONS_CODE);
         }
@@ -162,8 +157,13 @@ public class ChatActivity extends AppCompatActivity {
     @Override
     public void onResume() {
         super.onResume();
+
         registerReceiver(mMessageReceiver, new IntentFilter(ChatActivity.NEW_MESSAGE_FILTER));
         registerReceiver(mOnDownloadReceiver, new IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE));
+
+        if (SessionUtils.getToken(getApplicationContext()).isEmpty()) {
+            ChatActivity.this.finish();
+        }
     }
 
     @Override
