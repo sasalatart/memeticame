@@ -65,9 +65,9 @@ public class FileUtils {
         return byteBuffer.toByteArray();
     }
 
-    public static File createMediaFile(Context context, String extension) {
+    public static File createMediaFile(Context context, String extension, String directory) {
         String fileName = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
-        File storageDir = context.getExternalFilesDir(Environment.DIRECTORY_PICTURES);
+        File storageDir = context.getExternalFilesDir(directory);
 
         File file = null;
         try {
@@ -86,18 +86,22 @@ public class FileUtils {
     public static boolean checkFileExistence(Context context, String name) {
         File file1 = new File(Environment.getExternalStorageDirectory() + "/Memeticame/" + name);
         File file2 = new File(context.getExternalFilesDir(Environment.DIRECTORY_PICTURES) + "/" + name);
+        File file3 = new File(context.getExternalFilesDir(Environment.DIRECTORY_MUSIC) + "/" + name);
 
-        return file1.exists() || file2.exists();
+        return file1.exists() || file2.exists() || file3.exists();
     }
 
     public static Uri getUriFromFileName(Context context, String name) {
         File file1 = new File(Environment.getExternalStorageDirectory() + "/Memeticame/" + name);
         File file2 = new File(context.getExternalFilesDir(Environment.DIRECTORY_PICTURES) + "/" + name);
+        File file3 = new File(context.getExternalFilesDir(Environment.DIRECTORY_MUSIC) + "/" + name);
 
         if (file1.exists()) {
             return Uri.fromFile(file1);
         } else if (file2.exists()) {
             return Uri.fromFile(file2);
+        } else if (file3.exists()) {
+            return Uri.fromFile(file3);
         } else {
             return null;
         }

@@ -305,7 +305,7 @@ public class ChatActivity extends AppCompatActivity {
     public void dispatchTakePictureIntent(View view) {
         Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
         if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
-            File photoFile = FileUtils.createMediaFile(getApplicationContext(), "jpg");
+            File photoFile = FileUtils.createMediaFile(getApplicationContext(), "jpg", Environment.DIRECTORY_PICTURES);
             if (photoFile != null) {
                 mCurrentUri = FileProvider.getUriForFile(this, "com.salatart.memeticame.fileprovider", photoFile);
                 takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, mCurrentUri);
@@ -317,7 +317,7 @@ public class ChatActivity extends AppCompatActivity {
     public void dispatchTakeVideoIntent(View view) {
         Intent takeVideoIntent = new Intent(MediaStore.ACTION_VIDEO_CAPTURE);
         if (takeVideoIntent.resolveActivity(getPackageManager()) != null) {
-            File videoFile = FileUtils.createMediaFile(getApplicationContext(), "mp4");
+            File videoFile = FileUtils.createMediaFile(getApplicationContext(), "mp4", Environment.DIRECTORY_PICTURES);
             if (videoFile != null) {
                 mCurrentUri = FileProvider.getUriForFile(this, "com.salatart.memeticame.fileprovider", videoFile);
                 takeVideoIntent.putExtra(MediaStore.EXTRA_OUTPUT, mCurrentUri);
@@ -364,13 +364,7 @@ public class ChatActivity extends AppCompatActivity {
     }
 
     public void startAudioRecording() {
-        File sampleDir = Environment.getExternalStorageDirectory();
-        try {
-            mAudioFile = File.createTempFile(new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date()), ".mp4", sampleDir);
-        } catch (IOException e) {
-            Log.e("ERROR", e.toString());
-            return;
-        }
+        mAudioFile = FileUtils.createMediaFile(getApplicationContext(), "mp4", Environment.DIRECTORY_MUSIC);
 
         mAudioRecorder = new MediaRecorder();
         mAudioRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
