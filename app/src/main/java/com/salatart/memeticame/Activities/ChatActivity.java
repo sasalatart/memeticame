@@ -67,6 +67,8 @@ public class ChatActivity extends AppCompatActivity {
     public static final int REQUEST_VIDEO_CAPTURE = 3;
     public static final int PERMISSIONS_CODE = 200;
 
+    public static boolean sIsActive = false;
+
     private boolean mPermissionToRecordAudio = false;
     private boolean mPermissionToUseCamera = false;
     private boolean mPermissionToWrite = false;
@@ -160,6 +162,7 @@ public class ChatActivity extends AppCompatActivity {
 
         registerReceiver(mMessageReceiver, new IntentFilter(ChatActivity.NEW_MESSAGE_FILTER));
         registerReceiver(mOnDownloadReceiver, new IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE));
+        sIsActive = true;
 
         if (SessionUtils.getToken(getApplicationContext()).isEmpty()) {
             ChatActivity.this.finish();
@@ -171,6 +174,7 @@ public class ChatActivity extends AppCompatActivity {
         super.onPause();
         unregisterReceiver(mMessageReceiver);
         unregisterReceiver(mOnDownloadReceiver);
+        sIsActive = false;
     }
 
     public boolean onOptionsItemSelected(MenuItem item) {
