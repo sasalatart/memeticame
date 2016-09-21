@@ -59,6 +59,8 @@ public class ChatActivity extends AppCompatActivity {
     public static final int REQUEST_IMAGE_CAPTURE = 2;
     public static final int REQUEST_VIDEO_CAPTURE = 3;
     public static final int PERMISSIONS_CODE = 200;
+    public static final String PICTURE_STATE = "pictureState";
+    public static final String VIDEO_STATE = "videoState";
 
     public static boolean sIsActive = false;
 
@@ -76,7 +78,8 @@ public class ChatActivity extends AppCompatActivity {
     private MessagesAdapter mAdapter;
 
     private Attachment mCurrentAttachment;
-    private Uri mCurrentUri;
+    private Uri mCurrentImageUri;
+    private Uri mCurrentVideoUri;
 
     private EditText mMessageInput;
     private ImageView mAttachmentImageView;
@@ -115,6 +118,11 @@ public class ChatActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_chat);
+
+        if (savedInstanceState != null) {
+            mCurrentImageUri = savedInstanceState.getParcelable(PICTURE_STATE);
+            mCurrentVideoUri = savedInstanceState.getParcelable(VIDEO_STATE);
+        }
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && !hasMediaPermissions()) {
             requestPermissions(mPermissions, PERMISSIONS_CODE);
@@ -168,6 +176,13 @@ public class ChatActivity extends AppCompatActivity {
         unregisterReceiver(mMessageReceiver);
         unregisterReceiver(mOnDownloadReceiver);
         sIsActive = false;
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle savedInstanceState) {
+        savedInstanceState.putParcelable(PICTURE_STATE, mCurrentImageUri);
+        savedInstanceState.putParcelable(VIDEO_STATE, mCurrentVideoUri);
+        super.onSaveInstanceState(savedInstanceState);
     }
 
     public boolean onOptionsItemSelected(MenuItem item) {
@@ -306,8 +321,8 @@ public class ChatActivity extends AppCompatActivity {
         if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
             File photoFile = FileUtils.createMediaFile(getApplicationContext(), "jpg", Environment.DIRECTORY_PICTURES);
             if (photoFile != null) {
-                mCurrentUri = FileProvider.getUriForFile(this, "com.salatart.memeticame.fileprovider", photoFile);
-                takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, mCurrentUri);
+                mCurrentImageUri = FileProvider.getUriForFile(this, "com.salatart.memeticame.fileprovider", photoFile);
+                takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, mCurrentImageUri);
                 startActivityForResult(takePictureIntent, REQUEST_IMAGE_CAPTURE);
             }
         }
@@ -318,9 +333,9 @@ public class ChatActivity extends AppCompatActivity {
         if (takeVideoIntent.resolveActivity(getPackageManager()) != null) {
             File videoFile = FileUtils.createMediaFile(getApplicationContext(), "mp4", Environment.DIRECTORY_PICTURES);
             if (videoFile != null) {
-                mCurrentUri = FileProvider.getUriForFile(this, "com.salatart.memeticame.fileprovider", videoFile);
-                takeVideoIntent.putExtra(MediaStore.EXTRA_OUTPUT, mCurrentUri);
-                startActivityForResult(takeVideoIntent, REQUEST_IMAGE_CAPTURE);
+                mCurrentVideoUri = FileProvider.getUriForFile(this, "com.salatart.memeticame.fileprovider", videoFile);
+                takeVideoIntent.putExtra(MediaStore.EXTRA_OUTPUT, mCurrentVideoUri);
+                startActivityForResult(takeVideoIntent, REQUEST_VIDEO_CAPTURE);
             }
         }
     }
@@ -330,12 +345,11 @@ public class ChatActivity extends AppCompatActivity {
         super.onActivityResult(requestCode, resultCode, data);
 
         if (requestCode == REQUEST_PICK_FILE && resultCode == RESULT_OK && data != null && data.getData() != null) {
-            Uri uri = data.getData();
-            setCurrentAttachmentFromUri(uri);
+            setCurrentAttachmentFromUri(data.getData());
         } else if (requestCode == REQUEST_IMAGE_CAPTURE && resultCode == RESULT_OK) {
-            setCurrentAttachmentFromUri(mCurrentUri);
+            setCurrentAttachmentFromUri(mCurrentImageUri);
         } else if (requestCode == REQUEST_VIDEO_CAPTURE && resultCode == RESULT_OK) {
-            setCurrentAttachmentFromUri(mCurrentUri);
+            setCurrentAttachmentFromUri(mCurrentVideoUri);
         }
     }
 
@@ -391,8 +405,7 @@ public class ChatActivity extends AppCompatActivity {
 
         mAudioRecorder.stop();
         mAudioRecorder.release();
-        mCurrentUri = FileUtils.addRecordingToMediaLibrary(ChatActivity.this, mAudioFile);
-        setCurrentAttachmentFromUri(mCurrentUri);
+        setCurrentAttachmentFromUri(FileUtils.addRecordingToMediaLibrary(ChatActivity.this, mAudioFile));
         mAudioRecorder = null;
     }
 
