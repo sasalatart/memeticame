@@ -3,10 +3,7 @@ package com.salatart.memeticame.Activities;
 import android.Manifest;
 import android.app.DownloadManager;
 import android.content.BroadcastReceiver;
-import android.content.ContentResolver;
-import android.content.ContentValues;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
@@ -21,12 +18,10 @@ import android.support.annotation.NonNull;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.FileProvider;
 import android.support.v7.app.ActionBar;
-import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
-import android.webkit.URLUtil;
 import android.widget.AdapterView;
 import android.widget.EditText;
 import android.widget.ImageButton;
@@ -51,9 +46,7 @@ import org.json.JSONObject;
 
 import java.io.File;
 import java.io.IOException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 
 import okhttp3.Call;
 import okhttp3.Callback;
@@ -147,8 +140,8 @@ public class ChatActivity extends AppCompatActivity {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 Attachment attachment = mAdapter.getItem(position).getAttachment();
-                if (attachment != null && !FileUtils.checkFileExistence(getApplicationContext(), attachment.getName())) {
-                    downloadAttachment(attachment);
+                if (attachment != null) {
+                    FileUtils.openMedia(ChatActivity.this, attachment);
                 }
             }
         });
@@ -389,9 +382,14 @@ public class ChatActivity extends AppCompatActivity {
     }
 
     public void stopAudioRecording() {
+        if (mAudioFile == null) {
+            return;
+        }
+
         mAudioRecorder.stop();
         mAudioRecorder.release();
-        addRecordingToMediaLibrary();
+        mCurrentUri = FileUtils.addRecordingToMediaLibrary(ChatActivity.this, mAudioFile);
+        setCurrentAttachmentFromUri(mCurrentUri);
         mAudioRecorder = null;
     }
 
@@ -412,41 +410,10 @@ public class ChatActivity extends AppCompatActivity {
         }
     }
 
-    public void downloadAttachment(final Attachment attachment) {
-        if (attachment == null || !URLUtil.isValidUrl(attachment.getUri())) {
-            return;
-        }
-
-        new AlertDialog.Builder(ChatActivity.this)
-                .setTitle("Download file")
-                .setMessage("Do you really want to download this file (" + attachment.getName() + ")?")
-                .setIcon(android.R.drawable.ic_dialog_alert)
-                .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int whichButton) {
-                        FileUtils.downloadFile(getApplicationContext(), attachment);
-                    }
-                })
-                .setNegativeButton(android.R.string.no, null).show();
-    }
-
     private boolean hasMediaPermissions() {
         boolean canRecordAudio = ContextCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED;
         boolean canUseCamera = ContextCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED;
         boolean canWriteToStorage = ContextCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED;
         return canRecordAudio && canUseCamera && canWriteToStorage;
-    }
-
-    private void addRecordingToMediaLibrary() {
-        ContentValues values = new ContentValues(4);
-        long current = System.currentTimeMillis();
-        values.put(MediaStore.Audio.Media.TITLE, "audio" + mAudioFile.getName());
-        values.put(MediaStore.Audio.Media.DATE_ADDED, (int) (current / 1000));
-        values.put(MediaStore.Audio.Media.MIME_TYPE, "audio/mp4");
-        values.put(MediaStore.Audio.Media.DATA, mAudioFile.getAbsolutePath());
-        ContentResolver contentResolver = getContentResolver();
-
-        Uri base = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI;
-        mCurrentUri = contentResolver.insert(base, values);
-        setCurrentAttachmentFromUri(mCurrentUri);
     }
 }

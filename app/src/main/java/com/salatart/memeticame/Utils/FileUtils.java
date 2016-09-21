@@ -2,18 +2,22 @@ package com.salatart.memeticame.Utils;
 
 import android.app.DownloadManager;
 import android.content.ContentResolver;
+import android.content.ContentValues;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
+import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.Environment;
+import android.provider.MediaStore;
 import android.provider.OpenableColumns;
+import android.support.v7.app.AlertDialog;
 import android.util.Base64;
 import android.util.Log;
 import android.webkit.URLUtil;
 
 import com.salatart.memeticame.Models.Attachment;
-import com.salatart.memeticame.R;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -44,15 +48,6 @@ public class FileUtils {
         return Base64.encodeToString(file, Base64.NO_WRAP);
     }
 
-    public static Intent getSelectFileIntent() {
-        Intent intent = new Intent();
-        intent.setType("image/* video/* audio/*");
-        String[] mimetypes = {"image/*", "video/*", "audio/*"};
-        intent.putExtra(Intent.EXTRA_MIME_TYPES, mimetypes);
-        intent.setAction(Intent.ACTION_GET_CONTENT);
-        return Intent.createChooser(intent, "Select file");
-    }
-
     public static byte[] getBytes(InputStream inputStream) throws IOException {
         ByteArrayOutputStream byteBuffer = new ByteArrayOutputStream();
         byte[] buffer = new byte[1024];
@@ -63,6 +58,15 @@ public class FileUtils {
         }
 
         return byteBuffer.toByteArray();
+    }
+
+    public static Intent getSelectFileIntent() {
+        Intent intent = new Intent();
+        intent.setType("image/* video/* audio/*");
+        String[] mimetypes = {"image/*", "video/*", "audio/*"};
+        intent.putExtra(Intent.EXTRA_MIME_TYPES, mimetypes);
+        intent.setAction(Intent.ACTION_GET_CONTENT);
+        return Intent.createChooser(intent, "Select file");
     }
 
     public static File createMediaFile(Context context, String extension, String directory) {
@@ -130,5 +134,54 @@ public class FileUtils {
                 .setDestinationInExternalPublicDir("/Memeticame", attachment.getName());
 
         downloadManager.enqueue(request);
+    }
+
+    public static void downloadAttachment(final Context context, final Attachment attachment) {
+        if (attachment == null || !URLUtil.isValidUrl(attachment.getUri())) {
+            return;
+        }
+
+        new AlertDialog.Builder(context)
+                .setTitle("Download file")
+                .setMessage("Do you really want to download this file (" + attachment.getName() + ")?")
+                .setIcon(android.R.drawable.ic_dialog_alert)
+                .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int whichButton) {
+                        downloadFile(context, attachment);
+                    }
+                })
+                .setNegativeButton(android.R.string.no, null).show();
+    }
+
+    public static Intent getOpenImageOrVideoIntent(Uri uri, String mimeType) {
+        Intent intent = new Intent();
+        intent.setAction(Intent.ACTION_VIEW);
+        intent.setDataAndType(uri, mimeType);
+        return intent;
+    }
+
+    public static void openMedia(Context context, Attachment attachment) {
+        boolean fileExists = FileUtils.checkFileExistence(context, attachment.getName());
+        String mimeType = attachment.getMimeType();
+        if (!fileExists) {
+            downloadAttachment(context, attachment);
+        } else if (mimeType.contains("image") || mimeType.contains("video")) {
+            context.startActivity(FileUtils.getOpenImageOrVideoIntent(Uri.parse(attachment.getUri()), attachment.getMimeType()));
+        } else if (mimeType.contains("audio")) {
+            RingtoneManager.getRingtone(context, Uri.parse(attachment.getUri())).play();
+        }
+    }
+
+    public static Uri addRecordingToMediaLibrary(Context context, File audioFile) {
+        ContentValues values = new ContentValues(4);
+        long current = System.currentTimeMillis();
+        values.put(MediaStore.Audio.Media.TITLE, "audio" + audioFile.getName());
+        values.put(MediaStore.Audio.Media.DATE_ADDED, (int) (current / 1000));
+        values.put(MediaStore.Audio.Media.MIME_TYPE, "audio/mp4");
+        values.put(MediaStore.Audio.Media.DATA, audioFile.getAbsolutePath());
+        ContentResolver contentResolver = context.getContentResolver();
+
+        Uri base = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI;
+        return contentResolver.insert(base, values);
     }
 }

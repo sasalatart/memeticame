@@ -67,7 +67,7 @@
                 android:gravity="center"
                 android:text="@string/attachment_name"
                 android:textAppearance="?android:attr/textAppearanceSmall"
-                android:textColor="@color/inMessageColor"
+                android:textColor="@color/outMessageColor"
                 android:visibility="invisible" />
 
             <ImageView
