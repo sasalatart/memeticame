@@ -1,21 +1,29 @@
 package com.salatart.memeticame.Models;
 
-import android.content.Context;
 import android.os.Parcel;
 import android.os.Parcelable;
-
-import com.salatart.memeticame.Utils.SessionUtils;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Created by Andres Matte on 8/10/2016.
  */
 public class User implements Parcelable {
+    public static final Parcelable.Creator CREATOR = new Parcelable.Creator() {
+        public User createFromParcel(Parcel in) {
+            return new User(in);
+        }
+
+        public User[] newArray(int size) {
+            return new User[size];
+        }
+    };
     public static String PARCELABLE_KEY = "com.salatart.memeticamea.Models.User";
     private String mName;
     private String mPhoneNumber;
@@ -28,6 +36,10 @@ public class User implements Parcelable {
     public User(Parcel in) {
         this.mName = in.readString();
         this.mPhoneNumber = in.readString();
+    }
+
+    public static User fromMap(Map mapUser) {
+        return new User(mapUser.get("name").toString(), mapUser.get("phone_number").toString());
     }
 
     public static ArrayList<User> fromJsonArray(JSONArray jsonResponse) throws JSONException {
@@ -54,6 +66,19 @@ public class User implements Parcelable {
         }
 
         return users;
+    }
+
+    public static boolean isPresent(List<User> users, User newUser) {
+        for (User user : users) {
+            if (User.comparePhones(user.getPhoneNumber(), newUser.getPhoneNumber())) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public static boolean comparePhones(String phone1, String phone2) {
+        return phone1.replaceAll("[^\\d.]", "").equals(phone2.replaceAll("[^\\d.]", ""));
     }
 
     public String getName() {
@@ -86,10 +111,6 @@ public class User implements Parcelable {
         return chats;
     }
 
-    public static boolean comparePhones(String phone1, String phone2) {
-        return phone1.replaceAll("[^\\d.]", "").equals(phone2.replaceAll("[^\\d.]", ""));
-    }
-
     @Override
     public int describeContents() {
         return 0;
@@ -100,14 +121,4 @@ public class User implements Parcelable {
         dest.writeString(mName);
         dest.writeString(mPhoneNumber);
     }
-
-    public static final Parcelable.Creator CREATOR = new Parcelable.Creator() {
-        public User createFromParcel(Parcel in) {
-            return new User(in);
-        }
-
-        public User[] newArray(int size) {
-            return new User[size];
-        }
-    };
 }

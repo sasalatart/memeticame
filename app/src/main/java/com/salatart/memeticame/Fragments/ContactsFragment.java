@@ -2,8 +2,10 @@ package com.salatart.memeticame.Fragments;
 
 
 import android.Manifest;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
@@ -44,14 +46,26 @@ import okhttp3.Response;
 public class ContactsFragment extends Fragment {
 
     public static final String TAG = "contacts_fragment";
+    public static final String NEW_USER_FILTER = "newUserFilter";
     public static final int REQUEST_NEW_CONTACT = 1;
     public static final int PERMISSIONS_REQUEST_READ_CONTACTS = 101;
 
-    private ArrayList<User> mContacts;
+    private ArrayList<User> mLocalContacts = new ArrayList<>();
+    private ArrayList<User> mContacts = new ArrayList<>();
     private ContactsAdapter mAdapter;
     private ListView mContactsListView;
     private OnContactSelected mContactSelectedListener;
     private Routes.OnLogout mOnLogoutListener;
+    private BroadcastReceiver mUsersReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            User user = intent.getParcelableExtra(User.PARCELABLE_KEY);
+            if (User.isPresent(mLocalContacts, user)) {
+                mContacts.add(user);
+                mAdapter.notifyDataSetChanged();
+            }
+        }
+    };
 
     public ContactsFragment() {
         // Required empty public constructor
@@ -102,6 +116,7 @@ public class ContactsFragment extends Fragment {
                         @Override
                         public void onResponse(Call call, final Response response) throws IOException {
                             try {
+                                mLocalContacts = contacts;
                                 mContacts = User.intersect(contacts, User.fromJsonArray(new JSONArray(response.body().string())));
                                 mAdapter = new ContactsAdapter(getContext(), R.layout.contact_list_item, mContacts);
                                 getActivity().runOnUiThread(new Runnable() {
@@ -164,6 +179,18 @@ public class ContactsFragment extends Fragment {
         } catch (ClassCastException e) {
             throw new ClassCastException(context.toString() + " must implement onViewSelected");
         }
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        getActivity().registerReceiver(mUsersReceiver, new IntentFilter(NEW_USER_FILTER));
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        getActivity().unregisterReceiver(mUsersReceiver);
     }
 
     @Override

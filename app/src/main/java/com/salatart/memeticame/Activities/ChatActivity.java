@@ -294,7 +294,6 @@ public class ChatActivity extends AppCompatActivity {
             }
         } else {
             mCurrentAttachment = null;
-            mCurrentUri = null;
         }
     }
 
@@ -341,6 +340,10 @@ public class ChatActivity extends AppCompatActivity {
     }
 
     private void setCurrentAttachmentFromUri(Uri uri) {
+        if (uri == null) {
+            return;
+        }
+
         try {
             mCurrentAttachment = new Attachment(FileUtils.getName(getApplicationContext(), uri),
                     FileUtils.getMimeType(getApplicationContext(), uri),
