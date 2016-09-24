@@ -171,17 +171,4 @@ public class FileUtils {
             RingtoneManager.getRingtone(context, Uri.parse(attachment.getUri())).play();
         }
     }
-
-    public static Uri addRecordingToMediaLibrary(Context context, File audioFile) {
-        ContentValues values = new ContentValues(4);
-        long current = System.currentTimeMillis();
-        values.put(MediaStore.Audio.Media.TITLE, "audio" + audioFile.getName());
-        values.put(MediaStore.Audio.Media.DATE_ADDED, (int) (current / 1000));
-        values.put(MediaStore.Audio.Media.MIME_TYPE, "audio/mp4");
-        values.put(MediaStore.Audio.Media.DATA, audioFile.getAbsolutePath());
-        ContentResolver contentResolver = context.getContentResolver();
-
-        Uri base = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI;
-        return contentResolver.insert(base, values);
-    }
 }

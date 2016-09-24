@@ -8,7 +8,6 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
-import android.media.MediaRecorder;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -34,6 +33,7 @@ import com.salatart.memeticame.Models.Attachment;
 import com.salatart.memeticame.Models.Chat;
 import com.salatart.memeticame.Models.Message;
 import com.salatart.memeticame.R;
+import com.salatart.memeticame.Utils.AudioManager;
 import com.salatart.memeticame.Utils.FileUtils;
 import com.salatart.memeticame.Utils.HttpClient;
 import com.salatart.memeticame.Utils.Routes;
@@ -69,14 +69,13 @@ public class ChatActivity extends AppCompatActivity {
     private boolean mPermissionToWrite = false;
     private String[] mPermissions = {"android.permission.RECORD_AUDIO", "android.permission.CAMERA", "android.permission.WRITE_EXTERNAL_STORAGE"};
 
-    private MediaRecorder mAudioRecorder;
     private boolean mCurrentlyRecording;
-    private File mAudioFile;
 
     private Chat mChat;
     private ArrayList<Message> mMessages;
     private MessagesAdapter mAdapter;
 
+    private AudioManager mAudioManager;
     private Attachment mCurrentAttachment;
     private Uri mCurrentImageUri;
     private Uri mCurrentVideoUri;
@@ -86,6 +85,7 @@ public class ChatActivity extends AppCompatActivity {
     private ImageButton mCancelButton;
     private ImageButton mRecordButton;
     private ListView mMessagesListView;
+
     private BroadcastReceiver mMessageReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -101,6 +101,7 @@ public class ChatActivity extends AppCompatActivity {
             }
         }
     };
+
     private BroadcastReceiver mOnDownloadReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -154,6 +155,7 @@ public class ChatActivity extends AppCompatActivity {
             }
         });
 
+        mAudioManager = new AudioManager();
         mCurrentlyRecording = false;
     }
 
@@ -280,7 +282,7 @@ public class ChatActivity extends AppCompatActivity {
         Message message = Message.createFake(getApplicationContext(), content, mChat.getId());
         if (mCurrentAttachment != null) {
             message.setAttachment(mCurrentAttachment.clone());
-            toggleButtonVisibilities();
+            toggleAttachmentVisibilities();
             mCurrentAttachment = null;
         }
 
@@ -290,10 +292,10 @@ public class ChatActivity extends AppCompatActivity {
     }
 
     public void cancelAttachment(View view) {
-        toggleButtonVisibilities();
+        toggleAttachmentVisibilities();
     }
 
-    public void toggleButtonVisibilities() {
+    public void toggleAttachmentVisibilities() {
         mCancelButton.setVisibility(mCancelButton.getVisibility() == View.GONE ? View.VISIBLE : View.GONE);
         mAttachmentImageView.setVisibility(mAttachmentImageView.getVisibility() == View.GONE ? View.VISIBLE : View.GONE);
 
@@ -340,6 +342,19 @@ public class ChatActivity extends AppCompatActivity {
         }
     }
 
+    public void toggleRecording(View view) {
+        if (mCurrentlyRecording) {
+            File audioFile = mAudioManager.stopAudioRecording();
+            Uri uri = mAudioManager.addRecordingToMediaLibrary(ChatActivity.this, audioFile);
+            setCurrentAttachmentFromUri(uri);
+            mRecordButton.setColorFilter(Color.BLACK);
+        } else {
+            mAudioManager.startAudioRecording(ChatActivity.this);
+            mRecordButton.setColorFilter(Color.RED);
+        }
+        mCurrentlyRecording = !mCurrentlyRecording;
+    }
+
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
@@ -363,50 +378,10 @@ public class ChatActivity extends AppCompatActivity {
                     FileUtils.getMimeType(getApplicationContext(), uri),
                     FileUtils.encodeToBase64FromUri(getApplicationContext(), uri),
                     uri.toString());
-            toggleButtonVisibilities();
+            toggleAttachmentVisibilities();
         } catch (IOException e) {
             Log.e("ERROR", e.toString());
         }
-    }
-
-    public void toggleRecording(View view) {
-        if (mCurrentlyRecording) {
-            stopAudioRecording();
-            mRecordButton.setColorFilter(Color.BLACK);
-        } else {
-            startAudioRecording();
-            mRecordButton.setColorFilter(Color.RED);
-        }
-        mCurrentlyRecording = !mCurrentlyRecording;
-    }
-
-    public void startAudioRecording() {
-        mAudioFile = FileUtils.createMediaFile(getApplicationContext(), "mp4", Environment.DIRECTORY_MUSIC);
-
-        mAudioRecorder = new MediaRecorder();
-        mAudioRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
-        mAudioRecorder.setOutputFormat(MediaRecorder.OutputFormat.MPEG_4);
-        mAudioRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB);
-        mAudioRecorder.setOutputFile(mAudioFile.getAbsolutePath());
-
-        try {
-            mAudioRecorder.prepare();
-        } catch (IOException e) {
-            Log.e("ERROR", e.toString());
-        }
-
-        mAudioRecorder.start();
-    }
-
-    public void stopAudioRecording() {
-        if (mAudioFile == null) {
-            return;
-        }
-
-        mAudioRecorder.stop();
-        mAudioRecorder.release();
-        setCurrentAttachmentFromUri(FileUtils.addRecordingToMediaLibrary(ChatActivity.this, mAudioFile));
-        mAudioRecorder = null;
     }
 
     @Override
