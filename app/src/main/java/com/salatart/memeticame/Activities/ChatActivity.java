@@ -149,8 +149,8 @@ public class ChatActivity extends AppCompatActivity {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 Attachment attachment = mAdapter.getItem(position).getAttachment();
-                if (attachment != null) {
-                    FileUtils.openMedia(ChatActivity.this, attachment);
+                if (attachment != null && !FileUtils.openFile(ChatActivity.this, attachment)) {
+                    Toast.makeText(ChatActivity.this, "Can't open this file.", Toast.LENGTH_SHORT).show();
                 }
             }
         });
@@ -300,14 +300,15 @@ public class ChatActivity extends AppCompatActivity {
         mAttachmentImageView.setVisibility(mAttachmentImageView.getVisibility() == View.GONE ? View.VISIBLE : View.GONE);
 
         if (mAttachmentImageView.getVisibility() == View.VISIBLE) {
-            String mimeType = mCurrentAttachment.getMimeType();
-            if (mimeType.contains("image") || mimeType.contains("video")) {
+            if (mCurrentAttachment.isImage() || mCurrentAttachment.isVideo()) {
                 Glide.with(getApplicationContext())
                         .load(mCurrentAttachment.getUri())
                         .override(Attachment.IMAGE_THUMB_SIZE, Attachment.IMAGE_THUMB_SIZE)
                         .into(mAttachmentImageView);
-            } else if (mimeType.contains("audio")) {
+            } else if (mCurrentAttachment.isAudio()) {
                 mAttachmentImageView.setImageResource(R.drawable.ic_record_voice_over_black_24dp);
+            } else {
+                mAttachmentImageView.setImageResource(R.drawable.ic_insert_drive_file_black_24dp);
             }
         } else {
             mCurrentAttachment = null;
@@ -359,7 +360,7 @@ public class ChatActivity extends AppCompatActivity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
-        if (requestCode == REQUEST_PICK_FILE && resultCode == RESULT_OK && data != null && data.getData() != null) {
+        if (requestCode == REQUEST_PICK_FILE && resultCode == RESULT_OK && data != null && data != null) {
             setCurrentAttachmentFromUri(data.getData());
         } else if (requestCode == REQUEST_IMAGE_CAPTURE && resultCode == RESULT_OK) {
             setCurrentAttachmentFromUri(mCurrentImageUri);

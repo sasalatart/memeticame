@@ -41,11 +41,11 @@ public class MessagesAdapter extends ArrayAdapter<Message> {
             if (message.isMine(getContext()) && message.getAttachment() == null) {
                 view = mLayoutInflater.inflate(R.layout.message_out_text_list_item, parent, false);
             } else if (message.isMine(getContext())) {
-                view = mLayoutInflater.inflate(R.layout.message_out_media_list_item, parent, false);
+                view = mLayoutInflater.inflate(R.layout.message_out_attachment_list_item, parent, false);
             } else if (!message.isMine(getContext()) && message.getAttachment() == null) {
                 view = mLayoutInflater.inflate(R.layout.message_in_text_list_item, parent, false);
             } else if (!message.isMine(getContext())) {
-                view = mLayoutInflater.inflate(R.layout.message_in_media_list_item, parent, false);
+                view = mLayoutInflater.inflate(R.layout.message_in_attachment_list_item, parent, false);
             }
         }
 
@@ -107,19 +107,24 @@ public class MessagesAdapter extends ArrayAdapter<Message> {
             attachment.setUri(FileUtils.getUriFromFileName(getContext(), attachment.getName()).toString());
         }
 
-        String mimeType = attachment.getMimeType();
+        boolean isImage = attachment.isImage();
+        boolean isVideo = attachment.isVideo();
+        boolean isAudio = attachment.isAudio();
+        boolean isNotMedia = attachment.isNotMedia();
 
         ImageView attachmentType = (ImageView) view.findViewById(R.id.attachmentType);
-        if (mimeType.contains("image")) {
+        if (isImage) {
             attachmentType.setImageResource(R.drawable.ic_image_black_24dp);
-        } else if (mimeType.contains("video")) {
+        } else if (isVideo) {
             attachmentType.setImageResource(R.drawable.ic_videocam_black_24dp);
-        } else {
+        } else if (isAudio) {
             attachmentType.setImageResource(R.drawable.ic_record_voice_over_black_24dp);
+        } else {
+            attachmentType.setImageResource(R.drawable.ic_insert_drive_file_black_24dp);
         }
 
         ImageView thumbnail = (ImageView) view.findViewById(R.id.thumbnail);
-        if (mimeType.contains("image") || (mimeType.contains("video") && fileExists)) {
+        if (isImage || (isVideo && fileExists)) {
             Glide.with(getContext())
                     .load(message.getAttachment().getUri())
                     .placeholder(R.drawable.ic_access_time_black_24dp)
@@ -128,12 +133,14 @@ public class MessagesAdapter extends ArrayAdapter<Message> {
                     .into(thumbnail);
         } else if (!fileExists) {
             thumbnail.setImageResource(R.drawable.ic_file_download_black_24dp);
-        } else if (mimeType.contains("audio")) {
+        } else if (isAudio) {
             thumbnail.setImageResource(R.drawable.ic_play_circle_outline_black_24dp);
+        } else {
+            thumbnail.setImageResource(R.drawable.ic_attach_file_black_24dp);
         }
 
         TextView attachmentName = (TextView) view.findViewById(R.id.attachmentName);
-        if (!fileExists && !mimeType.contains("image") || mimeType.contains("audio")) {
+        if ((!fileExists && !isImage) || isAudio || isNotMedia) {
             attachmentName.setVisibility(View.VISIBLE);
             attachmentName.setText(attachment.getName());
         } else {

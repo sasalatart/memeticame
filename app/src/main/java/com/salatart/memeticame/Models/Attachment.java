@@ -61,6 +61,22 @@ public class Attachment implements Parcelable {
         mUri = uri;
     }
 
+    public boolean isAudio() {
+        return mMimeType.contains("audio");
+    }
+
+    public boolean isVideo() {
+        return mMimeType.contains("video");
+    }
+
+    public boolean isImage() {
+        return mMimeType.contains("image");
+    }
+
+    public boolean isNotMedia() {
+        return !mMimeType.contains("image") && !mMimeType.contains("video") && !mMimeType.contains("audio");
+    }
+
     @Override
     public int describeContents() {
         return 0;

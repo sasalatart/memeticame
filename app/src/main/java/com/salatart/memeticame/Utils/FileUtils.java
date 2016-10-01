@@ -1,8 +1,8 @@
 package com.salatart.memeticame.Utils;
 
 import android.app.DownloadManager;
+import android.content.ActivityNotFoundException;
 import android.content.ContentResolver;
-import android.content.ContentValues;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -10,7 +10,6 @@ import android.database.Cursor;
 import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.Environment;
-import android.provider.MediaStore;
 import android.provider.OpenableColumns;
 import android.support.v7.app.AlertDialog;
 import android.util.Base64;
@@ -61,12 +60,10 @@ public class FileUtils {
     }
 
     public static Intent getSelectFileIntent() {
-        Intent intent = new Intent();
-        intent.setType("image/* video/* audio/*");
-        String[] mimetypes = {"image/*", "video/*", "audio/*"};
-        intent.putExtra(Intent.EXTRA_MIME_TYPES, mimetypes);
-        intent.setAction(Intent.ACTION_GET_CONTENT);
-        return Intent.createChooser(intent, "Select file");
+        Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
+        intent.addCategory(Intent.CATEGORY_OPENABLE);
+        intent.setType("*/*");
+        return intent;
     }
 
     public static File createMediaFile(Context context, String extension, String directory) {
@@ -153,22 +150,29 @@ public class FileUtils {
                 .setNegativeButton(android.R.string.no, null).show();
     }
 
-    public static Intent getOpenImageOrVideoIntent(Uri uri, String mimeType) {
-        Intent intent = new Intent();
-        intent.setAction(Intent.ACTION_VIEW);
-        intent.setDataAndType(uri, mimeType);
-        return intent;
+    public static Intent getOpenFileIntent(Uri uri, String mimeType) {
+        Intent openIntent = new Intent(Intent.ACTION_VIEW);
+        openIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        openIntent.setDataAndType(uri, mimeType);
+        return openIntent;
     }
 
-    public static void openMedia(Context context, Attachment attachment) {
+    public static boolean openFile(Context context, Attachment attachment) {
         boolean fileExists = FileUtils.checkFileExistence(context, attachment.getName());
-        String mimeType = attachment.getMimeType();
+
         if (!fileExists) {
             downloadAttachment(context, attachment);
-        } else if (mimeType.contains("image") || mimeType.contains("video")) {
-            context.startActivity(FileUtils.getOpenImageOrVideoIntent(Uri.parse(attachment.getUri()), attachment.getMimeType()));
-        } else if (mimeType.contains("audio")) {
+        } else if (attachment.isAudio()) {
             RingtoneManager.getRingtone(context, Uri.parse(attachment.getUri())).play();
+        } else {
+            try {
+                context.startActivity(FileUtils.getOpenFileIntent(Uri.parse(attachment.getUri()), attachment.getMimeType()));
+            }
+            catch (ActivityNotFoundException e) {
+                return false;
+            }
         }
+
+        return true;
     }
 }
