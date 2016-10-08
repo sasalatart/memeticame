@@ -4,7 +4,6 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
@@ -17,21 +16,14 @@ import android.widget.Toast;
 import com.salatart.memeticame.Models.Chat;
 import com.salatart.memeticame.Models.User;
 import com.salatart.memeticame.R;
-import com.salatart.memeticame.Utils.HttpClient;
 import com.salatart.memeticame.Utils.Routes;
 import com.salatart.memeticame.Utils.SessionUtils;
 import com.salatart.memeticame.Views.ChatsAdapter;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 
-import okhttp3.Call;
-import okhttp3.Callback;
 import okhttp3.Request;
-import okhttp3.Response;
 
 public class NewChatActivity extends AppCompatActivity {
 
@@ -80,41 +72,19 @@ public class NewChatActivity extends AppCompatActivity {
     }
 
     public boolean onOptionsItemSelected(MenuItem item) {
-        Intent intent = new Intent(this, MainActivity.class);
-        startActivity(intent);
+        startActivity(new Intent(this, MainActivity.class));
         return true;
     }
 
     public void createChat(View view) {
-        String title = this.mChatNameInput.getText().toString();
 
+        String title = this.mChatNameInput.getText().toString();
         if (title.isEmpty()) {
             Toast.makeText(getApplicationContext(), "Title can't be blank", Toast.LENGTH_SHORT).show();
             return;
         }
 
-        Request request = Routes.chatsCreateRequest(getApplicationContext(),
-                SessionUtils.getPhoneNumber(getApplicationContext()),
-                mUser,
-                title);
-
-        HttpClient.getInstance().newCall(request).enqueue(new Callback() {
-            @Override
-            public void onFailure(Call call, IOException e) {
-                Log.e("ERROR", e.toString());
-            }
-
-            @Override
-            public void onResponse(Call call, Response response) throws IOException {
-                try {
-                    JSONObject jsonChat = new JSONObject(response.body().string());
-                    startActivity(ChatActivity.getIntent(getApplicationContext(), Chat.fromJson(jsonChat)));
-                } catch (JSONException e) {
-                    Log.e("ERROR", e.toString());
-                } finally {
-                    response.body().close();
-                }
-            }
-        });
+        Request request = Routes.chatsCreateRequest(getApplicationContext(), title, new ArrayList<>(Arrays.asList(mUser)), false);
+        Chat.createFromRequest(NewChatActivity.this, request);
     }
 }

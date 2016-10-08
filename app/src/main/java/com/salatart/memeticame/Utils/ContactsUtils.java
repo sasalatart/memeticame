@@ -1,21 +1,85 @@
 package com.salatart.memeticame.Utils;
 
+import android.Manifest;
+import android.app.Activity;
 import android.content.ContentResolver;
 import android.content.Context;
+import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.provider.ContactsContract;
-
-import java.util.ArrayList;
+import android.support.v4.content.ContextCompat;
+import android.util.Log;
 
 import com.salatart.memeticame.Models.User;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+
+import java.io.IOException;
+import java.util.ArrayList;
+
+import okhttp3.Call;
+import okhttp3.Callback;
+import okhttp3.Request;
+import okhttp3.Response;
 
 /**
  * Created by Andres Matte on 8/10/2016.
  */
 public class ContactsUtils {
+    public static final int PERMISSIONS_REQUEST_READ_CONTACTS = 101;
+    public static final String RETRIEVE_CONTACTS_FILTER = "retrieveContactsFilter";
+    public static final String LOCAL_CONTACTS_PARCELABLE_KEY = "localContactsParcelableKey";
+    public static final String INTERSECTED_CONTACTS_PARCELABLE_KEY = "intersectedContactsParcelableKey";
+
+    public static boolean hasContactsPermissions(Context context) {
+        return ContextCompat.checkSelfPermission(context, Manifest.permission.READ_CONTACTS) == PackageManager.PERMISSION_GRANTED;
+    }
+
     public static void getContacts(Context context, ContactsProviderListener listener) {
         new GetContactsTask(context, listener).execute();
+    }
+
+    public static void retrieveContacts(final Activity activity) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && !hasContactsPermissions(activity)) {
+            activity.requestPermissions(new String[]{Manifest.permission.READ_CONTACTS}, PERMISSIONS_REQUEST_READ_CONTACTS);
+        } else {
+            ContactsUtils.getContacts(activity, new ContactsUtils.ContactsProviderListener() {
+                @Override
+                public void OnContactsReady(final ArrayList<User> contacts) {
+                    Request request = Routes.userIndexRequest(activity);
+                    HttpClient.getInstance().newCall(request).enqueue(new Callback() {
+                        @Override
+                        public void onFailure(Call call, IOException e) {
+                            Log.e("ERROR", e.toString());
+                        }
+
+                        @Override
+                        public void onResponse(Call call, final Response response) throws IOException {
+                            try {
+                                if (activity == null) {
+                                    return;
+                                }
+
+                                ArrayList<User> localContacts = contacts;
+                                ArrayList<User> intersectedContacts = User.intersect(contacts, User.fromJsonArray(new JSONArray(response.body().string())));
+                                Intent intent = new Intent(RETRIEVE_CONTACTS_FILTER);
+                                intent.putExtra(LOCAL_CONTACTS_PARCELABLE_KEY, localContacts);
+                                intent.putExtra(INTERSECTED_CONTACTS_PARCELABLE_KEY, intersectedContacts);
+                                activity.sendBroadcast(intent);
+                            } catch (JSONException | IOException e) {
+                                Log.e("ERROR", e.toString());
+                            } finally {
+                                response.body().close();
+                            }
+                        }
+                    });
+                }
+            });
+        }
     }
 
     public interface ContactsProviderListener {
@@ -52,7 +116,9 @@ public class ContactsUtils {
         }
 
         public ArrayList<User> getPhoneContacts(Context context) {
-            if (mResolver == null) { mResolver = context.getContentResolver(); }
+            if (mResolver == null) {
+                mResolver = context.getContentResolver();
+            }
 
             ArrayList<User> contacts = new ArrayList<>();
             Cursor cursor = mResolver.query(ContactsContract.Contacts.CONTENT_URI, null, null, null,

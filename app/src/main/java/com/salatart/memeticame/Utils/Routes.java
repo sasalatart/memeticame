@@ -77,20 +77,14 @@ public class Routes {
                 .build();
     }
 
-    public static Request chatsCreateRequest(Context context, String admin, User participant, String title) {
-        ArrayList<User> participants = new ArrayList<>();
-        participants.add(participant);
-        return Routes.chatsCreateRequest(context, admin, participants, false, title);
-    }
-
-    public static Request chatsCreateRequest(Context context, String admin, ArrayList<User> participants, boolean isGroup, String title) {
+    public static Request chatsCreateRequest(Context context, String title, ArrayList<User> participants, boolean isGroup) {
         ArrayList<String> phoneNumbers = new ArrayList<>();
         for (User u : participants) {
             phoneNumbers.add(u.getPhoneNumber());
         }
 
         FormBody.Builder formBuilder = new FormBody.Builder();
-        formBuilder.add("admin", admin);
+        formBuilder.add("admin", SessionUtils.getPhoneNumber(context));
         formBuilder.add("group", String.valueOf(isGroup));
         formBuilder.add("title", title);
 

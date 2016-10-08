@@ -1,18 +1,14 @@
 package com.salatart.memeticame.Fragments;
 
 
-import android.Manifest;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
-import android.os.Build;
 import android.os.Bundle;
 import android.provider.ContactsContract;
 import android.support.v4.app.Fragment;
-import android.support.v4.content.ContextCompat;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -25,20 +21,12 @@ import android.widget.ListView;
 import com.salatart.memeticame.Models.User;
 import com.salatart.memeticame.R;
 import com.salatart.memeticame.Utils.ContactsUtils;
-import com.salatart.memeticame.Utils.HttpClient;
 import com.salatart.memeticame.Utils.Routes;
 import com.salatart.memeticame.Views.ContactsAdapter;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-
-import java.io.IOException;
 import java.util.ArrayList;
 
-import okhttp3.Call;
-import okhttp3.Callback;
-import okhttp3.Request;
-import okhttp3.Response;
+import static com.salatart.memeticame.Utils.ContactsUtils.PERMISSIONS_REQUEST_READ_CONTACTS;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -48,7 +36,6 @@ public class ContactsFragment extends Fragment {
     public static final String TAG = "contacts_fragment";
     public static final String NEW_USER_FILTER = "newUserFilter";
     public static final int REQUEST_NEW_CONTACT = 1;
-    public static final int PERMISSIONS_REQUEST_READ_CONTACTS = 101;
 
     private ArrayList<User> mLocalContacts = new ArrayList<>();
     private ArrayList<User> mContacts = new ArrayList<>();
@@ -56,6 +43,7 @@ public class ContactsFragment extends Fragment {
     private ListView mContactsListView;
     private OnContactSelected mContactSelectedListener;
     private Routes.OnLogout mOnLogoutListener;
+
     private BroadcastReceiver mUsersReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -66,6 +54,25 @@ public class ContactsFragment extends Fragment {
             }
         }
     };
+
+    private BroadcastReceiver mContactsReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (mLocalContacts.size() != 0 && mContacts.size() != 0) {
+                return;
+            }
+
+            mLocalContacts = intent.getParcelableArrayListExtra(ContactsUtils.LOCAL_CONTACTS_PARCELABLE_KEY);
+            mContacts = intent.getParcelableArrayListExtra(ContactsUtils.INTERSECTED_CONTACTS_PARCELABLE_KEY);
+            mAdapter = new ContactsAdapter(getContext(), R.layout.contact_list_item, mContacts);
+            getActivity().runOnUiThread(new Runnable() {
+                public void run() {
+                    mContactsListView.setAdapter(mAdapter);
+                }
+            });
+        }
+    };
+
 
     public ContactsFragment() {
         // Required empty public constructor
@@ -91,49 +98,8 @@ public class ContactsFragment extends Fragment {
         return view;
     }
 
-    /**
-     * Checks if the app has permission to read phone contacts.
-     * Only for SDK > 23.
-     */
-    private boolean hasContactsPermissions() {
-        return ContextCompat.checkSelfPermission(getContext(), Manifest.permission.READ_CONTACTS) != PackageManager.PERMISSION_GRANTED;
-    }
-
     private void showContacts() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && hasContactsPermissions()) {
-            requestPermissions(new String[]{Manifest.permission.READ_CONTACTS}, PERMISSIONS_REQUEST_READ_CONTACTS);
-        } else {
-            ContactsUtils.getContacts(getContext(), new ContactsUtils.ContactsProviderListener() {
-                @Override
-                public void OnContactsReady(final ArrayList<User> contacts) {
-                    Request request = Routes.userIndexRequest(getContext());
-                    HttpClient.getInstance().newCall(request).enqueue(new Callback() {
-                        @Override
-                        public void onFailure(Call call, IOException e) {
-                            Log.e("ERROR", e.toString());
-                        }
-
-                        @Override
-                        public void onResponse(Call call, final Response response) throws IOException {
-                            try {
-                                mLocalContacts = contacts;
-                                mContacts = User.intersect(contacts, User.fromJsonArray(new JSONArray(response.body().string())));
-                                mAdapter = new ContactsAdapter(getContext(), R.layout.contact_list_item, mContacts);
-                                getActivity().runOnUiThread(new Runnable() {
-                                    public void run() {
-                                        mContactsListView.setAdapter(mAdapter);
-                                    }
-                                });
-                            } catch (JSONException | IOException e) {
-                                Log.e("ERROR", e.toString());
-                            } finally {
-                                response.body().close();
-                            }
-                        }
-                    });
-                }
-            });
-        }
+        ContactsUtils.retrieveContacts(getActivity());
     }
 
     @Override
@@ -185,12 +151,14 @@ public class ContactsFragment extends Fragment {
     public void onResume() {
         super.onResume();
         getActivity().registerReceiver(mUsersReceiver, new IntentFilter(NEW_USER_FILTER));
+        getActivity().registerReceiver(mContactsReceiver, new IntentFilter(ContactsUtils.RETRIEVE_CONTACTS_FILTER));
     }
 
     @Override
     public void onPause() {
         super.onPause();
         getActivity().unregisterReceiver(mUsersReceiver);
+        getActivity().unregisterReceiver(mContactsReceiver);
     }
 
     @Override

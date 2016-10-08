@@ -1,15 +1,26 @@
 package com.salatart.memeticame.Models;
 
+import android.app.Activity;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.util.Log;
+
+import com.salatart.memeticame.Activities.ChatActivity;
+import com.salatart.memeticame.Utils.HttpClient;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+
+import okhttp3.Call;
+import okhttp3.Callback;
+import okhttp3.Request;
+import okhttp3.Response;
 
 /**
  * Created by sasalatart on 8/29/16.
@@ -81,6 +92,28 @@ public class Chat implements Parcelable {
                 Boolean.parseBoolean(mapChat.get("group").toString()),
                 mapChat.get("created_at").toString(),
                 users);
+    }
+
+    public static void createFromRequest(final Activity activity, Request request) {
+        HttpClient.getInstance().newCall(request).enqueue(new Callback() {
+            @Override
+            public void onFailure(Call call, IOException e) {
+                Log.e("ERROR", e.toString());
+            }
+
+            @Override
+            public void onResponse(Call call, Response response) throws IOException {
+                try {
+                    JSONObject jsonChat = new JSONObject(response.body().string());
+                    activity.startActivity(ChatActivity.getIntent(activity, Chat.fromJson(jsonChat)));
+                    activity.finish();
+                } catch (JSONException e) {
+                    Log.e("ERROR", e.toString());
+                } finally {
+                    response.body().close();
+                }
+            }
+        });
     }
 
     public int getId() {

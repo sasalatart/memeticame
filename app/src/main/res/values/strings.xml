@@ -21,4 +21,6 @@
     <string name="create_chat">Create chat</string>
     <string name="cancel">cancel</string>
     <string name="attachment_name">attachment name</string>
+    <string name="create_group">Create group</string>
+    <string name="group_name">Group Name</string>
 </resources>

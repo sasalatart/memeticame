@@ -25,7 +25,7 @@ import okhttp3.Request;
 import okhttp3.Response;
 
 public class MainActivity extends AppCompatActivity implements ChatsFragment.OnChatSelected,
-        ContactsFragment.OnContactSelected, Routes.OnLogout {
+        ChatsFragment.OnCreateGroupClicked, ContactsFragment.OnContactSelected, Routes.OnLogout {
 
     private ChatsFragment mChatsFragments;
     private ContactsFragment mContactsFragments;
@@ -78,6 +78,11 @@ public class MainActivity extends AppCompatActivity implements ChatsFragment.OnC
     @Override
     public void OnChatSelected(Chat chat) {
         startActivity(ChatActivity.getIntent(getApplicationContext(), chat));
+    }
+
+    @Override
+    public void OnCreateGroupClicked() {
+        startActivity(NewChatGroupActivity.getIntent(getApplicationContext()));
     }
 
     @Override

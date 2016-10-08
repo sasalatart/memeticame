@@ -47,6 +47,7 @@ public class ChatsFragment extends Fragment {
     private ListView mChatsListView;
     private OnChatSelected mChatSelectedListener;
     private Routes.OnLogout mOnLogoutListener;
+    private ChatsFragment.OnCreateGroupClicked mOnCreateGroupClickedListener;
     private BroadcastReceiver mChatsReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -81,7 +82,7 @@ public class ChatsFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         final View view = inflater.inflate(R.layout.fragment_chats, container, false);
 
-        mChatsListView = (ListView)view.findViewById(R.id.chatsListView);
+        mChatsListView = (ListView) view.findViewById(R.id.chatsListView);
         mChatsListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
@@ -114,7 +115,8 @@ public class ChatsFragment extends Fragment {
 
         if (id == R.id.action_logout) {
             mOnLogoutListener.OnLogout();
-            return true;
+        } else if (id == R.id.action_create_group_chat) {
+            mOnCreateGroupClickedListener.OnCreateGroupClicked();
         }
 
         return super.onOptionsItemSelected(item);
@@ -139,7 +141,7 @@ public class ChatsFragment extends Fragment {
                             mChatsListView.setAdapter(mAdapter);
                         }
                     });
-                } catch(JSONException e) {
+                } catch (JSONException e) {
                     Log.e("ERROR", e.toString());
                 } finally {
                     response.body().close();
@@ -158,6 +160,7 @@ public class ChatsFragment extends Fragment {
         try {
             mChatSelectedListener = (OnChatSelected) context;
             mOnLogoutListener = (Routes.OnLogout) context;
+            mOnCreateGroupClickedListener = (OnCreateGroupClicked) context;
         } catch (ClassCastException e) {
             throw new ClassCastException(context.toString() + " must implement onChatSelected");
         }
@@ -195,11 +198,16 @@ public class ChatsFragment extends Fragment {
                                 response.body().close();
                             }
                         });
-                    }})
+                    }
+                })
                 .setNegativeButton(android.R.string.no, null).show();
     }
 
     public interface OnChatSelected {
         void OnChatSelected(Chat chat);
+    }
+
+    public interface OnCreateGroupClicked {
+        void OnCreateGroupClicked();
     }
 }
