@@ -37,7 +37,7 @@ public class ChatsAdapter extends ArrayAdapter<Chat> {
             if (chat.isGroup()) {
                 view = mLayoutInflater.inflate(R.layout.chat_group_list_item, parent, false);
             } else {
-                view = mLayoutInflater.inflate(R.layout.chat_individual_list_item, parent, false);
+                view = mLayoutInflater.inflate(R.layout.chat_list_item, parent, false);
             }
         }
 

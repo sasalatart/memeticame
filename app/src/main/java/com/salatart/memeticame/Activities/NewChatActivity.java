@@ -44,11 +44,11 @@ public class NewChatActivity extends AppCompatActivity {
         mUser = data.getParcelable(User.PARCELABLE_KEY);
         final ArrayList<Chat> currentChats = data.getParcelableArrayList(Chat.PARCELABLE_ARRAY_KEY);
 
-        LinearLayout existingChatsLayout = (LinearLayout) findViewById(R.id.existingChats);
-        ListView currentChatsListView = (ListView) findViewById(R.id.existingChatsListView);
+        LinearLayout existingChatsLayout = (LinearLayout) findViewById(R.id.existing_chats);
+        ListView currentChatsListView = (ListView) findViewById(R.id.list_view_existing_chats);
         if (currentChats.size() > 0) {
             existingChatsLayout.setVisibility(View.VISIBLE);
-            ChatsAdapter mAdapter = new ChatsAdapter(getApplicationContext(), R.layout.chat_individual_list_item, currentChats);
+            ChatsAdapter mAdapter = new ChatsAdapter(getApplicationContext(), R.layout.chat_list_item, currentChats);
             currentChatsListView.setAdapter(mAdapter);
             currentChatsListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                 @Override
@@ -58,7 +58,7 @@ public class NewChatActivity extends AppCompatActivity {
             });
         }
 
-        mChatNameInput = (EditText) findViewById(R.id.chatNameInput);
+        mChatNameInput = (EditText) findViewById(R.id.input_chat_name);
         mChatNameInput.setText("Chat with " + mUser.getName(), TextView.BufferType.EDITABLE);
     }
 

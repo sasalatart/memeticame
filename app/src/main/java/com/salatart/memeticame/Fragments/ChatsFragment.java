@@ -82,7 +82,7 @@ public class ChatsFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         final View view = inflater.inflate(R.layout.fragment_chats, container, false);
 
-        mChatsListView = (ListView) view.findViewById(R.id.chatsListView);
+        mChatsListView = (ListView) view.findViewById(R.id.list_view_chats);
         mChatsListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {

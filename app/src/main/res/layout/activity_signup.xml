@@ -19,119 +19,92 @@
         tools:context=".Activities.SignupActivity">
 
         <ProgressBar
-            android:id="@+id/progressBar"
+            android:id="@+id/progress_bar"
             style="?android:attr/progressBarStyleLarge"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerInParent="true"
             android:visibility="gone" />
 
-        <LinearLayout
+        <TextView
+            android:id="@+id/signup_title"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:orientation="vertical">
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
+            android:layout_marginBottom="48dp"
+            android:layout_marginTop="32dp"
+            android:text="@string/signup"
+            android:textAlignment="center"
+            android:textAppearance="?android:attr/textAppearanceLarge"
+            android:textSize="48sp" />
 
-            <TextView
-                android:id="@+id/signupTitle"
+        <android.support.design.widget.TextInputLayout
+            android:id="@+id/layout_input_name"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/signup_title">
+
+            <EditText
+                android:id="@+id/input_name"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:gravity="center"
-                android:text="@string/signup"
-                android:textAppearance="?android:attr/textAppearanceLarge"
-                android:textSize="48sp" />
+                android:hint="@string/name"
+                android:inputType="text"
+                android:text="@={signupForm.name}" />
+        </android.support.design.widget.TextInputLayout>
 
-            <LinearLayout
+        <android.support.design.widget.TextInputLayout
+            android:id="@+id/layout_input_phone_number"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/layout_input_name">
+
+            <EditText
+                android:id="@+id/input_phone_number"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:gravity="bottom">
+                android:hint="@string/phone_number"
+                android:inputType="phone"
+                android:text="@={signupForm.phoneNumber}" />
+        </android.support.design.widget.TextInputLayout>
 
-                <TextView
-                    android:id="@+id/labelName"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/name"
-                    android:textAppearance="?android:attr/textAppearanceLarge" />
+        <android.support.design.widget.TextInputLayout
+            android:id="@+id/layout_input_password"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/layout_input_phone_number">
 
-                <EditText
-                    android:id="@+id/inputName"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:inputType="text"
-                    android:text="@={signupForm.name}" />
-            </LinearLayout>
-
-            <LinearLayout
+            <EditText
+                android:id="@+id/input_password"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:gravity="top">
+                android:hint="@string/password"
+                android:inputType="textPassword"
+                android:text="@={signupForm.password}" />
+        </android.support.design.widget.TextInputLayout>
 
-                <TextView
-                    android:id="@+id/labelPhoneNumber"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/phone_number"
-                    android:textAppearance="?android:attr/textAppearanceLarge" />
+        <android.support.design.widget.TextInputLayout
+            android:id="@+id/layout_input_password_confirmation"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/layout_input_password">
 
-                <EditText
-                    android:id="@+id/inputPhoneNumber"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:inputType="phone"
-                    android:text="@={signupForm.phoneNumber}" />
-            </LinearLayout>
-
-            <LinearLayout
+            <EditText
+                android:id="@+id/input_password_confirmation"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:gravity="bottom">
+                android:hint="@string/password_confirmation"
+                android:inputType="textPassword"
+                android:text="@={signupForm.passwordConfirmation}" />
+        </android.support.design.widget.TextInputLayout>
 
-                <TextView
-                    android:id="@+id/labelPassword"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/password"
-                    android:textAppearance="?android:attr/textAppearanceLarge" />
-
-                <EditText
-                    android:id="@+id/inputPassword"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:inputType="textPassword"
-                    android:text="@={signupForm.password}" />
-            </LinearLayout>
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:gravity="top">
-
-                <TextView
-                    android:id="@+id/labelPasswordConfirmation"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/password_confirmation"
-                    android:textAppearance="?android:attr/textAppearanceLarge" />
-
-                <EditText
-                    android:id="@+id/inputPasswordConfirmation"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:inputType="textPassword"
-                    android:text="@={signupForm.passwordConfirmation}" />
-            </LinearLayout>
-
-            <Button
-                android:id="@+id/buttonSignup"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:onClick="signup"
-                android:text="@string/signup" />
-        </LinearLayout>
+        <Button
+            android:id="@+id/buttonSignup"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:layout_gravity="center"
+            android:onClick="signup"
+            android:text="@string/signup" />
     </RelativeLayout>
 </layout>

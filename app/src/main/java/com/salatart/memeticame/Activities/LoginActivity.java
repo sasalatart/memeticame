@@ -43,7 +43,7 @@ public class LoginActivity extends AppCompatActivity {
             startActivity(new Intent(this, MainActivity.class));
             LoginActivity.this.finish();
         } else {
-            progressBar = (ProgressBar) findViewById(R.id.progressBar);
+            progressBar = (ProgressBar) findViewById(R.id.progress_bar);
 
             ActivityLoginBinding binding = DataBindingUtil.setContentView(this, R.layout.activity_login);
             mLoginForm = new LoginForm("", "");

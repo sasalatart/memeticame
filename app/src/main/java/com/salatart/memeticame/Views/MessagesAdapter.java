@@ -76,11 +76,11 @@ public class MessagesAdapter extends ArrayAdapter<Message> {
     }
 
     public void setTextViews(View view, Message message) {
-        TextView senderLabel = (TextView) view.findViewById(R.id.senderLabel);
+        TextView senderLabel = (TextView) view.findViewById(R.id.label_sender);
         if (message.isMine(getContext())) {
             senderLabel.setText(R.string.me);
 
-            ImageView statusImageView = (ImageView) view.findViewById(R.id.messageStatusCheck);
+            ImageView statusImageView = (ImageView) view.findViewById(R.id.message_status_check);
             if (message.getId() == -1) {
                 statusImageView.setImageResource(R.drawable.ic_access_time_black_24dp);
             } else {
@@ -90,8 +90,8 @@ public class MessagesAdapter extends ArrayAdapter<Message> {
             senderLabel.setText(mParentChat.getParticipantsHash().get(message.getSenderPhone()));
         }
 
-        ((TextView) view.findViewById(R.id.timestampLabel)).setText(message.getCreatedAt());
-        ((TextView) view.findViewById(R.id.messageLabel)).setText(message.getContent());
+        ((TextView) view.findViewById(R.id.label_timestamp)).setText(message.getCreatedAt());
+        ((TextView) view.findViewById(R.id.message)).setText(message.getContent());
     }
 
     public void setAttachment(View view, Message message) {
@@ -112,7 +112,7 @@ public class MessagesAdapter extends ArrayAdapter<Message> {
         boolean isAudio = attachment.isAudio();
         boolean isNotMedia = attachment.isNotMedia();
 
-        ImageView attachmentType = (ImageView) view.findViewById(R.id.attachmentType);
+        ImageView attachmentType = (ImageView) view.findViewById(R.id.label_attachment_type);
         if (isImage) {
             attachmentType.setImageResource(R.drawable.ic_image_black_24dp);
         } else if (isVideo) {
@@ -139,7 +139,7 @@ public class MessagesAdapter extends ArrayAdapter<Message> {
             thumbnail.setImageResource(R.drawable.ic_attach_file_black_24dp);
         }
 
-        TextView attachmentName = (TextView) view.findViewById(R.id.attachmentName);
+        TextView attachmentName = (TextView) view.findViewById(R.id.label_attachment_name);
         if ((!fileExists && !isImage) || isAudio || isNotMedia) {
             attachmentName.setVisibility(View.VISIBLE);
             attachmentName.setText(attachment.getName());

@@ -137,11 +137,11 @@ public class ChatActivity extends AppCompatActivity {
 
         setTitle(mChat.getTitle());
 
-        mMessagesListView = (ListView) findViewById(R.id.messagesListView);
-        mMessageInput = (EditText) findViewById(R.id.messageInput);
+        mMessagesListView = (ListView) findViewById(R.id.list_view_messages);
+        mMessageInput = (EditText) findViewById(R.id.input_message);
         mAttachmentImageView = (ImageView) findViewById(R.id.attachment);
-        mCancelButton = (ImageButton) findViewById(R.id.cancelAttachmentButton);
-        mRecordButton = (ImageButton) findViewById(R.id.takeAudio);
+        mCancelButton = (ImageButton) findViewById(R.id.button_cancel_attachment);
+        mRecordButton = (ImageButton) findViewById(R.id.take_audio);
 
         getMessages();
 

@@ -14,7 +14,7 @@
         android:paddingBottom="@dimen/message_padding">
 
         <TextView
-            android:id="@+id/senderLabel"
+            android:id="@+id/label_sender"
             android:layout_width="wrap_content"
             android:layout_height="24dp"
             android:gravity="center"
@@ -33,7 +33,7 @@
             android:textColor="@color/inMessageColor" />
 
         <TextView
-            android:id="@+id/timestampLabel"
+            android:id="@+id/label_timestamp"
             android:layout_width="wrap_content"
             android:layout_height="24dp"
             android:gravity="center"
@@ -42,7 +42,7 @@
             android:textColor="@color/inMessageColor" />
 
         <ImageView
-            android:id="@+id/attachmentType"
+            android:id="@+id/label_attachment_type"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:src="@drawable/ic_textsms_black_24dp" />
@@ -61,7 +61,7 @@
             android:orientation="horizontal">
 
             <TextView
-                android:id="@+id/attachmentName"
+                android:id="@+id/label_attachment_name"
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
                 android:layout_gravity="end"
@@ -82,7 +82,7 @@
         </LinearLayout>
 
         <TextView
-            android:id="@+id/messageLabel"
+            android:id="@+id/message"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:layout_gravity="end"

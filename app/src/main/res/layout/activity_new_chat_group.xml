@@ -11,39 +11,26 @@
     android:paddingTop="@dimen/activity_vertical_margin"
     tools:context="com.salatart.memeticame.Activities.NewChatGroupActivity">
 
-    <LinearLayout
-        android:id="@+id/group_name"
+    <android.support.design.widget.TextInputLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal">
-
-        <TextView
-            android:id="@+id/group_name_label"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/group_name"
-            android:textAppearance="?android:attr/textAppearanceLarge" />
+        android:layout_height="wrap_content">
 
         <EditText
             android:id="@+id/group_name_input"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
-    </LinearLayout>
+            android:layout_height="wrap_content"
+            android:hint="@string/group_name" />
+    </android.support.design.widget.TextInputLayout>
 
-    <LinearLayout
+    <ListView
+        android:id="@+id/contacts_list_view"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="8">
-
-        <ListView
-            android:id="@+id/contacts_list_view"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent" />
-    </LinearLayout>
+        android:layout_weight="8" />
 
     <Button
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="@string/create_group"
-        android:onClick="createGroup" />
+        android:onClick="createGroup"
+        android:text="@string/create_group" />
 </LinearLayout>

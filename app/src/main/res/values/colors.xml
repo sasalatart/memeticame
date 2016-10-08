@@ -5,8 +5,9 @@
     <color name="textColorPrimary">#FFFFFF</color>
     <color name="windowBackground">#FFFFFF</color>
     <color name="navigationBarColor">#000000</color>
-    <color name="colorAccent">#E0F2F1</color>
+    <color name="colorAccent">#009688</color>
     <color name="transparent">#00000000</color>
     <color name="outMessageColor">#000000</color>
     <color name="inMessageColor">#009688</color>
+    <color name="iconBackground">#E0F2F1</color>
 </resources>

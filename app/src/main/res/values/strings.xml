@@ -7,7 +7,7 @@
     <string name="create_group_chat">Create group</string>
     <string name="signup">Signup</string>
     <string name="name">Name</string>
-    <string name="password_confirmation">Password Conf.</string>
+    <string name="password_confirmation">Password Confirmation</string>
     <string name="chat_name">Chat name</string>
     <string name="send">Send</string>
     <string name="sender_label">sender</string>

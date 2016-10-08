@@ -11,7 +11,7 @@
     tools:context=".Activities.ChatActivity">
 
     <ListView
-        android:id="@+id/messagesListView"
+        android:id="@+id/list_view_messages"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="9"
@@ -24,7 +24,7 @@
         android:orientation="horizontal">
 
         <ImageButton
-            android:id="@+id/takePicture"
+            android:id="@+id/take_picture"
             android:layout_width="42dp"
             android:layout_height="42dp"
             android:layout_margin="4dp"
@@ -32,7 +32,7 @@
             android:src="@drawable/ic_camera_alt_black_24dp" />
 
         <ImageButton
-            android:id="@+id/takeVideo"
+            android:id="@+id/take_video"
             android:layout_width="42dp"
             android:layout_height="42dp"
             android:layout_margin="4dp"
@@ -40,7 +40,7 @@
             android:src="@drawable/ic_videocam_black_24dp" />
 
         <ImageButton
-            android:id="@+id/takeAudio"
+            android:id="@+id/take_audio"
             android:layout_width="42dp"
             android:layout_height="42dp"
             android:layout_margin="4dp"
@@ -48,7 +48,7 @@
             android:src="@drawable/ic_settings_voice_black_24dp" />
 
         <ImageButton
-            android:id="@+id/selectResource"
+            android:id="@+id/select_resource"
             android:layout_width="42dp"
             android:layout_height="42dp"
             android:layout_margin="4dp"
@@ -57,7 +57,7 @@
     </LinearLayout>
 
     <LinearLayout
-        android:id="@+id/newMessageForm"
+        android:id="@+id/new_message_form"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_weight="1"
@@ -73,7 +73,7 @@
             android:visibility="gone" />
 
         <EditText
-            android:id="@+id/messageInput"
+            android:id="@+id/input_message"
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="8"
@@ -87,7 +87,7 @@
             android:src="@drawable/ic_send_black_24dp" />
 
         <ImageButton
-            android:id="@+id/cancelAttachmentButton"
+            android:id="@+id/button_cancel_attachment"
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="3"

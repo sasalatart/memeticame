@@ -10,27 +10,19 @@
     android:paddingTop="@dimen/activity_vertical_margin"
     tools:context=".Activities.NewChatActivity">
 
-    <LinearLayout
-        android:id="@+id/chatName"
+    <android.support.design.widget.TextInputLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal">
-
-        <TextView
-            android:id="@+id/chatNameLabel"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/chat_name"
-            android:textAppearance="?android:attr/textAppearanceLarge" />
+        android:layout_height="wrap_content">
 
         <EditText
-            android:id="@+id/chatNameInput"
+            android:id="@+id/input_chat_name"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
-    </LinearLayout>
+            android:layout_height="wrap_content"
+            android:hint="@string/chat_name" />
+    </android.support.design.widget.TextInputLayout>
 
     <Button
-        android:id="@+id/newChatSubmit"
+        android:id="@+id/submit_new_chat"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
@@ -38,24 +30,24 @@
         android:text="@string/create_chat" />
 
     <LinearLayout
-        android:id="@+id/existingChats"
+        android:id="@+id/existing_chats"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
         android:paddingTop="32dp"
-        android:visibility="gone" >
+        android:visibility="gone">
 
         <TextView
-            android:id="@+id/existingChatsLabel"
+            android:id="@+id/label_existing_chats"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
+            android:paddingBottom="16dp"
             android:text="@string/chats_shared_with_user"
             android:textAlignment="center"
-            android:textAppearance="?android:attr/textAppearanceLarge"
-            android:paddingBottom="16dp" />
+            android:textAppearance="?android:attr/textAppearanceLarge" />
 
         <ListView
-            android:id="@+id/existingChatsListView"
+            android:id="@+id/list_view_existing_chats"
             android:layout_width="fill_parent"
             android:layout_height="fill_parent" />
     </LinearLayout>

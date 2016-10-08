@@ -9,7 +9,7 @@
         android:layout_width="64dp"
         android:layout_height="64dp"
         android:src="@drawable/ic_people_black_24dp"
-        android:background="@color/colorAccent" />
+        android:background="@color/iconBackground" />
 
     <TextView
         android:id="@+id/title"
