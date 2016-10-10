@@ -37,14 +37,17 @@ public class Chat implements Parcelable {
             return new Chat[size];
         }
     };
+
     public static String PARCELABLE_KEY = "com.salatart.memeticame.Models.Chat";
     public static String PARCELABLE_ARRAY_KEY = "com.salatart.memeticame.Models.ChatArrayList";
+
     private final int mId;
     private String mTitle;
     private boolean mIsGroup;
     private String mCreatedAt;
     private String mAdmin;
     private ArrayList<User> mParticipants;
+
     private HashMap<String, String> mParticipantsHash;
 
     public Chat(int mId, String mTitle, boolean mIsGroup, String mCreatedAt, String admin, ArrayList<User> participants) {

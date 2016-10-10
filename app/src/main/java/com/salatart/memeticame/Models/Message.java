@@ -20,7 +20,9 @@ public class Message implements Parcelable {
             return new Message[size];
         }
     };
+
     public static String PARCELABLE_KEY = "com.salatart.memeticame.Models.Message";
+
     private final int mId;
     private final String mSenderPhone;
     private final String mContent;

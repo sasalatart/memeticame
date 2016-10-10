@@ -19,7 +19,9 @@ public class User implements Parcelable {
             return new User[size];
         }
     };
+
     public static String PARCELABLE_KEY = "com.salatart.memeticamea.Models.User";
+
     private final int mId;
     private String mName;
     private String mPhoneNumber;
@@ -84,7 +86,6 @@ public class User implements Parcelable {
         if (allChats == null) {
             return null;
         }
-
 
         ArrayList<Chat> chats = new ArrayList<>();
         for (Chat chat : allChats) {

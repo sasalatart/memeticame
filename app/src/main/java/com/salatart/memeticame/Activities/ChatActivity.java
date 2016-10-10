@@ -182,14 +182,15 @@ public class ChatActivity extends AppCompatActivity {
     public void onResume() {
         super.onResume();
 
-        registerReceiver(mMessageReceiver, new IntentFilter(ChatActivity.NEW_MESSAGE_FILTER));
-        registerReceiver(mOnDownloadReceiver, new IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE));
-        registerReceiver(mUsersKickedReceiver, new IntentFilter(ParticipantsActivity.USER_KICKED_FILTER));
-        sIsActive = true;
-
         if (SessionUtils.getToken(getApplicationContext()).isEmpty()) {
             ChatActivity.this.finish();
         }
+
+        registerReceiver(mMessageReceiver, new IntentFilter(ChatActivity.NEW_MESSAGE_FILTER));
+        registerReceiver(mOnDownloadReceiver, new IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE));
+        registerReceiver(mUsersKickedReceiver, new IntentFilter(ParticipantsActivity.USER_KICKED_FILTER));
+        getMessages();
+        sIsActive = true;
     }
 
     @Override
