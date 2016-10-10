@@ -9,16 +9,15 @@ import android.util.Log;
 import com.salatart.memeticame.Activities.ChatActivity;
 import com.salatart.memeticame.Activities.MainActivity;
 import com.salatart.memeticame.Utils.HttpClient;
+import com.salatart.memeticame.Utils.ParserUtils;
 import com.salatart.memeticame.Utils.SessionUtils;
 
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Map;
 
 import okhttp3.Call;
 import okhttp3.Callback;
@@ -80,7 +79,7 @@ public class Chat implements Parcelable {
             public void onResponse(Call call, Response response) throws IOException {
                 try {
                     JSONObject jsonChat = new JSONObject(response.body().string());
-                    activity.startActivity(ChatActivity.getIntent(activity, Chat.fromJson(jsonChat)));
+                    activity.startActivity(ChatActivity.getIntent(activity, ParserUtils.chatFromJson(jsonChat)));
                     activity.finish();
                 } catch (JSONException e) {
                     Log.e("ERROR", e.toString());
@@ -89,41 +88,6 @@ public class Chat implements Parcelable {
                 }
             }
         });
-    }
-
-    public static Chat fromJson(JSONObject jsonResponse) throws JSONException {
-        ArrayList<User> users = User.fromJsonArray(new JSONArray(jsonResponse.getString("users")));
-        User admin = User.fromJson(new JSONObject(jsonResponse.getString("admin")));
-
-        return new Chat(Integer.parseInt(jsonResponse.getString("id")),
-                jsonResponse.getString("title"),
-                Boolean.parseBoolean(jsonResponse.getString("group")),
-                jsonResponse.getString("created_at"),
-                admin.getPhoneNumber(),
-                users);
-    }
-
-    public static ArrayList<Chat> fromJsonArray(JSONArray jsonResponse) throws JSONException {
-        ArrayList<Chat> chats = new ArrayList<>();
-
-        for (int i = 0; i < jsonResponse.length(); i++) {
-            JSONObject jsonChat = jsonResponse.getJSONObject(i);
-            chats.add(Chat.fromJson(jsonChat));
-        }
-
-        return chats;
-    }
-
-    public static Chat fromMap(Map mapChat) throws JSONException {
-        ArrayList<User> users = User.fromJsonArray(new JSONArray(mapChat.get("users").toString()));
-        User admin = User.fromJson(new JSONObject(mapChat.get("admin").toString()));
-
-        return new Chat(Integer.parseInt(mapChat.get("id").toString()),
-                mapChat.get("title").toString(),
-                Boolean.parseBoolean(mapChat.get("group").toString()),
-                mapChat.get("created_at").toString(),
-                admin.getPhoneNumber(),
-                users);
     }
 
     public boolean onUserRemoved(final Activity activity, int chatId, int userId) {

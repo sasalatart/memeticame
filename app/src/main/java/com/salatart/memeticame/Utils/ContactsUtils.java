@@ -65,7 +65,7 @@ public class ContactsUtils {
                                 }
 
                                 ArrayList<User> localContacts = contacts;
-                                ArrayList<User> intersectedContacts = User.intersect(contacts, User.fromJsonArray(new JSONArray(response.body().string())));
+                                ArrayList<User> intersectedContacts = User.intersect(contacts, ParserUtils.usersFromJsonArray(new JSONArray(response.body().string())));
                                 Intent intent = new Intent(RETRIEVE_CONTACTS_FILTER);
                                 intent.putExtra(LOCAL_CONTACTS_PARCELABLE_KEY, localContacts);
                                 intent.putExtra(INTERSECTED_CONTACTS_PARCELABLE_KEY, intersectedContacts);

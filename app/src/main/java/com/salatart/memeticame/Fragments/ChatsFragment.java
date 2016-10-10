@@ -23,6 +23,7 @@ import com.salatart.memeticame.Activities.ParticipantsActivity;
 import com.salatart.memeticame.Models.Chat;
 import com.salatart.memeticame.R;
 import com.salatart.memeticame.Utils.HttpClient;
+import com.salatart.memeticame.Utils.ParserUtils;
 import com.salatart.memeticame.Utils.Routes;
 import com.salatart.memeticame.Views.ChatsAdapter;
 
@@ -150,7 +151,7 @@ public class ChatsFragment extends Fragment {
             @Override
             public void onResponse(Call call, final Response response) throws IOException {
                 try {
-                    mChats = Chat.fromJsonArray(new JSONArray(response.body().string()));
+                    mChats = ParserUtils.chatsFromJsonArray(new JSONArray(response.body().string()));
                     mAdapter = new ChatsAdapter(getContext(), R.layout.list_item_contact, mChats);
                     getActivity().runOnUiThread(new Runnable() {
                         @Override

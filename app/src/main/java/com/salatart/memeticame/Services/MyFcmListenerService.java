@@ -16,6 +16,7 @@ import com.salatart.memeticame.Models.Chat;
 import com.salatart.memeticame.Models.Message;
 import com.salatart.memeticame.Models.User;
 import com.salatart.memeticame.R;
+import com.salatart.memeticame.Utils.ParserUtils;
 
 import org.json.JSONException;
 
@@ -55,7 +56,7 @@ public class MyFcmListenerService extends FirebaseMessagingService {
 
         Intent intent = new Intent(ChatActivity.NEW_MESSAGE_FILTER);
         try {
-            intent.putExtra(Message.PARCELABLE_KEY, Message.fromMap(data));
+            intent.putExtra(Message.PARCELABLE_KEY, ParserUtils.messageFromMap(data));
             getApplicationContext().sendBroadcast(intent);
         } catch (JSONException e) {
             Log.e("ERROR", e.toString());
@@ -65,7 +66,7 @@ public class MyFcmListenerService extends FirebaseMessagingService {
     public void broadcastNewChat(Map data) {
         Intent intent = new Intent(ChatsFragment.NEW_CHAT_FILTER);
         try {
-            intent.putExtra(Chat.PARCELABLE_KEY, Chat.fromMap(data));
+            intent.putExtra(Chat.PARCELABLE_KEY, ParserUtils.chatFromMap(data));
             getApplicationContext().sendBroadcast(intent);
         } catch (JSONException e) {
             Log.e("ERROR", e.toString());
@@ -74,7 +75,7 @@ public class MyFcmListenerService extends FirebaseMessagingService {
 
     public void broadcastNewUser(Map data) {
         Intent intent = new Intent(ContactsFragment.NEW_USER_FILTER);
-        intent.putExtra(User.PARCELABLE_KEY, User.fromMap(data));
+        intent.putExtra(User.PARCELABLE_KEY, ParserUtils.userFromMap(data));
         getApplicationContext().sendBroadcast(intent);
     }
 

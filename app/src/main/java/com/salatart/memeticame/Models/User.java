@@ -3,13 +3,8 @@ package com.salatart.memeticame.Models;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 /**
  * Created by Andres Matte on 8/10/2016.
@@ -39,24 +34,6 @@ public class User implements Parcelable {
         this.mId = in.readInt();
         this.mName = in.readString();
         this.mPhoneNumber = in.readString();
-    }
-
-    public static User fromMap(Map mapUser) {
-        return new User(Integer.parseInt(mapUser.get("id").toString()), mapUser.get("name").toString(), mapUser.get("phone_number").toString());
-    }
-
-    public static User fromJson(JSONObject jsonUser) throws JSONException {
-        return new User(jsonUser.getInt("id"), jsonUser.getString("name"), jsonUser.getString("phone_number"));
-    }
-
-    public static ArrayList<User> fromJsonArray(JSONArray jsonResponse) throws JSONException {
-        ArrayList<User> users = new ArrayList<>();
-
-        for (int i = 0; i < jsonResponse.length(); i++) {
-            users.add(User.fromJson(jsonResponse.getJSONObject(i)));
-        }
-
-        return users;
     }
 
     public static ArrayList<User> intersect(ArrayList<User> localUsers, ArrayList<User> externalUsers) {

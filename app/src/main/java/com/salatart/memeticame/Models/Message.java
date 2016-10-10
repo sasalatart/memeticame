@@ -4,16 +4,8 @@ import android.content.Context;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-import com.salatart.memeticame.Utils.Routes;
 import com.salatart.memeticame.Utils.SessionUtils;
 import com.salatart.memeticame.Utils.TimeUtils;
-
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import java.util.ArrayList;
-import java.util.Map;
 
 /**
  * Created by sasalatart on 9/4/16.
@@ -51,51 +43,6 @@ public class Message implements Parcelable {
         this.mChatId = in.readInt();
         this.mCreatedAt = in.readString();
         this.mAttachment = in.readParcelable(Attachment.class.getClassLoader());
-    }
-
-    public static Message fromJson(JSONObject jsonMessage) throws JSONException {
-        Message message = new Message(jsonMessage.getInt("id"),
-                jsonMessage.getString("sender_phone"),
-                jsonMessage.getString("content"),
-                jsonMessage.getInt("chat_id"),
-                jsonMessage.getString("created_at"));
-
-        JSONObject jsonAttachment = jsonMessage.getJSONObject("attachment_link");
-        if (!jsonAttachment.getString("name").equals("null")) {
-            message.setAttachment(new Attachment(jsonAttachment.getString("name"),
-                    jsonAttachment.getString("mime_type"),
-                    null,
-                    Routes.DOMAIN + jsonAttachment.getString("url")));
-        }
-
-        return message;
-    }
-
-    public static ArrayList<Message> fromJsonArray(JSONArray jsonResponse) throws JSONException {
-        ArrayList<Message> messages = new ArrayList<>();
-        for (int i = 0; i < jsonResponse.length(); i++) {
-            messages.add(Message.fromJson(jsonResponse.getJSONObject(i)));
-        }
-
-        return messages;
-    }
-
-    public static Message fromMap(Map mapMessage) throws JSONException {
-        Message message = new Message(Integer.parseInt(mapMessage.get("id").toString()),
-                mapMessage.get("sender_phone").toString(),
-                mapMessage.get("content").toString(),
-                Integer.parseInt(mapMessage.get("chat_id").toString()),
-                mapMessage.get("created_at").toString());
-
-        JSONObject jsonAttachment = new JSONObject(mapMessage.get("attachment_link").toString());
-        if (!jsonAttachment.getString("name").equals("null")) {
-            message.setAttachment(new Attachment(jsonAttachment.getString("name"),
-                    jsonAttachment.getString("mime_type"),
-                    null,
-                    Routes.DOMAIN + jsonAttachment.getString("url")));
-        }
-
-        return message;
     }
 
     public static Message createFake(Context context, String content, int chatId) {

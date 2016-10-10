@@ -38,6 +38,7 @@ import com.salatart.memeticame.R;
 import com.salatart.memeticame.Utils.AudioManager;
 import com.salatart.memeticame.Utils.FileUtils;
 import com.salatart.memeticame.Utils.HttpClient;
+import com.salatart.memeticame.Utils.ParserUtils;
 import com.salatart.memeticame.Utils.Routes;
 import com.salatart.memeticame.Utils.SessionUtils;
 import com.salatart.memeticame.Views.MessagesAdapter;
@@ -240,7 +241,7 @@ public class ChatActivity extends AppCompatActivity {
             @Override
             public void onResponse(Call call, final Response response) throws IOException {
                 try {
-                    mMessages = Message.fromJsonArray(new JSONArray(response.body().string()));
+                    mMessages = ParserUtils.messagesFromJsonArray(new JSONArray(response.body().string()));
                     mAdapter = new MessagesAdapter(getApplicationContext(), R.layout.list_item_message_in_text, mMessages, mChat);
                     runOnUiThread(new Runnable() {
                         @Override
@@ -284,7 +285,7 @@ public class ChatActivity extends AppCompatActivity {
                 if (response.isSuccessful()) {
                     try {
                         mMessages.remove(message);
-                        mMessages.add(Message.fromJson(new JSONObject(response.body().string())));
+                        mMessages.add(ParserUtils.messageFromJson(new JSONObject(response.body().string())));
                         ChatActivity.this.runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
@@ -392,6 +393,15 @@ public class ChatActivity extends AppCompatActivity {
         mCurrentlyRecording = !mCurrentlyRecording;
     }
 
+    private void setCurrentAttachmentFromUri(Uri uri) {
+        mCurrentAttachment = ParserUtils.attachmentFromUri(ChatActivity.this, uri);
+
+        if (mCurrentAttachment == null) {
+            return;
+        }
+        toggleAttachmentVisibilities();
+    }
+
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
@@ -402,22 +412,6 @@ public class ChatActivity extends AppCompatActivity {
             setCurrentAttachmentFromUri(mCurrentImageUri);
         } else if (requestCode == REQUEST_VIDEO_CAPTURE && resultCode == RESULT_OK) {
             setCurrentAttachmentFromUri(mCurrentVideoUri);
-        }
-    }
-
-    private void setCurrentAttachmentFromUri(Uri uri) {
-        if (uri == null) {
-            return;
-        }
-
-        try {
-            mCurrentAttachment = new Attachment(FileUtils.getName(getApplicationContext(), uri),
-                    FileUtils.getMimeType(getApplicationContext(), uri),
-                    FileUtils.encodeToBase64FromUri(getApplicationContext(), uri),
-                    uri.toString());
-            toggleAttachmentVisibilities();
-        } catch (IOException e) {
-            Log.e("ERROR", e.toString());
         }
     }
 
