@@ -48,7 +48,7 @@ public class NewChatActivity extends AppCompatActivity {
         ListView currentChatsListView = (ListView) findViewById(R.id.list_view_existing_chats);
         if (currentChats.size() > 0) {
             existingChatsLayout.setVisibility(View.VISIBLE);
-            ChatsAdapter mAdapter = new ChatsAdapter(getApplicationContext(), R.layout.chat_list_item, currentChats);
+            ChatsAdapter mAdapter = new ChatsAdapter(getApplicationContext(), R.layout.list_item_chat, currentChats);
             currentChatsListView.setAdapter(mAdapter);
             currentChatsListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                 @Override

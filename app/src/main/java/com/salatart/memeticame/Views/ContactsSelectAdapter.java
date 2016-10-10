@@ -34,7 +34,7 @@ public class ContactsSelectAdapter extends ArrayAdapter<User> {
         View view = convertView;
 
         if (view == null) {
-            view = mLayoutInflater.inflate(R.layout.contact_list_item_checkable, parent, false);
+            view = mLayoutInflater.inflate(R.layout.list_item_contact_checkable, parent, false);
         }
 
         User user = mContacts.get(position);

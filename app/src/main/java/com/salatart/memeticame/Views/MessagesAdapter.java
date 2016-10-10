@@ -39,13 +39,13 @@ public class MessagesAdapter extends ArrayAdapter<Message> {
 
         if (view == null) {
             if (message.isMine(getContext()) && message.getAttachment() == null) {
-                view = mLayoutInflater.inflate(R.layout.message_out_text_list_item, parent, false);
+                view = mLayoutInflater.inflate(R.layout.list_item_message_out_text, parent, false);
             } else if (message.isMine(getContext())) {
-                view = mLayoutInflater.inflate(R.layout.message_out_attachment_list_item, parent, false);
+                view = mLayoutInflater.inflate(R.layout.list_item_message_out_attachment, parent, false);
             } else if (!message.isMine(getContext()) && message.getAttachment() == null) {
-                view = mLayoutInflater.inflate(R.layout.message_in_text_list_item, parent, false);
+                view = mLayoutInflater.inflate(R.layout.list_item_message_in_text, parent, false);
             } else if (!message.isMine(getContext())) {
-                view = mLayoutInflater.inflate(R.layout.message_in_attachment_list_item, parent, false);
+                view = mLayoutInflater.inflate(R.layout.list_item_message_in_attachment, parent, false);
             }
         }
 

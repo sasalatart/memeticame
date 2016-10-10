@@ -241,7 +241,7 @@ public class ChatActivity extends AppCompatActivity {
             public void onResponse(Call call, final Response response) throws IOException {
                 try {
                     mMessages = Message.fromJsonArray(new JSONArray(response.body().string()));
-                    mAdapter = new MessagesAdapter(getApplicationContext(), R.layout.message_in_text_list_item, mMessages, mChat);
+                    mAdapter = new MessagesAdapter(getApplicationContext(), R.layout.list_item_message_in_text, mMessages, mChat);
                     runOnUiThread(new Runnable() {
                         @Override
                         public void run() {

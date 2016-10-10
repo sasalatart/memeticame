@@ -64,7 +64,7 @@ public class ContactsFragment extends Fragment {
 
             mLocalContacts = intent.getParcelableArrayListExtra(ContactsUtils.LOCAL_CONTACTS_PARCELABLE_KEY);
             mContacts = intent.getParcelableArrayListExtra(ContactsUtils.INTERSECTED_CONTACTS_PARCELABLE_KEY);
-            mAdapter = new ContactsAdapter(getContext(), R.layout.contact_list_item, mContacts);
+            mAdapter = new ContactsAdapter(getContext(), R.layout.list_item_contact, mContacts);
             getActivity().runOnUiThread(new Runnable() {
                 public void run() {
                     mContactsListView.setAdapter(mAdapter);

@@ -151,7 +151,7 @@ public class ChatsFragment extends Fragment {
             public void onResponse(Call call, final Response response) throws IOException {
                 try {
                     mChats = Chat.fromJsonArray(new JSONArray(response.body().string()));
-                    mAdapter = new ChatsAdapter(getContext(), R.layout.contact_list_item, mChats);
+                    mAdapter = new ChatsAdapter(getContext(), R.layout.list_item_contact, mChats);
                     getActivity().runOnUiThread(new Runnable() {
                         @Override
                         public void run() {

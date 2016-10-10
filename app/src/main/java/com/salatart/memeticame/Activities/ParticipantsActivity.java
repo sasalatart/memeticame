@@ -43,7 +43,7 @@ public class ParticipantsActivity extends AppCompatActivity {
         mChat = data.getParcelable(Chat.PARCELABLE_KEY);
 
         ListView mContactsListView = (ListView) findViewById(R.id.list_view_participants);
-        mAdapter = new ParticipantsAdapter(ParticipantsActivity.this, R.layout.participant_list_item, mChat);
+        mAdapter = new ParticipantsAdapter(ParticipantsActivity.this, R.layout.list_item_participant, mChat);
         mContactsListView.setAdapter(mAdapter);
     }
 
