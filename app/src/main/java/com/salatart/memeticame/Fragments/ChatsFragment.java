@@ -43,13 +43,16 @@ import okhttp3.Response;
  */
 public class ChatsFragment extends Fragment {
     public static final String NEW_CHAT_FILTER = "newChatFilter";
+    public static final String CHATS_STATE = "chatsState";
 
     private ArrayList<Chat> mChats;
     private ChatsAdapter mAdapter;
     private ListView mChatsListView;
+
     private OnChatSelected mChatSelectedListener;
     private Routes.OnLogout mOnLogoutListener;
     private ChatsFragment.OnCreateGroupClicked mOnCreateGroupClickedListener;
+
     private BroadcastReceiver mChatsReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -58,6 +61,7 @@ public class ChatsFragment extends Fragment {
             mAdapter.notifyDataSetChanged();
         }
     };
+
     private BroadcastReceiver mUsersKickedReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -77,23 +81,17 @@ public class ChatsFragment extends Fragment {
         // Required empty public constructor
     }
 
+    public void onActivityCreated(Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+
+        if (savedInstanceState != null) {
+            mChats = savedInstanceState.getParcelableArrayList(CHATS_STATE);
+        }
+    }
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-    }
-
-    @Override
-    public void onResume() {
-        super.onResume();
-        getActivity().registerReceiver(mChatsReceiver, new IntentFilter(NEW_CHAT_FILTER));
-        getActivity().registerReceiver(mUsersKickedReceiver, new IntentFilter(ParticipantsActivity.USER_KICKED_FILTER));
-    }
-
-    @Override
-    public void onPause() {
-        super.onPause();
-        getActivity().unregisterReceiver(mChatsReceiver);
-        getActivity().unregisterReceiver(mUsersKickedReceiver);
     }
 
     @Override
@@ -115,7 +113,16 @@ public class ChatsFragment extends Fragment {
             }
         });
 
-        showChats();
+        if (savedInstanceState != null) {
+            mChats = savedInstanceState.getParcelableArrayList(CHATS_STATE);
+        }
+
+        if (mChats != null && mChats.size() != 0) {
+            mAdapter = new ChatsAdapter(getContext(), R.layout.list_item_contact, mChats);
+            mChatsListView.setAdapter(mAdapter);
+        } else {
+            showChats();
+        }
 
         setHasOptionsMenu(true);
 
@@ -138,6 +145,38 @@ public class ChatsFragment extends Fragment {
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void onAttach(Context context) {
+        super.onAttach(context);
+        try {
+            mChatSelectedListener = (OnChatSelected) context;
+            mOnLogoutListener = (Routes.OnLogout) context;
+            mOnCreateGroupClickedListener = (OnCreateGroupClicked) context;
+        } catch (ClassCastException e) {
+            throw new ClassCastException(context.toString() + " must implement onChatSelected");
+        }
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        getActivity().registerReceiver(mChatsReceiver, new IntentFilter(NEW_CHAT_FILTER));
+        getActivity().registerReceiver(mUsersKickedReceiver, new IntentFilter(ParticipantsActivity.USER_KICKED_FILTER));
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        getActivity().unregisterReceiver(mChatsReceiver);
+        getActivity().unregisterReceiver(mUsersKickedReceiver);
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle savedInstanceState) {
+        super.onSaveInstanceState(savedInstanceState);
+        savedInstanceState.putParcelableArrayList(CHATS_STATE, mChats);
     }
 
     public void showChats() {
@@ -170,19 +209,6 @@ public class ChatsFragment extends Fragment {
 
     public ArrayList<Chat> getChats() {
         return mChats;
-    }
-
-    @Override
-    public void onAttach(Context context) {
-        super.onAttach(context);
-        try {
-            mChatSelectedListener = (OnChatSelected) context;
-            mOnLogoutListener = (Routes.OnLogout) context;
-            mOnCreateGroupClickedListener = (OnCreateGroupClicked) context;
-        } catch (ClassCastException e) {
-            throw new ClassCastException(context.toString() + " must implement onChatSelected");
-        }
-
     }
 
     public void onChatLongClick(final Chat chat) {

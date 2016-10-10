@@ -33,14 +33,15 @@ import static com.salatart.memeticame.Utils.ContactsUtils.PERMISSIONS_REQUEST_RE
  */
 public class ContactsFragment extends Fragment {
 
-    public static final String TAG = "contacts_fragment";
     public static final String NEW_USER_FILTER = "newUserFilter";
+    public static final String CONTACTS_STATE = "contactsFragmentState";
     public static final int REQUEST_NEW_CONTACT = 1;
 
     private ArrayList<User> mLocalContacts = new ArrayList<>();
     private ArrayList<User> mContacts = new ArrayList<>();
     private ContactsAdapter mAdapter;
     private ListView mContactsListView;
+
     private OnContactSelected mContactSelectedListener;
     private Routes.OnLogout mOnLogoutListener;
 
@@ -78,6 +79,14 @@ public class ContactsFragment extends Fragment {
         // Required empty public constructor
     }
 
+    public void onActivityCreated(Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+
+        if (savedInstanceState != null) {
+            mContacts = savedInstanceState.getParcelableArrayList(CONTACTS_STATE);
+        }
+    }
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 
@@ -91,30 +100,20 @@ public class ContactsFragment extends Fragment {
             }
         });
 
-        showContacts();
+        if (savedInstanceState != null) {
+            mContacts = savedInstanceState.getParcelableArrayList(CONTACTS_STATE);
+        }
+
+        if (mContacts != null && mContacts.size() != 0) {
+            mAdapter = new ContactsAdapter(getContext(), R.layout.list_item_contact, mContacts);
+            mContactsListView.setAdapter(mAdapter);
+        } else {
+            ContactsUtils.retrieveContacts(getActivity());
+        }
 
         setHasOptionsMenu(true);
 
         return view;
-    }
-
-    private void showContacts() {
-        ContactsUtils.retrieveContacts(getActivity());
-    }
-
-    @Override
-    public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
-        switch (requestCode) {
-            case PERMISSIONS_REQUEST_READ_CONTACTS: {
-                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    showContacts();
-                } else {
-                    // Disable the functionality that depends on this permission.
-                }
-
-                return;
-            }
-        }
     }
 
     @Override
@@ -162,11 +161,32 @@ public class ContactsFragment extends Fragment {
     }
 
     @Override
+    public void onSaveInstanceState(Bundle savedInstanceState) {
+        super.onSaveInstanceState(savedInstanceState);
+        savedInstanceState.putParcelableArrayList(CONTACTS_STATE, mContacts);
+    }
+
+    @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
         if (requestCode == REQUEST_NEW_CONTACT) {
-            showContacts();
+            ContactsUtils.retrieveContacts(getActivity());
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
+        switch (requestCode) {
+            case PERMISSIONS_REQUEST_READ_CONTACTS: {
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    ContactsUtils.retrieveContacts(getActivity());
+                } else {
+                    // Disable the functionality that depends on this permission.
+                }
+
+                return;
+            }
         }
     }
 

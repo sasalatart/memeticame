@@ -38,13 +38,19 @@ public class MainActivity extends AppCompatActivity implements ChatsFragment.OnC
         if (SessionUtils.getToken(getApplicationContext()).isEmpty()) {
             startActivity(new Intent(this, LoginActivity.class));
             MainActivity.this.finish();
+        } else if (savedInstanceState != null) {
+            this.mChatsFragments = (ChatsFragment) getSupportFragmentManager().getFragment(savedInstanceState, "chatsFragment");
+            this.mContactsFragments = (ContactsFragment) getSupportFragmentManager().getFragment(savedInstanceState, "contactsFragment");
         } else {
-            ViewPager viewPager = (ViewPager) findViewById(R.id.viewpager);
-            setupViewPager(viewPager);
-
-            TabLayout tabLayout = (TabLayout) findViewById(R.id.tabs);
-            tabLayout.setupWithViewPager(viewPager);
+            this.mChatsFragments = new ChatsFragment();
+            this.mContactsFragments = new ContactsFragment();
         }
+
+        ViewPager viewPager = (ViewPager) findViewById(R.id.viewpager);
+        setupViewPager(viewPager);
+
+        TabLayout tabLayout = (TabLayout) findViewById(R.id.tabs);
+        tabLayout.setupWithViewPager(viewPager);
     }
 
     @Override
@@ -59,12 +65,17 @@ public class MainActivity extends AppCompatActivity implements ChatsFragment.OnC
     private void setupViewPager(ViewPager viewPager) {
         ViewPagerAdapter adapter = new ViewPagerAdapter(getSupportFragmentManager());
 
-        this.mChatsFragments = new ChatsFragment();
-        this.mContactsFragments = new ContactsFragment();
         adapter.addFragment(this.mChatsFragments, "Chats");
         adapter.addFragment(this.mContactsFragments, "Contacts");
 
         viewPager.setAdapter(adapter);
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        getSupportFragmentManager().putFragment(outState, "contactsFragment", mContactsFragments);
+        getSupportFragmentManager().putFragment(outState, "chatsFragment", mChatsFragments);
     }
 
     @Override
