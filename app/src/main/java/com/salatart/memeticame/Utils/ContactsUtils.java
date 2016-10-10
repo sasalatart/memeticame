@@ -152,7 +152,7 @@ public class ContactsUtils {
                             ContactsContract.CommonDataKinds.Phone.NUMBER));
                     String name = c.getString(c.getColumnIndex(
                             ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME));
-                    contact = new User(name, phoneNumber);
+                    contact = new User(-1, name, phoneNumber);
                     c.close();
                 }
             }

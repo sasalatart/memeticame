@@ -1,12 +1,15 @@
 package com.salatart.memeticame.Models;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.Log;
 
 import com.salatart.memeticame.Activities.ChatActivity;
+import com.salatart.memeticame.Activities.MainActivity;
 import com.salatart.memeticame.Utils.HttpClient;
+import com.salatart.memeticame.Utils.SessionUtils;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -41,14 +44,16 @@ public class Chat implements Parcelable {
     private String mTitle;
     private boolean mIsGroup;
     private String mCreatedAt;
+    private String mAdmin;
     private ArrayList<User> mParticipants;
     private HashMap<String, String> mParticipantsHash;
 
-    public Chat(int mId, String mTitle, boolean mIsGroup, String mCreatedAt, ArrayList<User> participants) {
+    public Chat(int mId, String mTitle, boolean mIsGroup, String mCreatedAt, String admin, ArrayList<User> participants) {
         this.mId = mId;
         this.mTitle = mTitle;
         this.mIsGroup = mIsGroup;
         this.mCreatedAt = mCreatedAt;
+        this.mAdmin = admin;
         this.mParticipants = participants;
         setParticipantsHash();
     }
@@ -58,40 +63,10 @@ public class Chat implements Parcelable {
         this.mTitle = in.readString();
         this.mIsGroup = in.readByte() != 0;
         this.mCreatedAt = in.readString();
+        this.mAdmin = in.readString();
         this.mParticipants = new ArrayList<>();
         in.readTypedList(this.mParticipants, User.CREATOR);
         setParticipantsHash();
-    }
-
-    public static Chat fromJson(JSONObject jsonResponse) throws JSONException {
-        ArrayList<User> users = User.fromJsonArray(new JSONArray(jsonResponse.getString("users")));
-
-        return new Chat(Integer.parseInt(jsonResponse.getString("id")),
-                jsonResponse.getString("title"),
-                Boolean.parseBoolean(jsonResponse.getString("group")),
-                jsonResponse.getString("created_at"),
-                users);
-    }
-
-    public static ArrayList<Chat> fromJsonArray(JSONArray jsonResponse) throws JSONException {
-        ArrayList<Chat> chats = new ArrayList<>();
-
-        for (int i = 0; i < jsonResponse.length(); i++) {
-            JSONObject jsonChat = jsonResponse.getJSONObject(i);
-            chats.add(Chat.fromJson(jsonChat));
-        }
-
-        return chats;
-    }
-
-    public static Chat fromMap(Map mapChat) throws JSONException {
-        ArrayList<User> users = User.fromJsonArray(new JSONArray(mapChat.get("users").toString()));
-
-        return new Chat(Integer.parseInt(mapChat.get("id").toString()),
-                mapChat.get("title").toString(),
-                Boolean.parseBoolean(mapChat.get("group").toString()),
-                mapChat.get("created_at").toString(),
-                users);
     }
 
     public static void createFromRequest(final Activity activity, Request request) {
@@ -116,6 +91,80 @@ public class Chat implements Parcelable {
         });
     }
 
+    public static Chat fromJson(JSONObject jsonResponse) throws JSONException {
+        ArrayList<User> users = User.fromJsonArray(new JSONArray(jsonResponse.getString("users")));
+        User admin = User.fromJson(new JSONObject(jsonResponse.getString("admin")));
+
+        return new Chat(Integer.parseInt(jsonResponse.getString("id")),
+                jsonResponse.getString("title"),
+                Boolean.parseBoolean(jsonResponse.getString("group")),
+                jsonResponse.getString("created_at"),
+                admin.getPhoneNumber(),
+                users);
+    }
+
+    public static ArrayList<Chat> fromJsonArray(JSONArray jsonResponse) throws JSONException {
+        ArrayList<Chat> chats = new ArrayList<>();
+
+        for (int i = 0; i < jsonResponse.length(); i++) {
+            JSONObject jsonChat = jsonResponse.getJSONObject(i);
+            chats.add(Chat.fromJson(jsonChat));
+        }
+
+        return chats;
+    }
+
+    public static Chat fromMap(Map mapChat) throws JSONException {
+        ArrayList<User> users = User.fromJsonArray(new JSONArray(mapChat.get("users").toString()));
+        User admin = User.fromJson(new JSONObject(mapChat.get("admin").toString()));
+
+        return new Chat(Integer.parseInt(mapChat.get("id").toString()),
+                mapChat.get("title").toString(),
+                Boolean.parseBoolean(mapChat.get("group").toString()),
+                mapChat.get("created_at").toString(),
+                admin.getPhoneNumber(),
+                users);
+    }
+
+    public boolean onUserRemoved(final Activity activity, int chatId, int userId) {
+        if (mId != chatId) {
+            return false;
+        }
+
+        User userToRemove = findParticipantById(userId);
+
+        // Another activity already removed this user.
+        if (userToRemove == null) {
+            return true;
+        }
+
+        mParticipants.remove(userToRemove);
+        if (User.comparePhones(userToRemove.getPhoneNumber(), SessionUtils.getPhoneNumber(activity))) {
+            activity.startActivity(new Intent(activity, MainActivity.class));
+            activity.finish();
+        }
+
+        return true;
+    }
+
+    public boolean userPresent(String phoneNumber) {
+        for (User user : mParticipants) {
+            if (User.comparePhones(user.getPhoneNumber(), phoneNumber)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private User findParticipantById(int userId) {
+        for (User user : mParticipants) {
+            if (user.getId() == userId) {
+                return user;
+            }
+        }
+        return null;
+    }
+
     public int getId() {
         return mId;
     }
@@ -132,8 +181,8 @@ public class Chat implements Parcelable {
         return mIsGroup;
     }
 
-    public String getCreatedAt() {
-        return mCreatedAt;
+    public String getAdmin() {
+        return mAdmin;
     }
 
     public HashMap<String, String> getParticipantsHash() {
@@ -162,6 +211,7 @@ public class Chat implements Parcelable {
         dest.writeString(mTitle);
         dest.writeByte((byte) (mIsGroup ? 1 : 0));
         dest.writeString(mCreatedAt);
+        dest.writeString(mAdmin);
         dest.writeTypedList(mParticipants);
     }
 }

@@ -15,11 +15,13 @@ import java.util.ArrayList;
 public class ContactsAdapter extends ArrayAdapter<User> {
     private ArrayList<User> mContacts;
     private LayoutInflater mLayoutInflater;
+    private int mResource;
 
     public ContactsAdapter(Context context, int resource, ArrayList<User> contacts) {
         super(context, resource, contacts);
         mContacts = contacts;
         mLayoutInflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        mResource = resource;
     }
 
     @Override
@@ -27,7 +29,7 @@ public class ContactsAdapter extends ArrayAdapter<User> {
         View view = convertView;
 
         if (view == null) {
-            view = mLayoutInflater.inflate(R.layout.contact_list_item, parent, false);
+            view = mLayoutInflater.inflate(mResource, parent, false);
         }
 
         User user = mContacts.get(position);

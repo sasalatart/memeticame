@@ -9,6 +9,7 @@ import android.util.Log;
 import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
 import com.salatart.memeticame.Activities.ChatActivity;
+import com.salatart.memeticame.Activities.ParticipantsActivity;
 import com.salatart.memeticame.Fragments.ChatsFragment;
 import com.salatart.memeticame.Fragments.ContactsFragment;
 import com.salatart.memeticame.Models.Chat;
@@ -37,6 +38,8 @@ public class MyFcmListenerService extends FirebaseMessagingService {
             broadcastNewChat(data);
         } else if (collapseKey.equals("user_created")) {
             broadcastNewUser(data);
+        } else if (collapseKey.equals("user_kicked")) {
+            broadcastUserKicked(data);
         }
     }
 
@@ -72,6 +75,13 @@ public class MyFcmListenerService extends FirebaseMessagingService {
     public void broadcastNewUser(Map data) {
         Intent intent = new Intent(ContactsFragment.NEW_USER_FILTER);
         intent.putExtra(User.PARCELABLE_KEY, User.fromMap(data));
+        getApplicationContext().sendBroadcast(intent);
+    }
+
+    public void broadcastUserKicked(Map data) {
+        Intent intent = new Intent(ParticipantsActivity.USER_KICKED_FILTER);
+        intent.putExtra("user_id", Integer.parseInt(data.get("user_id").toString()));
+        intent.putExtra("chat_id", Integer.parseInt(data.get("chat_id").toString()));
         getApplicationContext().sendBroadcast(intent);
     }
 }

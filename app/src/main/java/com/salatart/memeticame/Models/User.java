@@ -25,29 +25,35 @@ public class User implements Parcelable {
         }
     };
     public static String PARCELABLE_KEY = "com.salatart.memeticamea.Models.User";
+    private final int mId;
     private String mName;
     private String mPhoneNumber;
 
-    public User(String name, String phoneNumber) {
+    public User(int id, String name, String phoneNumber) {
+        this.mId = id;
         this.mName = name;
         this.mPhoneNumber = phoneNumber;
     }
 
     public User(Parcel in) {
+        this.mId = in.readInt();
         this.mName = in.readString();
         this.mPhoneNumber = in.readString();
     }
 
     public static User fromMap(Map mapUser) {
-        return new User(mapUser.get("name").toString(), mapUser.get("phone_number").toString());
+        return new User(Integer.parseInt(mapUser.get("id").toString()), mapUser.get("name").toString(), mapUser.get("phone_number").toString());
+    }
+
+    public static User fromJson(JSONObject jsonUser) throws JSONException {
+        return new User(jsonUser.getInt("id"), jsonUser.getString("name"), jsonUser.getString("phone_number"));
     }
 
     public static ArrayList<User> fromJsonArray(JSONArray jsonResponse) throws JSONException {
         ArrayList<User> users = new ArrayList<>();
 
         for (int i = 0; i < jsonResponse.length(); i++) {
-            JSONObject jsonUser = jsonResponse.getJSONObject(i);
-            users.add(new User(jsonUser.getString("name"), jsonUser.getString("phone_number")));
+            users.add(User.fromJson(jsonResponse.getJSONObject(i)));
         }
 
         return users;
@@ -79,6 +85,10 @@ public class User implements Parcelable {
 
     public static boolean comparePhones(String phone1, String phone2) {
         return phone1.replaceAll("[^\\d.]", "").equals(phone2.replaceAll("[^\\d.]", ""));
+    }
+
+    public int getId() {
+        return mId;
     }
 
     public String getName() {
@@ -118,6 +128,7 @@ public class User implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
+        dest.writeInt(mId);
         dest.writeString(mName);
         dest.writeString(mPhoneNumber);
     }

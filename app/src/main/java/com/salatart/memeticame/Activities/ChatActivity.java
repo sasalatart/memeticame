@@ -19,6 +19,8 @@ import android.support.v4.content.FileProvider;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
@@ -109,6 +111,17 @@ public class ChatActivity extends AppCompatActivity {
         }
     };
 
+    private BroadcastReceiver mUsersKickedReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            int chatId = intent.getIntExtra("chat_id", 0);
+            int userId = intent.getIntExtra("user_id", 0);
+            if (mChat.onUserRemoved(ChatActivity.this, chatId, userId)) {
+                mAdapter.notifyDataSetChanged();
+            }
+        }
+    };
+
     public static Intent getIntent(Context context, Chat chat) {
         Intent intent = new Intent(context, ChatActivity.class);
         intent.putExtra(Chat.PARCELABLE_KEY, chat);
@@ -134,6 +147,11 @@ public class ChatActivity extends AppCompatActivity {
 
         Bundle data = getIntent().getExtras();
         mChat = data.getParcelable(Chat.PARCELABLE_KEY);
+
+        if (!mChat.userPresent(SessionUtils.getPhoneNumber(ChatActivity.this))) {
+            startActivity(new Intent(ChatActivity.this, MainActivity.class));
+            finish();
+        }
 
         setTitle(mChat.getTitle());
 
@@ -165,6 +183,7 @@ public class ChatActivity extends AppCompatActivity {
 
         registerReceiver(mMessageReceiver, new IntentFilter(ChatActivity.NEW_MESSAGE_FILTER));
         registerReceiver(mOnDownloadReceiver, new IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE));
+        registerReceiver(mUsersKickedReceiver, new IntentFilter(ParticipantsActivity.USER_KICKED_FILTER));
         sIsActive = true;
 
         if (SessionUtils.getToken(getApplicationContext()).isEmpty()) {
@@ -177,6 +196,7 @@ public class ChatActivity extends AppCompatActivity {
         super.onPause();
         unregisterReceiver(mMessageReceiver);
         unregisterReceiver(mOnDownloadReceiver);
+        unregisterReceiver(mUsersKickedReceiver);
         sIsActive = false;
     }
 
@@ -187,9 +207,25 @@ public class ChatActivity extends AppCompatActivity {
         super.onSaveInstanceState(savedInstanceState);
     }
 
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        super.onCreateOptionsMenu(menu);
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.chat_menu, menu);
+        return true;
+    }
+
     public boolean onOptionsItemSelected(MenuItem item) {
-        Intent intent = new Intent(this, MainActivity.class);
-        startActivity(intent);
+        int id = item.getItemId();
+
+        if (id == R.id.action_see_participants) {
+            Intent intent = new Intent(this, ParticipantsActivity.class);
+            intent.putExtra(Chat.PARCELABLE_KEY, mChat);
+            startActivity(intent);
+        } else {
+            startActivity(new Intent(this, MainActivity.class));
+        }
+
         return true;
     }
 

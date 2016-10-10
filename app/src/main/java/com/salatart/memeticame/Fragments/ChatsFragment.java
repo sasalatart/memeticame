@@ -19,6 +19,7 @@ import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.Toast;
 
+import com.salatart.memeticame.Activities.ParticipantsActivity;
 import com.salatart.memeticame.Models.Chat;
 import com.salatart.memeticame.R;
 import com.salatart.memeticame.Utils.HttpClient;
@@ -56,6 +57,20 @@ public class ChatsFragment extends Fragment {
             mAdapter.notifyDataSetChanged();
         }
     };
+    private BroadcastReceiver mUsersKickedReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            int userId = intent.getIntExtra("user_id", 0);
+            int chatId = intent.getIntExtra("chat_id", 0);
+
+            for (Chat chat : mChats) {
+                if (chat.onUserRemoved(getActivity(), chatId, userId)) {
+                    mAdapter.notifyDataSetChanged();
+                    break;
+                }
+            }
+        }
+    };
 
     public ChatsFragment() {
         // Required empty public constructor
@@ -70,12 +85,14 @@ public class ChatsFragment extends Fragment {
     public void onResume() {
         super.onResume();
         getActivity().registerReceiver(mChatsReceiver, new IntentFilter(NEW_CHAT_FILTER));
+        getActivity().registerReceiver(mUsersKickedReceiver, new IntentFilter(ParticipantsActivity.USER_KICKED_FILTER));
     }
 
     @Override
     public void onPause() {
         super.onPause();
         getActivity().unregisterReceiver(mChatsReceiver);
+        getActivity().unregisterReceiver(mUsersKickedReceiver);
     }
 
     @Override
@@ -191,11 +208,11 @@ public class ChatsFragment extends Fragment {
                                             mAdapter.notifyDataSetChanged();
                                             Toast.makeText(getActivity(), "You have left the chat", Toast.LENGTH_SHORT).show();
                                         } else {
-                                            Toast.makeText(getActivity(), "Could not leave the chat", Toast.LENGTH_SHORT).show();
+                                            Toast.makeText(getActivity(), HttpClient.parseErrorMessage(response), Toast.LENGTH_SHORT).show();
                                         }
+                                        response.body().close();
                                     }
                                 });
-                                response.body().close();
                             }
                         });
                     }

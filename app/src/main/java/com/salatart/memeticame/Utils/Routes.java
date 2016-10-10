@@ -4,6 +4,7 @@ import android.content.Context;
 import android.util.Log;
 
 import com.salatart.memeticame.Models.Attachment;
+import com.salatart.memeticame.Models.Chat;
 import com.salatart.memeticame.Models.Message;
 import com.salatart.memeticame.Models.User;
 
@@ -24,6 +25,7 @@ import okhttp3.RequestBody;
  */
 public class Routes {
     public static String DOMAIN = "https://memeticame.salatart.com";
+    //public static String DOMAIN = "http://10.0.2.2:3000";
     public static String LOGIN_PATH = "/login";
     public static String SIGNUP_PATH = "/signup";
     public static String LOGOUT_PATH = "/logout";
@@ -138,6 +140,15 @@ public class Routes {
     public static Request chatLeaveRequest(Context context, int chatId) {
         return new Request.Builder()
                 .url(DOMAIN + "/chats/" + chatId + "/leave")
+                .addHeader("content-type", "application/json")
+                .addHeader("authorization", "Token token=" + SessionUtils.getToken(context))
+                .post(new FormBody.Builder().build())
+                .build();
+    }
+
+    public static Request kickUserRequest(Context context, Chat chat, User user) {
+        return new Request.Builder()
+                .url(DOMAIN + "/chats/" + chat.getId() + "/users/" + user.getId() + "/kick")
                 .addHeader("content-type", "application/json")
                 .addHeader("authorization", "Token token=" + SessionUtils.getToken(context))
                 .post(new FormBody.Builder().build())
