@@ -93,20 +93,16 @@ public class Chat implements Parcelable {
         });
     }
 
-    public boolean onUserRemoved(final Activity activity, int chatId, int userId) {
-        if (mId != chatId) {
-            return false;
+    public boolean onUserRemoved(final Activity activity, User user) {
+
+        for (User localUser : mParticipants) {
+            if (localUser.getId() == user.getId()) {
+                mParticipants.remove(localUser);
+                break;
+            }
         }
 
-        User userToRemove = findParticipantById(userId);
-
-        // Another activity already removed this user.
-        if (userToRemove == null) {
-            return true;
-        }
-
-        mParticipants.remove(userToRemove);
-        if (User.comparePhones(userToRemove.getPhoneNumber(), SessionUtils.getPhoneNumber(activity))) {
+        if (User.comparePhones(user.getPhoneNumber(), SessionUtils.getPhoneNumber(activity))) {
             activity.startActivity(new Intent(activity, MainActivity.class));
             activity.finish();
         }
@@ -121,15 +117,6 @@ public class Chat implements Parcelable {
             }
         }
         return false;
-    }
-
-    private User findParticipantById(int userId) {
-        for (User user : mParticipants) {
-            if (user.getId() == userId) {
-                return user;
-            }
-        }
-        return null;
     }
 
     public int getId() {

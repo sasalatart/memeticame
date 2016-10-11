@@ -11,6 +11,7 @@ import android.view.MenuItem;
 import android.widget.ListView;
 
 import com.salatart.memeticame.Models.Chat;
+import com.salatart.memeticame.Models.User;
 import com.salatart.memeticame.R;
 import com.salatart.memeticame.Views.ParticipantsAdapter;
 
@@ -23,9 +24,9 @@ public class ParticipantsActivity extends AppCompatActivity {
     private BroadcastReceiver mUsersKickedReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            int chatId = intent.getIntExtra("chat_id", 0);
-            int userId = intent.getIntExtra("user_id", 0);
-            if (mChat.onUserRemoved(ParticipantsActivity.this, chatId, userId)) {
+            Chat chat = intent.getParcelableExtra(Chat.PARCELABLE_KEY);
+            User user = intent.getParcelableExtra(User.PARCELABLE_KEY);
+            if (mChat.getId() == chat.getId() && mChat.onUserRemoved(ParticipantsActivity.this, user)) {
                 mAdapter.notifyDataSetChanged();
             }
         }

@@ -21,6 +21,7 @@ import android.widget.Toast;
 
 import com.salatart.memeticame.Activities.ParticipantsActivity;
 import com.salatart.memeticame.Models.Chat;
+import com.salatart.memeticame.Models.User;
 import com.salatart.memeticame.R;
 import com.salatart.memeticame.Utils.HttpClient;
 import com.salatart.memeticame.Utils.ParserUtils;
@@ -65,11 +66,10 @@ public class ChatsFragment extends Fragment {
     private BroadcastReceiver mUsersKickedReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            int userId = intent.getIntExtra("user_id", 0);
-            int chatId = intent.getIntExtra("chat_id", 0);
-
-            for (Chat chat : mChats) {
-                if (chat.onUserRemoved(getActivity(), chatId, userId)) {
+            Chat chat = intent.getParcelableExtra(Chat.PARCELABLE_KEY);
+            User user = intent.getParcelableExtra(User.PARCELABLE_KEY);
+            for (Chat localChat : mChats) {
+                if (localChat.getId() == chat.getId() && localChat.onUserRemoved(getActivity(), user)) {
                     mAdapter.notifyDataSetChanged();
                     break;
                 }

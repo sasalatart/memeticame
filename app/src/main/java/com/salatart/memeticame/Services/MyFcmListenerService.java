@@ -19,6 +19,7 @@ import com.salatart.memeticame.R;
 import com.salatart.memeticame.Utils.ParserUtils;
 
 import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.util.Map;
 
@@ -81,8 +82,12 @@ public class MyFcmListenerService extends FirebaseMessagingService {
 
     public void broadcastUserKicked(Map data) {
         Intent intent = new Intent(ParticipantsActivity.USER_KICKED_FILTER);
-        intent.putExtra("user_id", Integer.parseInt(data.get("user_id").toString()));
-        intent.putExtra("chat_id", Integer.parseInt(data.get("chat_id").toString()));
-        getApplicationContext().sendBroadcast(intent);
+        try {
+            intent.putExtra(User.PARCELABLE_KEY, ParserUtils.userFromJson(new JSONObject(data.get("user").toString())));
+            intent.putExtra(Chat.PARCELABLE_KEY, ParserUtils.chatFromJson(new JSONObject(data.get("chat").toString())));
+            getApplicationContext().sendBroadcast(intent);
+        } catch (JSONException e) {
+            Log.e("ERROR", e.toString());
+        }
     }
 }

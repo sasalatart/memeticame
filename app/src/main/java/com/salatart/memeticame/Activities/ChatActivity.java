@@ -34,6 +34,7 @@ import com.bumptech.glide.Glide;
 import com.salatart.memeticame.Models.Attachment;
 import com.salatart.memeticame.Models.Chat;
 import com.salatart.memeticame.Models.Message;
+import com.salatart.memeticame.Models.User;
 import com.salatart.memeticame.R;
 import com.salatart.memeticame.Utils.AudioManager;
 import com.salatart.memeticame.Utils.FileUtils;
@@ -115,9 +116,9 @@ public class ChatActivity extends AppCompatActivity {
     private BroadcastReceiver mUsersKickedReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            int chatId = intent.getIntExtra("chat_id", 0);
-            int userId = intent.getIntExtra("user_id", 0);
-            if (mChat.onUserRemoved(ChatActivity.this, chatId, userId)) {
+            Chat chat = intent.getParcelableExtra(Chat.PARCELABLE_KEY);
+            User user = intent.getParcelableExtra(User.PARCELABLE_KEY);
+            if (mChat.getId() == chat.getId() && mChat.onUserRemoved(ChatActivity.this, user)) {
                 mAdapter.notifyDataSetChanged();
             }
         }
