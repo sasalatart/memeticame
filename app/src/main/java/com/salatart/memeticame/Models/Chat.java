@@ -47,17 +47,16 @@ public class Chat implements Parcelable {
     private String mCreatedAt;
     private String mAdmin;
     private ArrayList<User> mParticipants;
+    private ArrayList<Message> mMessages;
 
-    private HashMap<String, String> mParticipantsHash;
-
-    public Chat(int mId, String mTitle, boolean mIsGroup, String mCreatedAt, String admin, ArrayList<User> participants) {
+    public Chat(int mId, String mTitle, boolean mIsGroup, String mCreatedAt, String admin, ArrayList<User> participants, ArrayList<Message> messages) {
         this.mId = mId;
         this.mTitle = mTitle;
         this.mIsGroup = mIsGroup;
         this.mCreatedAt = mCreatedAt;
         this.mAdmin = admin;
         this.mParticipants = participants;
-        setParticipantsHash();
+        this.mMessages = messages;
     }
 
     public Chat(Parcel in) {
@@ -68,7 +67,8 @@ public class Chat implements Parcelable {
         this.mAdmin = in.readString();
         this.mParticipants = new ArrayList<>();
         in.readTypedList(this.mParticipants, User.CREATOR);
-        setParticipantsHash();
+        this.mMessages = new ArrayList<>();
+        in.readTypedList(this.mMessages, Message.CREATOR);
     }
 
     public static void createFromRequest(final Activity activity, Request request) {
@@ -127,10 +127,6 @@ public class Chat implements Parcelable {
         return mTitle;
     }
 
-    public void setTitle(String title) {
-        this.mTitle = title;
-    }
-
     public boolean isGroup() {
         return mIsGroup;
     }
@@ -139,18 +135,33 @@ public class Chat implements Parcelable {
         return mAdmin;
     }
 
-    public HashMap<String, String> getParticipantsHash() {
-        return mParticipantsHash;
-    }
-
     public ArrayList<User> getParticipants() {
         return mParticipants;
     }
 
-    private void setParticipantsHash() {
-        mParticipantsHash = new HashMap<>();
+    public HashMap<String, String> getParticipantsHash() {
+        HashMap<String, String> participantsHash = new HashMap<>();
         for (User user : mParticipants) {
-            mParticipantsHash.put(user.getPhoneNumber(), user.getName());
+            participantsHash.put(user.getPhoneNumber(), user.getName());
+        }
+        return participantsHash;
+    }
+
+    public ArrayList<Message> getMessages() {
+        return mMessages;
+    }
+
+    public void addUsers(ArrayList<User> newUsers) {
+        for (User newUser : newUsers) {
+            boolean isPresent = false;
+            for (User user : mParticipants) {
+                if (user.getId() == newUser.getId()) {
+                    isPresent = true;
+                }
+            }
+            if (!isPresent) {
+                mParticipants.add(newUser);
+            }
         }
     }
 
@@ -167,5 +178,6 @@ public class Chat implements Parcelable {
         dest.writeString(mCreatedAt);
         dest.writeString(mAdmin);
         dest.writeTypedList(mParticipants);
+        dest.writeTypedList(mMessages);
     }
 }

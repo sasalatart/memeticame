@@ -26,30 +26,23 @@ import okhttp3.RequestBody;
 public class Routes {
     static String DOMAIN = "https://memeticame.salatart.com";
     //public static String DOMAIN = "http://10.0.2.2:3000";
-    private static String LOGIN_PATH = "/login";
-    private static String SIGNUP_PATH = "/signup";
-    private static String LOGOUT_PATH = "/logout";
-    private static String USERS_INDEX_PATH = "/users";
-    private static String CHATS_INDEX_PATH = "/chats";
-    private static String CHATS_CREATE_PATH = "/chats";
-    private static String FCM_REGISTRATION_PATH = "/fcm_register";
     private static MediaType JSON = MediaType.parse("application/json; charset=utf-8");
 
     public static Request loginRequest(String phoneNumber, String password) {
-        Map<String, String> params = new HashMap<String, String>();
+        Map<String, String> params = new HashMap<>();
         params.put("phone_number", phoneNumber);
         params.put("password", password);
 
         RequestBody body = RequestBody.create(JSON, new JSONObject(params).toString());
         return new Request.Builder()
-                .url(DOMAIN + LOGIN_PATH)
+                .url(DOMAIN + "/login")
                 .addHeader("content-type", "application/json")
                 .post(body)
                 .build();
     }
 
     public static Request signupRequest(String name, String phoneNumber, String password, String passwordConfirmation) {
-        Map<String, String> params = new HashMap<String, String>();
+        Map<String, String> params = new HashMap<>();
         params.put("name", name);
         params.put("phone_number", phoneNumber);
         params.put("password", password);
@@ -57,7 +50,7 @@ public class Routes {
 
         RequestBody body = RequestBody.create(JSON, new JSONObject(params).toString());
         return new Request.Builder()
-                .url(DOMAIN + SIGNUP_PATH)
+                .url(DOMAIN + "/signup")
                 .addHeader("content-type", "application/json")
                 .post(body)
                 .build();
@@ -65,7 +58,7 @@ public class Routes {
 
     public static Request userIndexRequest(Context context) {
         return new Request.Builder()
-                .url(DOMAIN + USERS_INDEX_PATH)
+                .url(DOMAIN + "/users")
                 .addHeader("content-type", "application/json")
                 .addHeader("authorization", "Token token=" + SessionUtils.getToken(context))
                 .build();
@@ -73,7 +66,7 @@ public class Routes {
 
     public static Request chatsIndexRequest(Context context) {
         return new Request.Builder()
-                .url(DOMAIN + CHATS_INDEX_PATH)
+                .url(DOMAIN + "/chats")
                 .addHeader("content-type", "application/json")
                 .addHeader("authorization", "Token token=" + SessionUtils.getToken(context))
                 .build();
@@ -95,16 +88,16 @@ public class Routes {
         }
 
         return new Request.Builder()
-                .url(DOMAIN + CHATS_CREATE_PATH)
+                .url(DOMAIN + "/chats")
                 .addHeader("content-type", "application/json")
                 .addHeader("authorization", "Token token=" + SessionUtils.getToken(context))
                 .post(formBuilder.build())
                 .build();
     }
 
-    public static Request chatMessagesRequest(Context context, int chatId) {
+    public static Request chatRequest(Context context, Chat chat) {
         return new Request.Builder()
-                .url(DOMAIN + "/chats/" + chatId + "/messages")
+                .url(DOMAIN + "/chats/" + chat.getId())
                 .addHeader("content-type", "application/json")
                 .addHeader("authorization", "Token token=" + SessionUtils.getToken(context))
                 .build();
@@ -171,7 +164,7 @@ public class Routes {
 
     public static Request logoutRequest(Context context) {
         return new Request.Builder()
-                .url(DOMAIN + LOGOUT_PATH)
+                .url(DOMAIN + "/logout")
                 .addHeader("content-type", "application/json")
                 .addHeader("authorization", "Token token=" + SessionUtils.getToken(context))
                 .build();
@@ -183,7 +176,7 @@ public class Routes {
 
         RequestBody body = RequestBody.create(JSON, new JSONObject(params).toString());
         return new Request.Builder()
-                .url(DOMAIN + FCM_REGISTRATION_PATH)
+                .url(DOMAIN + "/fcm_register")
                 .addHeader("content-type", "application/json")
                 .addHeader("authorization", "Token token=" + SessionUtils.getToken(context))
                 .post(body)

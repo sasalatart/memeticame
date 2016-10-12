@@ -25,13 +25,15 @@ public class ParserUtils {
     public static Chat chatFromJson(JSONObject jsonResponse) throws JSONException {
         ArrayList<User> users = usersFromJsonArray(new JSONArray(jsonResponse.getString("users")));
         User admin = userFromJson(new JSONObject(jsonResponse.getString("admin")));
+        ArrayList<Message> messages = messagesFromJsonArray(new JSONArray(jsonResponse.getString("messages")));
 
         return new Chat(Integer.parseInt(jsonResponse.getString("id")),
                 jsonResponse.getString("title"),
                 Boolean.parseBoolean(jsonResponse.getString("group")),
                 jsonResponse.getString("created_at"),
                 admin.getPhoneNumber(),
-                users);
+                users,
+                messages);
     }
 
     public static ArrayList<Chat> chatsFromJsonArray(JSONArray jsonResponse) throws JSONException {
@@ -48,14 +50,16 @@ public class ParserUtils {
     public static Chat chatFromMap(Map mapChat) throws JSONException {
         ArrayList<User> users = usersFromJsonArray(new JSONArray(mapChat.get("users").toString()));
         User admin = userFromJson(new JSONObject(mapChat.get("admin").toString()));
+        ArrayList<Message> messages = messagesFromJsonArray(new JSONArray(mapChat.get("messages").toString()));
 
         return new Chat(Integer.parseInt(mapChat.get("id").toString()),
                 mapChat.get("title").toString(),
                 Boolean.parseBoolean(mapChat.get("group").toString()),
                 mapChat.get("created_at").toString(),
                 admin.getPhoneNumber(),
-                users);
-    }
+                users,
+                messages);
+        }
 
     public static Message messageFromJson(JSONObject jsonMessage) throws JSONException {
         Message message = new Message(jsonMessage.getInt("id"),

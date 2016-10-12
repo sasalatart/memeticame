@@ -15,6 +15,8 @@ import com.salatart.memeticame.Models.User;
 import com.salatart.memeticame.R;
 import com.salatart.memeticame.Views.ParticipantsAdapter;
 
+import java.util.ArrayList;
+
 public class ParticipantsActivity extends AppCompatActivity {
     public static final String USER_KICKED_FILTER = "userKickedFilter";
 
@@ -29,6 +31,21 @@ public class ParticipantsActivity extends AppCompatActivity {
             if (mChat.getId() == chat.getId() && mChat.onUserRemoved(ParticipantsActivity.this, user)) {
                 mAdapter.notifyDataSetChanged();
             }
+        }
+    };
+
+    private BroadcastReceiver mUsersAddedReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            Chat chat = intent.getParcelableExtra(Chat.PARCELABLE_KEY);
+            ArrayList<User> users = intent.getParcelableArrayListExtra(User.PARCELABLE_KEY_ARRAY_LIST);
+
+            if (chat.getId() != mChat.getId()) {
+                return;
+            }
+
+            mChat.addUsers(users);
+            mAdapter.notifyDataSetChanged();
         }
     };
 
@@ -57,11 +74,13 @@ public class ParticipantsActivity extends AppCompatActivity {
     public void onResume() {
         super.onResume();
         registerReceiver(mUsersKickedReceiver, new IntentFilter(USER_KICKED_FILTER));
+        registerReceiver(mUsersAddedReceiver, new IntentFilter(AddParticipantsActivity.USERS_ADDED_FILTER));
     }
 
     @Override
     public void onPause() {
         super.onPause();
         unregisterReceiver(mUsersKickedReceiver);
+        unregisterReceiver(mUsersAddedReceiver);
     }
 }

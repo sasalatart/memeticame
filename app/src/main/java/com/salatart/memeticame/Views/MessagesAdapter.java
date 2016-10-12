@@ -22,12 +22,10 @@ import java.util.ArrayList;
  */
 public class MessagesAdapter extends ArrayAdapter<Message> {
     private Chat mParentChat;
-    private ArrayList<Message> mMessages;
     private LayoutInflater mLayoutInflater;
 
-    public MessagesAdapter(Context context, int resource, ArrayList<Message> messages, Chat parentChat) {
-        super(context, resource, messages);
-        mMessages = messages;
+    public MessagesAdapter(Context context, int resource, Chat parentChat) {
+        super(context, resource, parentChat.getMessages());
         mLayoutInflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         mParentChat = parentChat;
     }
@@ -35,7 +33,7 @@ public class MessagesAdapter extends ArrayAdapter<Message> {
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
         View view = convertView;
-        Message message = mMessages.get(position);
+        Message message = mParentChat.getMessages().get(position);
 
         if (view == null) {
             if (message.isMine(getContext()) && message.getAttachment() == null) {

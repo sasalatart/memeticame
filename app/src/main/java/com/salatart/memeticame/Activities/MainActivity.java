@@ -38,13 +38,10 @@ public class MainActivity extends AppCompatActivity implements ChatsFragment.OnC
         if (SessionUtils.getToken(getApplicationContext()).isEmpty()) {
             startActivity(new Intent(this, LoginActivity.class));
             MainActivity.this.finish();
-        } else if (savedInstanceState != null) {
-            this.mChatsFragments = (ChatsFragment) getSupportFragmentManager().getFragment(savedInstanceState, "chatsFragment");
-            this.mContactsFragments = (ContactsFragment) getSupportFragmentManager().getFragment(savedInstanceState, "contactsFragment");
-        } else {
-            this.mChatsFragments = new ChatsFragment();
-            this.mContactsFragments = new ContactsFragment();
         }
+
+        this.mChatsFragments = new ChatsFragment();
+        this.mContactsFragments = new ContactsFragment();
 
         ViewPager viewPager = (ViewPager) findViewById(R.id.viewpager);
         setupViewPager(viewPager);
@@ -69,13 +66,6 @@ public class MainActivity extends AppCompatActivity implements ChatsFragment.OnC
         adapter.addFragment(this.mContactsFragments, "Contacts");
 
         viewPager.setAdapter(adapter);
-    }
-
-    @Override
-    protected void onSaveInstanceState(Bundle outState) {
-        super.onSaveInstanceState(outState);
-        getSupportFragmentManager().putFragment(outState, "contactsFragment", mContactsFragments);
-        getSupportFragmentManager().putFragment(outState, "chatsFragment", mChatsFragments);
     }
 
     @Override

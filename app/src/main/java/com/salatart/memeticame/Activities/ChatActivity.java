@@ -76,7 +76,6 @@ public class ChatActivity extends AppCompatActivity {
     private boolean mCurrentlyRecording;
 
     private Chat mChat;
-    private ArrayList<Message> mMessages;
     private MessagesAdapter mAdapter;
 
     private AudioManager mAudioManager;
@@ -100,7 +99,7 @@ public class ChatActivity extends AppCompatActivity {
             }
 
             if (!newMessage.isMine(getApplicationContext())) {
-                mMessages.add(newMessage);
+                mChat.getMessages().add(newMessage);
                 mAdapter.notifyDataSetChanged();
             }
         }
@@ -118,9 +117,23 @@ public class ChatActivity extends AppCompatActivity {
         public void onReceive(Context context, Intent intent) {
             Chat chat = intent.getParcelableExtra(Chat.PARCELABLE_KEY);
             User user = intent.getParcelableExtra(User.PARCELABLE_KEY);
-            if (mChat.getId() == chat.getId() && mChat.onUserRemoved(ChatActivity.this, user)) {
-                mAdapter.notifyDataSetChanged();
+            if (mChat.getId() == chat.getId()) {
+                mChat.onUserRemoved(ChatActivity.this, user);
             }
+        }
+    };
+
+    private BroadcastReceiver mUsersAddedReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            Chat chat = intent.getParcelableExtra(Chat.PARCELABLE_KEY);
+            ArrayList<User> users = intent.getParcelableArrayListExtra(User.PARCELABLE_KEY_ARRAY_LIST);
+
+            if (chat.getId() != mChat.getId()) {
+                return;
+            }
+
+            mChat.addUsers(users);
         }
     };
 
@@ -158,12 +171,13 @@ public class ChatActivity extends AppCompatActivity {
         setTitle(mChat.getTitle());
 
         mMessagesListView = (ListView) findViewById(R.id.list_view_messages);
+        mAdapter = new MessagesAdapter(ChatActivity.this, R.layout.list_item_message_in_text, mChat);
+        mMessagesListView.setAdapter(mAdapter);
+
         mMessageInput = (EditText) findViewById(R.id.input_message);
         mAttachmentImageView = (ImageView) findViewById(R.id.attachment);
         mCancelButton = (ImageButton) findViewById(R.id.button_cancel_attachment);
         mRecordButton = (ImageButton) findViewById(R.id.take_audio);
-
-        getMessages();
 
         mMessagesListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
@@ -187,10 +201,12 @@ public class ChatActivity extends AppCompatActivity {
             ChatActivity.this.finish();
         }
 
+        getChat();
+
         registerReceiver(mMessageReceiver, new IntentFilter(ChatActivity.NEW_MESSAGE_FILTER));
         registerReceiver(mOnDownloadReceiver, new IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE));
         registerReceiver(mUsersKickedReceiver, new IntentFilter(ParticipantsActivity.USER_KICKED_FILTER));
-        getMessages();
+        registerReceiver(mUsersAddedReceiver, new IntentFilter(AddParticipantsActivity.USERS_ADDED_FILTER));
         sIsActive = true;
     }
 
@@ -200,6 +216,7 @@ public class ChatActivity extends AppCompatActivity {
         unregisterReceiver(mMessageReceiver);
         unregisterReceiver(mOnDownloadReceiver);
         unregisterReceiver(mUsersKickedReceiver);
+        unregisterReceiver(mUsersAddedReceiver);
         sIsActive = false;
     }
 
@@ -238,8 +255,8 @@ public class ChatActivity extends AppCompatActivity {
         return true;
     }
 
-    public void getMessages() {
-        Request request = Routes.chatMessagesRequest(getApplicationContext(), mChat.getId());
+    public void getChat() {
+        Request request = Routes.chatRequest(getApplicationContext(), mChat);
         HttpClient.getInstance().newCall(request).enqueue(new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
@@ -247,20 +264,22 @@ public class ChatActivity extends AppCompatActivity {
             }
 
             @Override
-            public void onResponse(Call call, final Response response) throws IOException {
-                try {
-                    mMessages = ParserUtils.messagesFromJsonArray(new JSONArray(response.body().string()));
-                    mAdapter = new MessagesAdapter(getApplicationContext(), R.layout.list_item_message_in_text, mMessages, mChat);
-                    runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            mMessagesListView.setAdapter(mAdapter);
-                        }
-                    });
-                } catch (IOException | JSONException e) {
-                    Log.e("ERROR", e.toString());
-                } finally {
-                    response.body().close();
+            public void onResponse(Call call, Response response) throws IOException {
+                if (response.isSuccessful()) {
+                    try {
+                        mChat = ParserUtils.chatFromJson(new JSONObject(response.body().string()));
+                        mAdapter = new MessagesAdapter(getApplicationContext(), R.layout.list_item_message_in_text, mChat);
+                        ChatActivity.this.runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                mMessagesListView.setAdapter(mAdapter);
+                            }
+                        });
+                    } catch (JSONException e) {
+                        Log.e("ERROR", e.toString());
+                    }
+                } else {
+                    Log.e("ERROR", "Could not retrieve chat");
                 }
             }
         });
@@ -292,8 +311,8 @@ public class ChatActivity extends AppCompatActivity {
             public void onResponse(Call call, final Response response) throws IOException {
                 if (response.isSuccessful()) {
                     try {
-                        mMessages.remove(message);
-                        mMessages.add(ParserUtils.messageFromJson(new JSONObject(response.body().string())));
+                        mChat.getMessages().remove(message);
+                        mChat.getMessages().add(ParserUtils.messageFromJson(new JSONObject(response.body().string())));
                         ChatActivity.this.runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
@@ -315,7 +334,7 @@ public class ChatActivity extends AppCompatActivity {
         ChatActivity.this.runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                mMessages.remove(message);
+                mChat.getMessages().remove(message);
                 mAdapter.notifyDataSetChanged();
                 mMessageInput.setText(message.getContent());
                 Toast.makeText(getApplicationContext(), "Could not send message", Toast.LENGTH_LONG).show();
@@ -331,7 +350,7 @@ public class ChatActivity extends AppCompatActivity {
             mCurrentAttachment = null;
         }
 
-        mMessages.add(message);
+        mChat.getMessages().add(message);
         mAdapter.notifyDataSetChanged();
         return message;
     }

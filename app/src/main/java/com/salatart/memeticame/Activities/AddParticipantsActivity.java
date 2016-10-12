@@ -55,6 +55,32 @@ public class AddParticipantsActivity extends AppCompatActivity {
         }
     };
 
+    private BroadcastReceiver mUsersKickedReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            Chat chat = intent.getParcelableExtra(Chat.PARCELABLE_KEY);
+            User user = intent.getParcelableExtra(User.PARCELABLE_KEY);
+            if (mChat.getId() == chat.getId() && mChat.onUserRemoved(AddParticipantsActivity.this, user)) {
+                mAdapter.notifyDataSetChanged();
+            }
+        }
+    };
+
+    private BroadcastReceiver mUsersAddedReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            Chat chat = intent.getParcelableExtra(Chat.PARCELABLE_KEY);
+            ArrayList<User> users = intent.getParcelableArrayListExtra(User.PARCELABLE_KEY_ARRAY_LIST);
+
+            if (chat.getId() != mChat.getId()) {
+                return;
+            }
+
+            mChat.addUsers(users);
+            mAdapter.notifyDataSetChanged();
+        }
+    };
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -89,12 +115,16 @@ public class AddParticipantsActivity extends AppCompatActivity {
     public void onResume() {
         super.onResume();
         AddParticipantsActivity.this.registerReceiver(mContactsReceiver, new IntentFilter(ContactsUtils.RETRIEVE_CONTACTS_FILTER));
+        AddParticipantsActivity.this.registerReceiver(mUsersKickedReceiver, new IntentFilter(ParticipantsActivity.USER_KICKED_FILTER));
+        AddParticipantsActivity.this.registerReceiver(mUsersAddedReceiver, new IntentFilter(AddParticipantsActivity.USERS_ADDED_FILTER));
     }
 
     @Override
     public void onPause() {
         super.onPause();
         AddParticipantsActivity.this.unregisterReceiver(mContactsReceiver);
+        AddParticipantsActivity.this.unregisterReceiver(mUsersKickedReceiver);
+        AddParticipantsActivity.this.unregisterReceiver(mUsersAddedReceiver);
     }
 
     public boolean onOptionsItemSelected(MenuItem item) {

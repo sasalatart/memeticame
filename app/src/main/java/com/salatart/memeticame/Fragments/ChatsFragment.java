@@ -46,7 +46,6 @@ import okhttp3.Response;
  */
 public class ChatsFragment extends Fragment {
     public static final String NEW_CHAT_FILTER = "newChatFilter";
-    public static final String CHATS_STATE = "chatsState";
 
     private ArrayList<Chat> mChats;
     private ChatsAdapter mAdapter;
@@ -99,14 +98,6 @@ public class ChatsFragment extends Fragment {
         // Required empty public constructor
     }
 
-    public void onActivityCreated(Bundle savedInstanceState) {
-        super.onActivityCreated(savedInstanceState);
-
-        if (savedInstanceState != null) {
-            mChats = savedInstanceState.getParcelableArrayList(CHATS_STATE);
-        }
-    }
-
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -131,16 +122,8 @@ public class ChatsFragment extends Fragment {
             }
         });
 
-        if (savedInstanceState != null) {
-            mChats = savedInstanceState.getParcelableArrayList(CHATS_STATE);
-        }
 
-        if (mChats != null && mChats.size() != 0) {
-            mAdapter = new ChatsAdapter(getContext(), R.layout.list_item_contact, mChats);
-            mChatsListView.setAdapter(mAdapter);
-        } else {
-            showChats();
-        }
+        showChats();
 
         setHasOptionsMenu(true);
 
@@ -191,12 +174,6 @@ public class ChatsFragment extends Fragment {
         getActivity().unregisterReceiver(mChatsReceiver);
         getActivity().unregisterReceiver(mUsersKickedReceiver);
         getActivity().unregisterReceiver(mUsersAddedReceiver);
-    }
-
-    @Override
-    public void onSaveInstanceState(Bundle savedInstanceState) {
-        super.onSaveInstanceState(savedInstanceState);
-        savedInstanceState.putParcelableArrayList(CHATS_STATE, mChats);
     }
 
     public void showChats() {
