@@ -215,6 +215,8 @@ public class ChatActivity extends AppCompatActivity {
         super.onCreateOptionsMenu(menu);
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.chat_menu, menu);
+        MenuItem addParticipantsItem = menu.findItem(R.id.action_add_participants);
+        addParticipantsItem.setVisible(mChat.isGroup());
         return true;
     }
 
@@ -223,6 +225,10 @@ public class ChatActivity extends AppCompatActivity {
 
         if (id == R.id.action_see_participants) {
             Intent intent = new Intent(this, ParticipantsActivity.class);
+            intent.putExtra(Chat.PARCELABLE_KEY, mChat);
+            startActivity(intent);
+        } else if (id == R.id.action_add_participants) {
+            Intent intent = new Intent(this, AddParticipantsActivity.class);
             intent.putExtra(Chat.PARCELABLE_KEY, mChat);
             startActivity(intent);
         } else {

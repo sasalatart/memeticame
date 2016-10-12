@@ -54,7 +54,8 @@
         </provider>
 
         <activity android:name=".Activities.NewChatGroupActivity" />
-        <activity android:name=".Activities.ParticipantsActivity"></activity>
+        <activity android:name=".Activities.ParticipantsActivity" />
+        <activity android:name=".Activities.AddParticipantsActivity"></activity>
     </application>
 
 </manifest>

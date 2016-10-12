@@ -8,6 +8,7 @@ import android.util.Log;
 
 import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
+import com.salatart.memeticame.Activities.AddParticipantsActivity;
 import com.salatart.memeticame.Activities.ChatActivity;
 import com.salatart.memeticame.Activities.ParticipantsActivity;
 import com.salatart.memeticame.Fragments.ChatsFragment;
@@ -18,6 +19,7 @@ import com.salatart.memeticame.Models.User;
 import com.salatart.memeticame.R;
 import com.salatart.memeticame.Utils.ParserUtils;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -42,6 +44,8 @@ public class MyFcmListenerService extends FirebaseMessagingService {
             broadcastNewUser(data);
         } else if (collapseKey.equals("user_kicked")) {
             broadcastUserKicked(data);
+        } else if (collapseKey.equals("users_added")) {
+            broadcastUsersAdded(data);
         }
     }
 
@@ -84,6 +88,17 @@ public class MyFcmListenerService extends FirebaseMessagingService {
         Intent intent = new Intent(ParticipantsActivity.USER_KICKED_FILTER);
         try {
             intent.putExtra(User.PARCELABLE_KEY, ParserUtils.userFromJson(new JSONObject(data.get("user").toString())));
+            intent.putExtra(Chat.PARCELABLE_KEY, ParserUtils.chatFromJson(new JSONObject(data.get("chat").toString())));
+            getApplicationContext().sendBroadcast(intent);
+        } catch (JSONException e) {
+            Log.e("ERROR", e.toString());
+        }
+    }
+
+    public void broadcastUsersAdded(Map data) {
+        Intent intent = new Intent(AddParticipantsActivity.USERS_ADDED_FILTER);
+        try {
+            intent.putExtra(User.PARCELABLE_KEY_ARRAY_LIST, ParserUtils.usersFromJsonArray(new JSONArray(data.get("users").toString())));
             intent.putExtra(Chat.PARCELABLE_KEY, ParserUtils.chatFromJson(new JSONObject(data.get("chat").toString())));
             getApplicationContext().sendBroadcast(intent);
         } catch (JSONException e) {

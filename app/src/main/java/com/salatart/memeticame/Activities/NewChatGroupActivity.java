@@ -4,7 +4,6 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
@@ -26,8 +25,6 @@ import java.util.ArrayList;
 
 import okhttp3.Request;
 
-import static com.salatart.memeticame.Utils.ContactsUtils.PERMISSIONS_REQUEST_READ_CONTACTS;
-
 public class NewChatGroupActivity extends AppCompatActivity {
 
     private ArrayList<User> mContacts = new ArrayList<>();
@@ -39,10 +36,6 @@ public class NewChatGroupActivity extends AppCompatActivity {
     private BroadcastReceiver mContactsReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            if (mContacts.size() != 0) {
-                return;
-            }
-
             mContacts = intent.getParcelableArrayListExtra(ContactsUtils.INTERSECTED_CONTACTS_PARCELABLE_KEY);
             mAdapter = new ContactsSelectAdapter(NewChatGroupActivity.this, R.layout.list_item_contact, mContacts, mSelectedContacts);
             NewChatGroupActivity.this.runOnUiThread(new Runnable() {
@@ -78,7 +71,7 @@ public class NewChatGroupActivity extends AppCompatActivity {
             }
         });
 
-        showContacts();
+        ContactsUtils.retrieveContacts(NewChatGroupActivity.this);
 
         ActionBar actionBar = getSupportActionBar();
         actionBar.setDisplayHomeAsUpEnabled(true);
@@ -117,24 +110,5 @@ public class NewChatGroupActivity extends AppCompatActivity {
 
         Request request = Routes.chatsCreateRequest(getApplicationContext(), title, mSelectedContacts, true);
         Chat.createFromRequest(NewChatGroupActivity.this, request);
-    }
-
-    private void showContacts() {
-        ContactsUtils.retrieveContacts(NewChatGroupActivity.this);
-    }
-
-    @Override
-    public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
-        switch (requestCode) {
-            case PERMISSIONS_REQUEST_READ_CONTACTS: {
-                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    showContacts();
-                } else {
-                    // Disable the functionality that depends on this permission.
-                }
-
-                return;
-            }
-        }
     }
 }

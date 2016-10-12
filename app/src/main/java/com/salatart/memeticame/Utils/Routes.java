@@ -24,16 +24,16 @@ import okhttp3.RequestBody;
  * Created by sasalatart on 8/27/16.
  */
 public class Routes {
-    public static String DOMAIN = "https://memeticame.salatart.com";
+    static String DOMAIN = "https://memeticame.salatart.com";
     //public static String DOMAIN = "http://10.0.2.2:3000";
-    public static String LOGIN_PATH = "/login";
-    public static String SIGNUP_PATH = "/signup";
-    public static String LOGOUT_PATH = "/logout";
-    public static String USERS_INDEX_PATH = "/users";
-    public static String CHATS_INDEX_PATH = "/chats";
-    public static String CHATS_CREATE_PATH = "/chats";
-    public static String FCM_REGISTRATION_PATH = "/fcm_register";
-    public static MediaType JSON = MediaType.parse("application/json; charset=utf-8");
+    private static String LOGIN_PATH = "/login";
+    private static String SIGNUP_PATH = "/signup";
+    private static String LOGOUT_PATH = "/logout";
+    private static String USERS_INDEX_PATH = "/users";
+    private static String CHATS_INDEX_PATH = "/chats";
+    private static String CHATS_CREATE_PATH = "/chats";
+    private static String FCM_REGISTRATION_PATH = "/fcm_register";
+    private static MediaType JSON = MediaType.parse("application/json; charset=utf-8");
 
     public static Request loginRequest(String phoneNumber, String password) {
         Map<String, String> params = new HashMap<String, String>();
@@ -152,6 +152,20 @@ public class Routes {
                 .addHeader("content-type", "application/json")
                 .addHeader("authorization", "Token token=" + SessionUtils.getToken(context))
                 .post(new FormBody.Builder().build())
+                .build();
+    }
+
+    public static Request addParticipantsRequest(Context context, Chat chat, ArrayList<User> users) {
+        FormBody.Builder formBuilder = new FormBody.Builder();
+        for (int i = 0; i < users.size(); i++) {
+            formBuilder.add("users[" + i + "]", users.get(i).getPhoneNumber());
+        }
+
+        return new Request.Builder()
+                .url(DOMAIN + "/chats/" + chat.getId() + "/add_users")
+                .addHeader("content-type", "application/json")
+                .addHeader("authorization", "Token token=" + SessionUtils.getToken(context))
+                .post(formBuilder.build())
                 .build();
     }
 

@@ -59,10 +59,6 @@ public class ContactsFragment extends Fragment {
     private BroadcastReceiver mContactsReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            if (mLocalContacts.size() != 0 && mContacts.size() != 0) {
-                return;
-            }
-
             mLocalContacts = intent.getParcelableArrayListExtra(ContactsUtils.LOCAL_CONTACTS_PARCELABLE_KEY);
             mContacts = intent.getParcelableArrayListExtra(ContactsUtils.INTERSECTED_CONTACTS_PARCELABLE_KEY);
             mAdapter = new ContactsAdapter(getContext(), R.layout.list_item_contact, mContacts);

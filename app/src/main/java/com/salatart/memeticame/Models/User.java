@@ -21,6 +21,7 @@ public class User implements Parcelable {
     };
 
     public static String PARCELABLE_KEY = "com.salatart.memeticamea.Models.User";
+    public static String PARCELABLE_KEY_ARRAY_LIST = "com.salatart.memeticamea.Models.UserArrayList";
 
     private final int mId;
     private String mName;
@@ -47,6 +48,26 @@ public class User implements Parcelable {
                     users.add(eU);
                     break;
                 }
+            }
+        }
+
+        return users;
+    }
+
+    public static ArrayList<User> difference(ArrayList<User> originalUsers, ArrayList<User> usersToRemove) {
+        ArrayList<User> users = new ArrayList<>();
+
+        for (User originalUser : originalUsers) {
+            boolean present = false;
+            for (User userToRemove : usersToRemove) {
+                if (originalUser.getId() == userToRemove.getId()) {
+                    present = true;
+                    break;
+                }
+            }
+
+            if (!present) {
+                users.add(originalUser);
             }
         }
 

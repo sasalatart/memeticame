@@ -19,6 +19,7 @@ import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.Toast;
 
+import com.salatart.memeticame.Activities.AddParticipantsActivity;
 import com.salatart.memeticame.Activities.ParticipantsActivity;
 import com.salatart.memeticame.Models.Chat;
 import com.salatart.memeticame.Models.User;
@@ -26,6 +27,7 @@ import com.salatart.memeticame.R;
 import com.salatart.memeticame.Utils.HttpClient;
 import com.salatart.memeticame.Utils.ParserUtils;
 import com.salatart.memeticame.Utils.Routes;
+import com.salatart.memeticame.Utils.SessionUtils;
 import com.salatart.memeticame.Views.ChatsAdapter;
 
 import org.json.JSONArray;
@@ -70,6 +72,22 @@ public class ChatsFragment extends Fragment {
             User user = intent.getParcelableExtra(User.PARCELABLE_KEY);
             for (Chat localChat : mChats) {
                 if (localChat.getId() == chat.getId() && localChat.onUserRemoved(getActivity(), user)) {
+                    mAdapter.notifyDataSetChanged();
+                    break;
+                }
+            }
+        }
+    };
+
+    private BroadcastReceiver mUsersAddedReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            Chat chat = intent.getParcelableExtra(Chat.PARCELABLE_KEY);
+            ArrayList<User> users = intent.getParcelableArrayListExtra(User.PARCELABLE_KEY_ARRAY_LIST);
+
+            for (User user : users) {
+                if (User.comparePhones(SessionUtils.getPhoneNumber(getContext()), user.getPhoneNumber())) {
+                    mChats.add(chat);
                     mAdapter.notifyDataSetChanged();
                     break;
                 }
@@ -164,6 +182,7 @@ public class ChatsFragment extends Fragment {
         super.onResume();
         getActivity().registerReceiver(mChatsReceiver, new IntentFilter(NEW_CHAT_FILTER));
         getActivity().registerReceiver(mUsersKickedReceiver, new IntentFilter(ParticipantsActivity.USER_KICKED_FILTER));
+        getActivity().registerReceiver(mUsersAddedReceiver, new IntentFilter(AddParticipantsActivity.USERS_ADDED_FILTER));
     }
 
     @Override
@@ -171,6 +190,7 @@ public class ChatsFragment extends Fragment {
         super.onPause();
         getActivity().unregisterReceiver(mChatsReceiver);
         getActivity().unregisterReceiver(mUsersKickedReceiver);
+        getActivity().unregisterReceiver(mUsersAddedReceiver);
     }
 
     @Override
