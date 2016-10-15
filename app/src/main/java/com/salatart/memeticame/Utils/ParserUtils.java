@@ -59,7 +59,7 @@ public class ParserUtils {
                 admin.getPhoneNumber(),
                 users,
                 messages);
-        }
+    }
 
     public static Message messageFromJson(JSONObject jsonMessage) throws JSONException {
         Message message = new Message(jsonMessage.getInt("id"),
@@ -124,14 +124,19 @@ public class ParserUtils {
         return users;
     }
 
-    public static Attachment attachmentFromUri(Context context, Uri uri) {
+    public static Attachment attachmentFromUri(Context context, Uri uri, boolean isZip) {
         if (uri == null) {
             return null;
         }
 
+        String mimeType = "zip/memeaudio";
+        if (!isZip) {
+            mimeType = FileUtils.getMimeType(context, uri);
+        }
+
         try {
             return new Attachment(FileUtils.getName(context, uri),
-                    FileUtils.getMimeType(context, uri),
+                    mimeType,
                     FileUtils.encodeToBase64FromUri(context, uri),
                     uri.toString());
         } catch (IOException e) {

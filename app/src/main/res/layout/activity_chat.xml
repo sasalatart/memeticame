@@ -24,6 +24,14 @@
         android:orientation="horizontal">
 
         <ImageButton
+            android:id="@+id/take_memeaudio"
+            android:layout_width="42dp"
+            android:layout_height="42dp"
+            android:layout_margin="4dp"
+            android:onClick="dispatchTakeMemeaudioIntent"
+            android:src="@drawable/ic_sentiment_very_satisfied_black_24dp" />
+
+        <ImageButton
             android:id="@+id/take_picture"
             android:layout_width="42dp"
             android:layout_height="42dp"

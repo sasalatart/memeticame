@@ -15,8 +15,6 @@ import com.salatart.memeticame.Models.Message;
 import com.salatart.memeticame.R;
 import com.salatart.memeticame.Utils.FileUtils;
 
-import java.util.ArrayList;
-
 /**
  * Created by sasalatart on 9/4/16.
  */
@@ -101,14 +99,17 @@ public class MessagesAdapter extends ArrayAdapter<Message> {
 
         boolean fileExists = FileUtils.checkFileExistence(getContext(), attachment.getName());
 
-        if (fileExists) {
-            attachment.setUri(FileUtils.getUriFromFileName(getContext(), attachment.getName()).toString());
-        }
-
         boolean isImage = attachment.isImage();
         boolean isVideo = attachment.isVideo();
         boolean isAudio = attachment.isAudio();
+        boolean isMemeaudio = attachment.isMemeaudio();
         boolean isNotMedia = attachment.isNotMedia();
+
+        if (fileExists && !isMemeaudio) {
+            attachment.setUri(FileUtils.getUriFromFileName(getContext(), attachment.getName()).toString());
+        } else if (fileExists) {
+            attachment.setUri(attachment.getMemeaudioImageUri(getContext()).toString());
+        }
 
         ImageView attachmentType = (ImageView) view.findViewById(R.id.label_attachment_type);
         if (isImage) {
@@ -117,14 +118,16 @@ public class MessagesAdapter extends ArrayAdapter<Message> {
             attachmentType.setImageResource(R.drawable.ic_videocam_black_24dp);
         } else if (isAudio) {
             attachmentType.setImageResource(R.drawable.ic_record_voice_over_black_24dp);
+        } else if (isMemeaudio) {
+            attachmentType.setImageResource(R.drawable.ic_sentiment_very_satisfied_black_24dp);
         } else {
             attachmentType.setImageResource(R.drawable.ic_insert_drive_file_black_24dp);
         }
 
         ImageView thumbnail = (ImageView) view.findViewById(R.id.thumbnail);
-        if (isImage || (isVideo && fileExists)) {
+        if (isImage || (fileExists && (isVideo || isMemeaudio))) {
             Glide.with(getContext())
-                    .load(message.getAttachment().getUri())
+                    .load(attachment.getStringUri())
                     .placeholder(R.drawable.ic_access_time_black_24dp)
                     .crossFade()
                     .override(Attachment.IMAGE_SIZE, Attachment.IMAGE_SIZE)

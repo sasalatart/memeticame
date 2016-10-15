@@ -1,7 +1,14 @@
 package com.salatart.memeticame.Models;
 
+import android.content.Context;
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Parcel;
 import android.os.Parcelable;
+
+import com.salatart.memeticame.Activities.MemeaudioActivity;
+import com.salatart.memeticame.Utils.FileUtils;
+import com.salatart.memeticame.Utils.ZipManager;
 
 /**
  * Created by sasalatart on 9/14/16.
@@ -53,7 +60,7 @@ public class Attachment implements Parcelable {
         return mBase64Content;
     }
 
-    public String getUri() {
+    public String getStringUri() {
         return mUri;
     }
 
@@ -61,8 +68,41 @@ public class Attachment implements Parcelable {
         mUri = uri;
     }
 
+    public String getShowableStringUri(Context context) {
+        if (isMemeaudio()) {
+            return getMemeaudioImageUri(context).toString();
+        } else {
+            return getStringUri();
+        }
+    }
+
+    public Uri getMemeaudioImageUri(Context context) {
+        if (FileUtils.checkFileExistence(context, mName.split(ZipManager.SEPARATOR)[0])) {
+            return FileUtils.getUriFromFileName(context, mName.split(ZipManager.SEPARATOR)[0]);
+        } else if (ZipManager.fastUnzip(FileUtils.getMemeticameDirectory() + "/" + mName)) {
+            context.sendBroadcast(new Intent(MemeaudioActivity.UNZIP_FILTER));
+            return FileUtils.getUriFromFileName(context, mName.split(ZipManager.SEPARATOR)[0]);
+        } else {
+            return null;
+        }
+    }
+
+    public Uri getMemeaudioAudioUri(Context context) {
+        if (FileUtils.checkFileExistence(context, mName.split(ZipManager.SEPARATOR)[1])) {
+            return FileUtils.getUriFromFileName(context, mName.split(ZipManager.SEPARATOR)[1].replace(".zip", ""));
+        } else if (ZipManager.fastUnzip(FileUtils.getMemeticameDirectory() + "/" + mName)) {
+            return FileUtils.getUriFromFileName(context, mName.split(ZipManager.SEPARATOR)[1].replace(".zip", ""));
+        } else {
+            return null;
+        }
+    }
+
+    public boolean isMemeaudio() {
+        return mMimeType.contains("memeaudio");
+    }
+
     public boolean isAudio() {
-        return mMimeType.contains("audio");
+        return mMimeType.contains("audio") && !mMimeType.contains("meme");
     }
 
     public boolean isVideo() {

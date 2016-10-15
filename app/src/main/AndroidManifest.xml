@@ -10,6 +10,7 @@
     <uses-permission android:name="com.google.android.c2dm.permission.RECEIVE" />
     <uses-permission android:name="android.permission.READ_CONTACTS" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.WRITE_INTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
     <uses-permission android:name="android.permission.CAMERA" />
@@ -55,7 +56,8 @@
 
         <activity android:name=".Activities.NewChatGroupActivity" />
         <activity android:name=".Activities.ParticipantsActivity" />
-        <activity android:name=".Activities.AddParticipantsActivity"></activity>
+        <activity android:name=".Activities.AddParticipantsActivity" />
+        <activity android:name=".Activities.MemeaudioActivity"></activity>
     </application>
 
 </manifest>

@@ -25,4 +25,6 @@
     <string name="group_name">Group Name</string>
     <string name="participants">Participants</string>
     <string name="add_participants">Add participants</string>
+    <string name="step_1_choose_an_image">Step 1: Choose an Image</string>
+    <string name="step_2_record_your_audio">Step 2: Record Your Audio</string>
 </resources>

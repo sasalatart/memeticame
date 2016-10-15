@@ -44,7 +44,6 @@ import com.salatart.memeticame.Utils.Routes;
 import com.salatart.memeticame.Utils.SessionUtils;
 import com.salatart.memeticame.Views.MessagesAdapter;
 
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -62,6 +61,7 @@ public class ChatActivity extends AppCompatActivity {
     public static final int REQUEST_PICK_FILE = 1;
     public static final int REQUEST_IMAGE_CAPTURE = 2;
     public static final int REQUEST_VIDEO_CAPTURE = 3;
+    public static final int REQUEST_MEMEAUDIO_FILE = 4;
     public static final int PERMISSIONS_CODE = 200;
     public static final String PICTURE_STATE = "pictureState";
     public static final String VIDEO_STATE = "videoState";
@@ -73,12 +73,12 @@ public class ChatActivity extends AppCompatActivity {
     private boolean mPermissionToWrite = false;
     private String[] mPermissions = {"android.permission.RECORD_AUDIO", "android.permission.CAMERA", "android.permission.WRITE_EXTERNAL_STORAGE"};
 
-    private boolean mCurrentlyRecording;
-
     private Chat mChat;
     private MessagesAdapter mAdapter;
 
+    private boolean mCurrentlyRecording;
     private AudioManager mAudioManager;
+
     private Attachment mCurrentAttachment;
     private Uri mCurrentImageUri;
     private Uri mCurrentVideoUri;
@@ -137,6 +137,14 @@ public class ChatActivity extends AppCompatActivity {
         }
     };
 
+    private BroadcastReceiver mZipReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            finish();
+            startActivity(getIntent());
+        }
+    };
+
     public static Intent getIntent(Context context, Chat chat) {
         Intent intent = new Intent(context, ChatActivity.class);
         intent.putExtra(Chat.PARCELABLE_KEY, chat);
@@ -162,11 +170,6 @@ public class ChatActivity extends AppCompatActivity {
 
         Bundle data = getIntent().getExtras();
         mChat = data.getParcelable(Chat.PARCELABLE_KEY);
-
-        if (!mChat.userPresent(SessionUtils.getPhoneNumber(ChatActivity.this))) {
-            startActivity(new Intent(ChatActivity.this, MainActivity.class));
-            finish();
-        }
 
         setTitle(mChat.getTitle());
 
@@ -207,6 +210,7 @@ public class ChatActivity extends AppCompatActivity {
         registerReceiver(mOnDownloadReceiver, new IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE));
         registerReceiver(mUsersKickedReceiver, new IntentFilter(ParticipantsActivity.USER_KICKED_FILTER));
         registerReceiver(mUsersAddedReceiver, new IntentFilter(AddParticipantsActivity.USERS_ADDED_FILTER));
+        registerReceiver(mZipReceiver, new IntentFilter(MemeaudioActivity.UNZIP_FILTER));
         sIsActive = true;
     }
 
@@ -217,6 +221,7 @@ public class ChatActivity extends AppCompatActivity {
         unregisterReceiver(mOnDownloadReceiver);
         unregisterReceiver(mUsersKickedReceiver);
         unregisterReceiver(mUsersAddedReceiver);
+        unregisterReceiver(mZipReceiver);
         sIsActive = false;
     }
 
@@ -364,9 +369,9 @@ public class ChatActivity extends AppCompatActivity {
         mAttachmentImageView.setVisibility(mAttachmentImageView.getVisibility() == View.GONE ? View.VISIBLE : View.GONE);
 
         if (mAttachmentImageView.getVisibility() == View.VISIBLE) {
-            if (mCurrentAttachment.isImage() || mCurrentAttachment.isVideo()) {
+            if (mCurrentAttachment.isImage() || mCurrentAttachment.isVideo() || mCurrentAttachment.isMemeaudio()) {
                 Glide.with(getApplicationContext())
-                        .load(mCurrentAttachment.getUri())
+                        .load(mCurrentAttachment.getShowableStringUri(ChatActivity.this))
                         .override(Attachment.IMAGE_THUMB_SIZE, Attachment.IMAGE_THUMB_SIZE)
                         .into(mAttachmentImageView);
             } else if (mCurrentAttachment.isAudio()) {
@@ -380,7 +385,12 @@ public class ChatActivity extends AppCompatActivity {
     }
 
     public void selectMediaResource(View view) {
-        startActivityForResult(FileUtils.getSelectFileIntent(), REQUEST_PICK_FILE);
+        startActivityForResult(FileUtils.getSelectFileIntent("*/*"), REQUEST_PICK_FILE);
+    }
+
+    public void dispatchTakeMemeaudioIntent(View view) {
+        Intent takeMemeaudioIntent = new Intent(ChatActivity.this, MemeaudioActivity.class);
+        startActivityForResult(takeMemeaudioIntent, REQUEST_MEMEAUDIO_FILE);
     }
 
     public void dispatchTakePictureIntent(View view) {
@@ -411,7 +421,7 @@ public class ChatActivity extends AppCompatActivity {
         if (mCurrentlyRecording) {
             File audioFile = mAudioManager.stopAudioRecording();
             Uri uri = mAudioManager.addRecordingToMediaLibrary(ChatActivity.this, audioFile);
-            setCurrentAttachmentFromUri(uri);
+            setCurrentAttachmentFromUri(uri, false);
             mRecordButton.setColorFilter(Color.BLACK);
         } else {
             mAudioManager.startAudioRecording(ChatActivity.this);
@@ -420,12 +430,13 @@ public class ChatActivity extends AppCompatActivity {
         mCurrentlyRecording = !mCurrentlyRecording;
     }
 
-    private void setCurrentAttachmentFromUri(Uri uri) {
-        mCurrentAttachment = ParserUtils.attachmentFromUri(ChatActivity.this, uri);
+    private void setCurrentAttachmentFromUri(Uri uri, boolean isZip) {
+        mCurrentAttachment = ParserUtils.attachmentFromUri(ChatActivity.this, uri, isZip);
 
         if (mCurrentAttachment == null) {
             return;
         }
+
         toggleAttachmentVisibilities();
     }
 
@@ -433,12 +444,15 @@ public class ChatActivity extends AppCompatActivity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
-        if (requestCode == REQUEST_PICK_FILE && resultCode == RESULT_OK && data != null && data != null) {
-            setCurrentAttachmentFromUri(data.getData());
+        if (requestCode == REQUEST_PICK_FILE && resultCode == RESULT_OK && data != null) {
+            setCurrentAttachmentFromUri(data.getData(), false);
         } else if (requestCode == REQUEST_IMAGE_CAPTURE && resultCode == RESULT_OK) {
-            setCurrentAttachmentFromUri(mCurrentImageUri);
+            setCurrentAttachmentFromUri(mCurrentImageUri, false);
         } else if (requestCode == REQUEST_VIDEO_CAPTURE && resultCode == RESULT_OK) {
-            setCurrentAttachmentFromUri(mCurrentVideoUri);
+            setCurrentAttachmentFromUri(mCurrentVideoUri, false);
+        } else if (requestCode == REQUEST_MEMEAUDIO_FILE && resultCode == RESULT_OK && data != null) {
+            Uri memeaudioZipUri = (Uri) data.getExtras().get(MemeaudioActivity.MEMEAUDIO_ZIP);
+            setCurrentAttachmentFromUri(memeaudioZipUri, true);
         }
     }
 
@@ -450,7 +464,7 @@ public class ChatActivity extends AppCompatActivity {
             case PERMISSIONS_CODE:
                 mPermissionToRecordAudio = grantResults[0] == PackageManager.PERMISSION_GRANTED;
                 mPermissionToUseCamera = grantResults[1] == PackageManager.PERMISSION_GRANTED;
-                mPermissionToWrite = grantResults[2] == PackageManager.PERMISSION_GRANTED;
+                mPermissionToWrite = (grantResults[2] == PackageManager.PERMISSION_GRANTED);
                 break;
         }
 

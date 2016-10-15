@@ -1,5 +1,6 @@
 package com.salatart.memeticame.Utils;
 
+import android.annotation.SuppressLint;
 import android.app.DownloadManager;
 import android.content.ActivityNotFoundException;
 import android.content.ContentResolver;
@@ -10,6 +11,8 @@ import android.database.Cursor;
 import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.Environment;
+import android.provider.DocumentsContract;
+import android.provider.MediaStore;
 import android.provider.OpenableColumns;
 import android.support.v7.app.AlertDialog;
 import android.util.Base64;
@@ -30,10 +33,28 @@ import java.util.Date;
  */
 public class FileUtils {
     public static String getName(Context context, Uri uri) {
-        Cursor returnCursor = context.getContentResolver().query(uri, null, null, null, null);
-        int nameIndex = returnCursor.getColumnIndex(OpenableColumns.DISPLAY_NAME);
-        returnCursor.moveToFirst();
-        return returnCursor.getString(nameIndex);
+        String result = null;
+
+        if (uri.getScheme() != null && uri.getScheme().equals("content")) {
+            Cursor cursor = context.getContentResolver().query(uri, null, null, null, null);
+            try {
+                if (cursor != null && cursor.moveToFirst()) {
+                    result = cursor.getString(cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME));
+                }
+            } finally {
+                cursor.close();
+            }
+        }
+
+        if (result == null) {
+            result = uri.getPath();
+            int cut = result.lastIndexOf('/');
+            if (cut != -1) {
+                result = result.substring(cut + 1);
+            }
+        }
+
+        return result;
     }
 
     public static String getMimeType(Context context, Uri uri) {
@@ -59,10 +80,10 @@ public class FileUtils {
         return byteBuffer.toByteArray();
     }
 
-    public static Intent getSelectFileIntent() {
+    public static Intent getSelectFileIntent(String type) {
         Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
         intent.addCategory(Intent.CATEGORY_OPENABLE);
-        intent.setType("*/*");
+        intent.setType(type);
         return intent;
     }
 
@@ -85,7 +106,7 @@ public class FileUtils {
     }
 
     public static boolean checkFileExistence(Context context, String name) {
-        File file1 = new File(Environment.getExternalStorageDirectory() + "/Memeticame/" + name);
+        File file1 = new File(FileUtils.getMemeticameDirectory() + "/" + name);
         File file2 = new File(context.getExternalFilesDir(Environment.DIRECTORY_PICTURES) + "/" + name);
         File file3 = new File(context.getExternalFilesDir(Environment.DIRECTORY_MUSIC) + "/" + name);
 
@@ -93,7 +114,7 @@ public class FileUtils {
     }
 
     public static Uri getUriFromFileName(Context context, String name) {
-        File file1 = new File(Environment.getExternalStorageDirectory() + "/Memeticame/" + name);
+        File file1 = new File(FileUtils.getMemeticameDirectory() + "/" + name);
         File file2 = new File(context.getExternalFilesDir(Environment.DIRECTORY_PICTURES) + "/" + name);
         File file3 = new File(context.getExternalFilesDir(Environment.DIRECTORY_MUSIC) + "/" + name);
 
@@ -109,11 +130,11 @@ public class FileUtils {
     }
 
     public static void downloadFile(Context context, Attachment attachment) {
-        if (!URLUtil.isValidUrl(attachment.getUri())) {
+        if (!URLUtil.isValidUrl(attachment.getStringUri())) {
             return;
         }
 
-        File dir = new File(Environment.getExternalStorageDirectory() + "/Memeticame");
+        File dir = new File(FileUtils.getMemeticameDirectory());
 
         if (!dir.exists()) {
             dir.mkdirs();
@@ -121,7 +142,7 @@ public class FileUtils {
 
         DownloadManager downloadManager = (DownloadManager) context.getSystemService(Context.DOWNLOAD_SERVICE);
 
-        Uri downloadUri = Uri.parse(attachment.getUri());
+        Uri downloadUri = Uri.parse(attachment.getStringUri());
         DownloadManager.Request request = new DownloadManager.Request(downloadUri);
         request.setAllowedNetworkTypes(
                 DownloadManager.Request.NETWORK_WIFI | DownloadManager.Request.NETWORK_MOBILE)
@@ -134,7 +155,7 @@ public class FileUtils {
     }
 
     public static void downloadAttachment(final Context context, final Attachment attachment) {
-        if (attachment == null || !URLUtil.isValidUrl(attachment.getUri())) {
+        if (attachment == null || !URLUtil.isValidUrl(attachment.getStringUri())) {
             return;
         }
 
@@ -163,16 +184,43 @@ public class FileUtils {
         if (!fileExists) {
             downloadAttachment(context, attachment);
         } else if (attachment.isAudio()) {
-            RingtoneManager.getRingtone(context, Uri.parse(attachment.getUri())).play();
+            RingtoneManager.getRingtone(context, Uri.parse(attachment.getStringUri())).play();
+        } else if (attachment.isMemeaudio()) {
+            RingtoneManager.getRingtone(context, attachment.getMemeaudioAudioUri(context)).play();
         } else {
             try {
-                context.startActivity(FileUtils.getOpenFileIntent(Uri.parse(attachment.getUri()), attachment.getMimeType()));
-            }
-            catch (ActivityNotFoundException e) {
+                context.startActivity(FileUtils.getOpenFileIntent(Uri.parse(attachment.getStringUri()), attachment.getMimeType()));
+            } catch (ActivityNotFoundException e) {
                 return false;
             }
         }
 
         return true;
+    }
+
+    @SuppressLint("NewApi")
+    public static String getRealPathFromURI(Context context, Uri uri) {
+        String filePath = "";
+        String wholeID = DocumentsContract.getDocumentId(uri);
+
+        String id = wholeID.split(":")[1];
+
+        String[] column = {MediaStore.Images.Media.DATA};
+
+        String sel = MediaStore.Images.Media._ID + "=?";
+
+        Cursor cursor = context.getContentResolver().query(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, column, sel, new String[]{id}, null);
+
+        int columnIndex = cursor.getColumnIndex(column[0]);
+
+        if (cursor.moveToFirst()) {
+            filePath = cursor.getString(columnIndex);
+        }
+        cursor.close();
+        return filePath;
+    }
+
+    public static String getMemeticameDirectory() {
+        return Environment.getExternalStorageDirectory() + "/Memeticame";
     }
 }
