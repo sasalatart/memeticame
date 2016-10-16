@@ -33,11 +33,13 @@ import android.widget.Toast;
 import com.bumptech.glide.Glide;
 import com.salatart.memeticame.Models.Attachment;
 import com.salatart.memeticame.Models.Chat;
+import com.salatart.memeticame.Models.ChatInvitation;
 import com.salatart.memeticame.Models.Message;
 import com.salatart.memeticame.Models.User;
 import com.salatart.memeticame.R;
 import com.salatart.memeticame.Utils.AudioManager;
 import com.salatart.memeticame.Utils.FileUtils;
+import com.salatart.memeticame.Utils.FilterUtils;
 import com.salatart.memeticame.Utils.HttpClient;
 import com.salatart.memeticame.Utils.ParserUtils;
 import com.salatart.memeticame.Utils.Routes;
@@ -49,7 +51,6 @@ import org.json.JSONObject;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
 
 import okhttp3.Call;
 import okhttp3.Callback;
@@ -57,7 +58,6 @@ import okhttp3.Request;
 import okhttp3.Response;
 
 public class ChatActivity extends AppCompatActivity {
-    public static final String NEW_MESSAGE_FILTER = "newMessageFilter";
     public static final int REQUEST_PICK_FILE = 1;
     public static final int REQUEST_IMAGE_CAPTURE = 2;
     public static final int REQUEST_VIDEO_CAPTURE = 3;
@@ -123,17 +123,14 @@ public class ChatActivity extends AppCompatActivity {
         }
     };
 
-    private BroadcastReceiver mUsersAddedReceiver = new BroadcastReceiver() {
+    private BroadcastReceiver mUserAcceptedInvitationReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            Chat chat = intent.getParcelableExtra(Chat.PARCELABLE_KEY);
-            ArrayList<User> users = intent.getParcelableArrayListExtra(User.PARCELABLE_KEY_ARRAY_LIST);
+            ChatInvitation chatInvitation = intent.getParcelableExtra(ChatInvitation.PARCELABLE_KEY);
 
-            if (chat.getId() != mChat.getId()) {
-                return;
+            if (chatInvitation.getChatId() == mChat.getId()) {
+                mChat.getParticipants().add(chatInvitation.getUser());
             }
-
-            mChat.addUsers(users);
         }
     };
 
@@ -206,11 +203,11 @@ public class ChatActivity extends AppCompatActivity {
 
         getChat();
 
-        registerReceiver(mMessageReceiver, new IntentFilter(ChatActivity.NEW_MESSAGE_FILTER));
+        registerReceiver(mMessageReceiver, new IntentFilter(FilterUtils.NEW_MESSAGE_FILTER));
         registerReceiver(mOnDownloadReceiver, new IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE));
-        registerReceiver(mUsersKickedReceiver, new IntentFilter(ParticipantsActivity.USER_KICKED_FILTER));
-        registerReceiver(mUsersAddedReceiver, new IntentFilter(AddParticipantsActivity.USERS_ADDED_FILTER));
-        registerReceiver(mZipReceiver, new IntentFilter(MemeaudioActivity.UNZIP_FILTER));
+        registerReceiver(mUsersKickedReceiver, new IntentFilter(FilterUtils.USER_KICKED_FILTER));
+        registerReceiver(mUserAcceptedInvitationReceiver, new IntentFilter(FilterUtils.CHAT_INVITATION_ACCEPTED_FILTER));
+        registerReceiver(mZipReceiver, new IntentFilter(FilterUtils.UNZIP_FILTER));
         sIsActive = true;
     }
 
@@ -220,7 +217,7 @@ public class ChatActivity extends AppCompatActivity {
         unregisterReceiver(mMessageReceiver);
         unregisterReceiver(mOnDownloadReceiver);
         unregisterReceiver(mUsersKickedReceiver);
-        unregisterReceiver(mUsersAddedReceiver);
+        unregisterReceiver(mUserAcceptedInvitationReceiver);
         unregisterReceiver(mZipReceiver);
         sIsActive = false;
     }

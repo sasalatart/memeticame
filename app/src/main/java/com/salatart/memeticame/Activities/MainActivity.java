@@ -7,6 +7,7 @@ import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 
+import com.salatart.memeticame.Fragments.ChatInvitationsFragment;
 import com.salatart.memeticame.Fragments.ChatsFragment;
 import com.salatart.memeticame.Fragments.ContactsFragment;
 import com.salatart.memeticame.Models.Chat;
@@ -29,6 +30,7 @@ public class MainActivity extends AppCompatActivity implements ChatsFragment.OnC
 
     private ChatsFragment mChatsFragments;
     private ContactsFragment mContactsFragments;
+    private ChatInvitationsFragment mChatInvitationsFragment;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -42,6 +44,7 @@ public class MainActivity extends AppCompatActivity implements ChatsFragment.OnC
 
         this.mChatsFragments = new ChatsFragment();
         this.mContactsFragments = new ContactsFragment();
+        this.mChatInvitationsFragment = new ChatInvitationsFragment();
 
         ViewPager viewPager = (ViewPager) findViewById(R.id.viewpager);
         setupViewPager(viewPager);
@@ -64,6 +67,7 @@ public class MainActivity extends AppCompatActivity implements ChatsFragment.OnC
 
         adapter.addFragment(this.mChatsFragments, "Chats");
         adapter.addFragment(this.mContactsFragments, "Contacts");
+        adapter.addFragment(this.mChatInvitationsFragment, "Chat Invitations");
 
         viewPager.setAdapter(adapter);
     }

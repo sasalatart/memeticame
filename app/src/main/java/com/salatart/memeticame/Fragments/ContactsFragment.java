@@ -49,7 +49,7 @@ public class ContactsFragment extends Fragment {
         @Override
         public void onReceive(Context context, Intent intent) {
             User user = intent.getParcelableExtra(User.PARCELABLE_KEY);
-            if (User.isPresent(mLocalContacts, user)) {
+            if (User.isPresent(mLocalContacts, user.getPhoneNumber())) {
                 mContacts.add(user);
                 mAdapter.notifyDataSetChanged();
             }

@@ -6,8 +6,8 @@ import android.net.Uri;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-import com.salatart.memeticame.Activities.MemeaudioActivity;
 import com.salatart.memeticame.Utils.FileUtils;
+import com.salatart.memeticame.Utils.FilterUtils;
 import com.salatart.memeticame.Utils.ZipManager;
 
 /**
@@ -80,7 +80,7 @@ public class Attachment implements Parcelable {
         if (FileUtils.checkFileExistence(context, mName.split(ZipManager.SEPARATOR)[0])) {
             return FileUtils.getUriFromFileName(context, mName.split(ZipManager.SEPARATOR)[0]);
         } else if (ZipManager.fastUnzip(FileUtils.getMemeticameDirectory() + "/" + mName)) {
-            context.sendBroadcast(new Intent(MemeaudioActivity.UNZIP_FILTER));
+            context.sendBroadcast(new Intent(FilterUtils.UNZIP_FILTER));
             return FileUtils.getUriFromFileName(context, mName.split(ZipManager.SEPARATOR)[0]);
         } else {
             return null;

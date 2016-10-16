@@ -19,11 +19,11 @@ import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.Toast;
 
-import com.salatart.memeticame.Activities.AddParticipantsActivity;
-import com.salatart.memeticame.Activities.ParticipantsActivity;
 import com.salatart.memeticame.Models.Chat;
+import com.salatart.memeticame.Models.ChatInvitation;
 import com.salatart.memeticame.Models.User;
 import com.salatart.memeticame.R;
+import com.salatart.memeticame.Utils.FilterUtils;
 import com.salatart.memeticame.Utils.HttpClient;
 import com.salatart.memeticame.Utils.ParserUtils;
 import com.salatart.memeticame.Utils.Routes;
@@ -78,18 +78,15 @@ public class ChatsFragment extends Fragment {
         }
     };
 
-    private BroadcastReceiver mUsersAddedReceiver = new BroadcastReceiver() {
+    private BroadcastReceiver mUserAcceptedInvitationReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
+            ChatInvitation chatInvitation = intent.getParcelableExtra(ChatInvitation.PARCELABLE_KEY);
             Chat chat = intent.getParcelableExtra(Chat.PARCELABLE_KEY);
-            ArrayList<User> users = intent.getParcelableArrayListExtra(User.PARCELABLE_KEY_ARRAY_LIST);
 
-            for (User user : users) {
-                if (User.comparePhones(SessionUtils.getPhoneNumber(getContext()), user.getPhoneNumber())) {
-                    mChats.add(chat);
-                    mAdapter.notifyDataSetChanged();
-                    break;
-                }
+            if (User.comparePhones(SessionUtils.getPhoneNumber(getContext()), chatInvitation.getUser().getPhoneNumber())) {
+                mChats.add(chat);
+                mAdapter.notifyDataSetChanged();
             }
         }
     };
@@ -164,8 +161,8 @@ public class ChatsFragment extends Fragment {
     public void onResume() {
         super.onResume();
         getActivity().registerReceiver(mChatsReceiver, new IntentFilter(NEW_CHAT_FILTER));
-        getActivity().registerReceiver(mUsersKickedReceiver, new IntentFilter(ParticipantsActivity.USER_KICKED_FILTER));
-        getActivity().registerReceiver(mUsersAddedReceiver, new IntentFilter(AddParticipantsActivity.USERS_ADDED_FILTER));
+        getActivity().registerReceiver(mUsersKickedReceiver, new IntentFilter(FilterUtils.USER_KICKED_FILTER));
+        getActivity().registerReceiver(mUserAcceptedInvitationReceiver, new IntentFilter(FilterUtils.CHAT_INVITATION_ACCEPTED_FILTER));
     }
 
     @Override
@@ -173,7 +170,7 @@ public class ChatsFragment extends Fragment {
         super.onPause();
         getActivity().unregisterReceiver(mChatsReceiver);
         getActivity().unregisterReceiver(mUsersKickedReceiver);
-        getActivity().unregisterReceiver(mUsersAddedReceiver);
+        getActivity().unregisterReceiver(mUserAcceptedInvitationReceiver);
     }
 
     public void showChats() {

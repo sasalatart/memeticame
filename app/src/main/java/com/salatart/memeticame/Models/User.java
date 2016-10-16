@@ -74,9 +74,18 @@ public class User implements Parcelable {
         return users;
     }
 
-    public static boolean isPresent(List<User> users, User newUser) {
+    public static void removeFromList(ArrayList<User> users, User userToRemove) {
         for (User user : users) {
-            if (User.comparePhones(user.getPhoneNumber(), newUser.getPhoneNumber())) {
+            if (user.getId() == userToRemove.getId()) {
+                users.remove(user);
+                break;
+            }
+        }
+    }
+
+    public static boolean isPresent(List<User> users, String phoneNumber) {
+        for (User user : users) {
+            if (User.comparePhones(user.getPhoneNumber(), phoneNumber)) {
                 return true;
             }
         }

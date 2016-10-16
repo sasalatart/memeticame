@@ -30,7 +30,6 @@ import static com.salatart.memeticame.Activities.ChatActivity.REQUEST_PICK_FILE;
 
 public class MemeaudioActivity extends AppCompatActivity {
     public static final String MEMEAUDIO_ZIP = "MemeaudioZip";
-    public static final String UNZIP_FILTER = "unzipFilter";
 
     @BindView(R.id.group_step_1) RelativeLayout mGroup1Layout;
     @BindView(R.id.group_step_2) RelativeLayout mGroup2Layout;

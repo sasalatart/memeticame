@@ -110,15 +110,6 @@ public class Chat implements Parcelable {
         return true;
     }
 
-    public boolean userPresent(String phoneNumber) {
-        for (User user : mParticipants) {
-            if (User.comparePhones(user.getPhoneNumber(), phoneNumber)) {
-                return true;
-            }
-        }
-        return false;
-    }
-
     public int getId() {
         return mId;
     }
@@ -149,20 +140,6 @@ public class Chat implements Parcelable {
 
     public ArrayList<Message> getMessages() {
         return mMessages;
-    }
-
-    public void addUsers(ArrayList<User> newUsers) {
-        for (User newUser : newUsers) {
-            boolean isPresent = false;
-            for (User user : mParticipants) {
-                if (user.getId() == newUser.getId()) {
-                    isPresent = true;
-                }
-            }
-            if (!isPresent) {
-                mParticipants.add(newUser);
-            }
-        }
     }
 
     @Override

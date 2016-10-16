@@ -11,14 +11,13 @@ import android.view.MenuItem;
 import android.widget.ListView;
 
 import com.salatart.memeticame.Models.Chat;
+import com.salatart.memeticame.Models.ChatInvitation;
 import com.salatart.memeticame.Models.User;
 import com.salatart.memeticame.R;
+import com.salatart.memeticame.Utils.FilterUtils;
 import com.salatart.memeticame.Views.ParticipantsAdapter;
 
-import java.util.ArrayList;
-
 public class ParticipantsActivity extends AppCompatActivity {
-    public static final String USER_KICKED_FILTER = "userKickedFilter";
 
     private ParticipantsAdapter mAdapter;
     private Chat mChat;
@@ -34,18 +33,15 @@ public class ParticipantsActivity extends AppCompatActivity {
         }
     };
 
-    private BroadcastReceiver mUsersAddedReceiver = new BroadcastReceiver() {
+    private BroadcastReceiver mUserAcceptedInvitation = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            Chat chat = intent.getParcelableExtra(Chat.PARCELABLE_KEY);
-            ArrayList<User> users = intent.getParcelableArrayListExtra(User.PARCELABLE_KEY_ARRAY_LIST);
+            ChatInvitation chatInvitation = intent.getParcelableExtra(ChatInvitation.PARCELABLE_KEY);
 
-            if (chat.getId() != mChat.getId()) {
-                return;
+            if (chatInvitation.getChatId() == mChat.getId()) {
+                mChat.getParticipants().add(chatInvitation.getUser());
+                mAdapter.notifyDataSetChanged();
             }
-
-            mChat.addUsers(users);
-            mAdapter.notifyDataSetChanged();
         }
     };
 
@@ -73,14 +69,14 @@ public class ParticipantsActivity extends AppCompatActivity {
     @Override
     public void onResume() {
         super.onResume();
-        registerReceiver(mUsersKickedReceiver, new IntentFilter(USER_KICKED_FILTER));
-        registerReceiver(mUsersAddedReceiver, new IntentFilter(AddParticipantsActivity.USERS_ADDED_FILTER));
+        registerReceiver(mUsersKickedReceiver, new IntentFilter(FilterUtils.USER_KICKED_FILTER));
+        registerReceiver(mUserAcceptedInvitation, new IntentFilter(FilterUtils.CHAT_INVITATION_ACCEPTED_FILTER));
     }
 
     @Override
     public void onPause() {
         super.onPause();
         unregisterReceiver(mUsersKickedReceiver);
-        unregisterReceiver(mUsersAddedReceiver);
+        unregisterReceiver(mUserAcceptedInvitation);
     }
 }

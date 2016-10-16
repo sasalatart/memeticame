@@ -6,6 +6,7 @@ import android.util.Log;
 
 import com.salatart.memeticame.Models.Attachment;
 import com.salatart.memeticame.Models.Chat;
+import com.salatart.memeticame.Models.ChatInvitation;
 import com.salatart.memeticame.Models.Message;
 import com.salatart.memeticame.Models.User;
 
@@ -15,7 +16,6 @@ import org.json.JSONObject;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Map;
 
 /**
  * Created by sasalatart on 10/10/16.
@@ -47,20 +47,6 @@ public class ParserUtils {
         return chats;
     }
 
-    public static Chat chatFromMap(Map mapChat) throws JSONException {
-        ArrayList<User> users = usersFromJsonArray(new JSONArray(mapChat.get("users").toString()));
-        User admin = userFromJson(new JSONObject(mapChat.get("admin").toString()));
-        ArrayList<Message> messages = messagesFromJsonArray(new JSONArray(mapChat.get("messages").toString()));
-
-        return new Chat(Integer.parseInt(mapChat.get("id").toString()),
-                mapChat.get("title").toString(),
-                Boolean.parseBoolean(mapChat.get("group").toString()),
-                mapChat.get("created_at").toString(),
-                admin.getPhoneNumber(),
-                users,
-                messages);
-    }
-
     public static Message messageFromJson(JSONObject jsonMessage) throws JSONException {
         Message message = new Message(jsonMessage.getInt("id"),
                 jsonMessage.getString("sender_phone"),
@@ -86,28 +72,6 @@ public class ParserUtils {
         }
 
         return messages;
-    }
-
-    public static Message messageFromMap(Map mapMessage) throws JSONException {
-        Message message = new Message(Integer.parseInt(mapMessage.get("id").toString()),
-                mapMessage.get("sender_phone").toString(),
-                mapMessage.get("content").toString(),
-                Integer.parseInt(mapMessage.get("chat_id").toString()),
-                mapMessage.get("created_at").toString());
-
-        JSONObject jsonAttachment = new JSONObject(mapMessage.get("attachment_link").toString());
-        if (!jsonAttachment.getString("name").equals("null")) {
-            message.setAttachment(new Attachment(jsonAttachment.getString("name"),
-                    jsonAttachment.getString("mime_type"),
-                    null,
-                    Routes.DOMAIN + jsonAttachment.getString("url")));
-        }
-
-        return message;
-    }
-
-    public static User userFromMap(Map mapUser) {
-        return new User(Integer.parseInt(mapUser.get("id").toString()), mapUser.get("name").toString(), mapUser.get("phone_number").toString());
     }
 
     public static User userFromJson(JSONObject jsonUser) throws JSONException {
@@ -143,5 +107,23 @@ public class ParserUtils {
             Log.e("ERROR", e.toString());
             return null;
         }
+    }
+
+    public static ChatInvitation chatInvitationFromJson(JSONObject jsonChatInvitation) throws JSONException {
+        return new ChatInvitation(jsonChatInvitation.getInt("id"),
+                ParserUtils.userFromJson(new JSONObject(jsonChatInvitation.getString("user"))),
+                jsonChatInvitation.getInt("chat_id"),
+                jsonChatInvitation.getString("chat_title"),
+                jsonChatInvitation.getString("created_at"));
+    }
+
+    public static ArrayList<ChatInvitation> chatInvitationsFromJsonArray(JSONArray jsonResponse) throws JSONException {
+        ArrayList<ChatInvitation> chatInvitations = new ArrayList<>();
+
+        for (int i = 0; i < jsonResponse.length(); i++) {
+            chatInvitations.add(chatInvitationFromJson(jsonResponse.getJSONObject(i)));
+        }
+
+        return chatInvitations;
     }
 }

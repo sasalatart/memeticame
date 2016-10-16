@@ -5,6 +5,7 @@ import android.util.Log;
 
 import com.salatart.memeticame.Models.Attachment;
 import com.salatart.memeticame.Models.Chat;
+import com.salatart.memeticame.Models.ChatInvitation;
 import com.salatart.memeticame.Models.Message;
 import com.salatart.memeticame.Models.User;
 
@@ -148,17 +149,51 @@ public class Routes {
                 .build();
     }
 
-    public static Request addParticipantsRequest(Context context, Chat chat, ArrayList<User> users) {
+    public static Request inviteUsersRequest(Context context, Chat chat, ArrayList<User> users) {
         FormBody.Builder formBuilder = new FormBody.Builder();
         for (int i = 0; i < users.size(); i++) {
             formBuilder.add("users[" + i + "]", users.get(i).getPhoneNumber());
         }
 
         return new Request.Builder()
-                .url(DOMAIN + "/chats/" + chat.getId() + "/add_users")
+                .url(DOMAIN + "/chats/" + chat.getId() + "/invite")
                 .addHeader("content-type", "application/json")
                 .addHeader("authorization", "Token token=" + SessionUtils.getToken(context))
                 .post(formBuilder.build())
+                .build();
+    }
+
+    public static Request chatInvitationIndexRequest(Context context) {
+        return new Request.Builder()
+                .url(DOMAIN + "/chat_invitations")
+                .addHeader("content-type", "application/json")
+                .addHeader("authorization", "Token token=" + SessionUtils.getToken(context))
+                .build();
+    }
+
+    public static Request chatInvitationsFromChatRequest(Context context, Chat chat) {
+        return new Request.Builder()
+                .url(DOMAIN + "/chats/" + chat.getId() + "/invitations")
+                .addHeader("content-type", "application/json")
+                .addHeader("authorization", "Token token=" + SessionUtils.getToken(context))
+                .build();
+    }
+
+    public static Request rejectChatInvitationRequest(Context context, ChatInvitation chatInvitation) {
+        return new Request.Builder()
+                .url(DOMAIN + "/chat_invitations/" + chatInvitation.getId() + "/reject")
+                .addHeader("content-type", "application/json")
+                .addHeader("authorization", "Token token=" + SessionUtils.getToken(context))
+                .post(new FormBody.Builder().build())
+                .build();
+    }
+
+    public static Request acceptChatInvitationRequest(Context context, ChatInvitation chatInvitation) {
+        return new Request.Builder()
+                .url(DOMAIN + "/chat_invitations/" + chatInvitation.getId() + "/accept")
+                .addHeader("content-type", "application/json")
+                .addHeader("authorization", "Token token=" + SessionUtils.getToken(context))
+                .post(new FormBody.Builder().build())
                 .build();
     }
 

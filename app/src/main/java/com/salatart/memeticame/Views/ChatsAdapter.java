@@ -7,10 +7,10 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.TextView;
 
-import java.util.ArrayList;
-
 import com.salatart.memeticame.Models.Chat;
 import com.salatart.memeticame.R;
+
+import java.util.ArrayList;
 
 /**
  * Created by sasalatart on 8/29/16.
@@ -22,12 +22,10 @@ public class ChatsAdapter extends ArrayAdapter<Chat> {
     public ChatsAdapter(Context context, int resource, ArrayList<Chat> chats) {
         super(context, resource, chats);
         mChats = chats;
-        mLayoutInflater = (LayoutInflater)context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        mLayoutInflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
     }
 
-    /**
-     * Return the view of a row.
-     */
+
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
         View view = convertView;

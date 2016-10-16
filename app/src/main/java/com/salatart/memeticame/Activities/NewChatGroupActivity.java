@@ -37,7 +37,7 @@ public class NewChatGroupActivity extends AppCompatActivity {
         @Override
         public void onReceive(Context context, Intent intent) {
             mContacts = intent.getParcelableArrayListExtra(ContactsUtils.INTERSECTED_CONTACTS_PARCELABLE_KEY);
-            mAdapter = new ContactsSelectAdapter(NewChatGroupActivity.this, R.layout.list_item_contact, mContacts, mSelectedContacts);
+            mAdapter = new ContactsSelectAdapter(NewChatGroupActivity.this, R.layout.list_item_contact, mContacts, mSelectedContacts, new ArrayList<User>());
             NewChatGroupActivity.this.runOnUiThread(new Runnable() {
                 public void run() {
                     mContactsListView.setAdapter(mAdapter);
