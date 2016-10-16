@@ -28,4 +28,6 @@
     <string name="step_1_choose_an_image">Step 1: Choose an Image</string>
     <string name="step_2_record_your_audio">Step 2: Record Your Audio</string>
     <string name="invitation_to">Invitation to...</string>
+    <string name="admin">Admin</string>
+    <string name="created_at">Created At</string>
 </resources>

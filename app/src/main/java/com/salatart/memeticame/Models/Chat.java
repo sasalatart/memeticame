@@ -126,6 +126,10 @@ public class Chat implements Parcelable {
         return mAdmin;
     }
 
+    public String getCreatedAt() {
+        return mCreatedAt;
+    }
+
     public ArrayList<User> getParticipants() {
         return mParticipants;
     }

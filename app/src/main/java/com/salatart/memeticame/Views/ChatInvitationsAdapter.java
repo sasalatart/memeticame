@@ -47,7 +47,7 @@ public class ChatInvitationsAdapter extends ArrayAdapter<ChatInvitation> {
             convertView = mLayoutInflater.inflate(R.layout.list_item_chat_invitation, parent, false);
         }
 
-        TextView titleView = (TextView) convertView.findViewById(R.id.title);
+        TextView titleView = (TextView) convertView.findViewById(R.id.label_title);
         titleView.setText(chatInvitation.getChatTitle());
 
         final Callback callback = new Callback() {

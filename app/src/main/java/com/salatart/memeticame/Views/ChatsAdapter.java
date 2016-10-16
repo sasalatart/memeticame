@@ -9,6 +9,7 @@ import android.widget.TextView;
 
 import com.salatart.memeticame.Models.Chat;
 import com.salatart.memeticame.R;
+import com.salatart.memeticame.Utils.TimeUtils;
 
 import java.util.ArrayList;
 
@@ -39,8 +40,15 @@ public class ChatsAdapter extends ArrayAdapter<Chat> {
             }
         }
 
-        TextView titleView = (TextView) view.findViewById(R.id.title);
+        TextView titleView = (TextView) view.findViewById(R.id.label_title);
         titleView.setText(chat.getTitle());
+
+        TextView adminView = (TextView) view.findViewById(R.id.label_admin);
+        adminView.setText("Admin: " + chat.getParticipantsHash().get(chat.getAdmin()));
+
+        TextView createdAt = (TextView) view.findViewById(R.id.label_created_at);
+        createdAt.setText("Created At: " + TimeUtils.parseISODate(chat.getCreatedAt()));
+
         return view;
     }
 
