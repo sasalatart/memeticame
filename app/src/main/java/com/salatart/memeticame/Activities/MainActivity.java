@@ -3,10 +3,12 @@ package com.salatart.memeticame.Activities;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.provider.ContactsContract;
 import android.support.design.widget.TabLayout;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 
 import com.salatart.memeticame.Fragments.ChatInvitationsFragment;
 import com.salatart.memeticame.Fragments.ChatsFragment;
@@ -15,23 +17,15 @@ import com.salatart.memeticame.Models.Chat;
 import com.salatart.memeticame.Models.User;
 import com.salatart.memeticame.R;
 import com.salatart.memeticame.Utils.ContactsUtils;
-import com.salatart.memeticame.Utils.HttpClient;
-import com.salatart.memeticame.Utils.Routes;
 import com.salatart.memeticame.Utils.SessionUtils;
 import com.salatart.memeticame.Views.ViewPagerAdapter;
 
-import java.io.IOException;
-
 import io.realm.Realm;
-import okhttp3.Call;
-import okhttp3.Callback;
-import okhttp3.Request;
-import okhttp3.Response;
 
 import static com.salatart.memeticame.Utils.ContactsUtils.PERMISSIONS_REQUEST_READ_CONTACTS;
+import static com.salatart.memeticame.Utils.FilterUtils.REQUEST_NEW_CONTACT;
 
-public class MainActivity extends AppCompatActivity implements ChatsFragment.OnChatSelected,
-        ChatsFragment.OnCreateGroupClicked, ContactsFragment.OnContactSelected, Routes.OnLogout {
+public class MainActivity extends AppCompatActivity implements ChatsFragment.OnChatSelected, ContactsFragment.OnContactSelected {
 
     private ChatsFragment mChatsFragments;
     private ContactsFragment mContactsFragments;
@@ -50,6 +44,28 @@ public class MainActivity extends AppCompatActivity implements ChatsFragment.OnC
         }
 
         setupViewPager();
+    }
+
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.basic_menu, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+
+        if (id == R.id.action_logout) {
+            SessionUtils.logout(MainActivity.this);
+        } else if (id == R.id.action_add_contact) {
+            startActivityForResult(new Intent(Intent.ACTION_INSERT, ContactsContract.Contacts.CONTENT_URI), REQUEST_NEW_CONTACT);
+        } else if (id == R.id.action_create_group_chat) {
+            startActivity(NewChatGroupActivity.getIntent(getApplicationContext()));
+        } else if (id == R.id.action_see_gallery) {
+            startActivity(new Intent(MainActivity.this, GalleryActivity.class));
+        }
+
+        return super.onOptionsItemSelected(item);
     }
 
     @Override
@@ -94,27 +110,12 @@ public class MainActivity extends AppCompatActivity implements ChatsFragment.OnC
     }
 
     @Override
-    public void OnCreateGroupClicked() {
-        startActivity(NewChatGroupActivity.getIntent(getApplicationContext()));
-    }
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
 
-    @Override
-    public void OnLogout() {
-        Request request = Routes.logoutRequest(getApplicationContext());
-        HttpClient.getInstance().newCall(request).enqueue(new Callback() {
-            @Override
-            public void onFailure(Call call, IOException e) {
-                Log.e("ERROR", e.toString());
-            }
-
-            @Override
-            public void onResponse(Call call, Response response) throws IOException {
-                SessionUtils.logout(getApplicationContext());
-                startActivity(new Intent(getApplicationContext(), LoginActivity.class));
-                MainActivity.this.finish();
-                response.body().close();
-            }
-        });
+        if (requestCode == REQUEST_NEW_CONTACT) {
+            ContactsUtils.retrieveContacts(MainActivity.this);
+        }
     }
 
     @Override

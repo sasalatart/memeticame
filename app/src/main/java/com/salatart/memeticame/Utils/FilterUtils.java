@@ -15,4 +15,6 @@ public class FilterUtils {
     public static final String NEW_CHAT_FILTER = "newChatFilter";
     public static final String RETRIEVE_CONTACTS_FILTER = "retrieveContactsFilter";
     public static final String NEW_USER_FILTER = "newUserFilter";
+
+    public static final int REQUEST_NEW_CONTACT = 1;
 }

@@ -32,4 +32,7 @@
     <string name="created_at">Created At</string>
     <string name="unread_count">Unread Count</string>
     <string name="message_size">message size</string>
+    <string name="attachment_size">attachment size</string>
+    <string name="mime_type">mime type</string>
+    <string name="see_gallery">See gallery</string>
 </resources>

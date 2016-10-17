@@ -1,8 +1,12 @@
 package com.salatart.memeticame.Utils;
 
+import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.util.Log;
+
+import com.salatart.memeticame.Activities.LoginActivity;
 
 import java.io.IOException;
 
@@ -67,10 +71,29 @@ public class SessionUtils {
         });
     }
 
-    public static void logout(Context context) {
-        SharedPreferences.Editor editor = context.getSharedPreferences(PREFERENCES, 0).edit();
-        editor.remove("Token");
-        editor.remove("PhoneNumber");
-        editor.commit();
+    public static void logout(final Activity activity) {
+        Request request = Routes.logoutRequest(activity);
+        HttpClient.getInstance().newCall(request).enqueue(new Callback() {
+            @Override
+            public void onFailure(Call call, IOException e) {
+                Log.e("ERROR", e.toString());
+            }
+
+            @Override
+            public void onResponse(Call call, Response response) throws IOException {
+                if (activity == null) {
+                    return;
+                }
+
+                SharedPreferences.Editor editor = activity.getSharedPreferences(PREFERENCES, 0).edit();
+                editor.remove("Token");
+                editor.remove("PhoneNumber");
+                editor.commit();
+
+                activity.startActivity(new Intent(activity, LoginActivity.class));
+                activity.finish();
+                response.body().close();
+            }
+        });
     }
 }

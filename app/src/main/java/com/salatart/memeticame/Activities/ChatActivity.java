@@ -418,7 +418,7 @@ public class ChatActivity extends AppCompatActivity {
         if (mCurrentlyRecording) {
             File audioFile = mAudioManager.stopAudioRecording();
             Uri uri = mAudioManager.addRecordingToMediaLibrary(ChatActivity.this, audioFile);
-            setCurrentAttachmentFromUri(uri, false);
+            setCurrentAttachmentFromUri(uri);
             mRecordButton.setColorFilter(Color.BLACK);
         } else {
             mAudioManager.startAudioRecording(ChatActivity.this);
@@ -427,8 +427,8 @@ public class ChatActivity extends AppCompatActivity {
         mCurrentlyRecording = !mCurrentlyRecording;
     }
 
-    private void setCurrentAttachmentFromUri(Uri uri, boolean isZip) {
-        mCurrentAttachment = ParserUtils.attachmentFromUri(ChatActivity.this, uri, isZip);
+    private void setCurrentAttachmentFromUri(Uri uri) {
+        mCurrentAttachment = ParserUtils.attachmentFromUri(ChatActivity.this, uri);
 
         if (mCurrentAttachment == null) {
             return;
@@ -442,14 +442,14 @@ public class ChatActivity extends AppCompatActivity {
         super.onActivityResult(requestCode, resultCode, data);
 
         if (requestCode == REQUEST_PICK_FILE && resultCode == RESULT_OK && data != null) {
-            setCurrentAttachmentFromUri(data.getData(), false);
+            setCurrentAttachmentFromUri(data.getData());
         } else if (requestCode == REQUEST_IMAGE_CAPTURE && resultCode == RESULT_OK) {
-            setCurrentAttachmentFromUri(mCurrentImageUri, false);
+            setCurrentAttachmentFromUri(mCurrentImageUri);
         } else if (requestCode == REQUEST_VIDEO_CAPTURE && resultCode == RESULT_OK) {
-            setCurrentAttachmentFromUri(mCurrentVideoUri, false);
+            setCurrentAttachmentFromUri(mCurrentVideoUri);
         } else if (requestCode == REQUEST_MEMEAUDIO_FILE && resultCode == RESULT_OK && data != null) {
             Uri memeaudioZipUri = (Uri) data.getExtras().get(MemeaudioActivity.MEMEAUDIO_ZIP);
-            setCurrentAttachmentFromUri(memeaudioZipUri, true);
+            setCurrentAttachmentFromUri(memeaudioZipUri);
         }
     }
 

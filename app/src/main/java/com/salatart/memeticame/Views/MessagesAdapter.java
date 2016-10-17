@@ -108,7 +108,7 @@ public class MessagesAdapter extends ArrayAdapter<Message> {
         if (fileExists && !isMemeaudio) {
             attachment.setUri(FileUtils.getUriFromFileName(getContext(), attachment.getName()).toString());
         } else if (fileExists) {
-            attachment.setUri(attachment.getMemeaudioImageUri(getContext()).toString());
+            attachment.setUri(attachment.getMemeaudioPartUri(getContext(), true).toString());
         }
 
         ImageView attachmentType = (ImageView) view.findViewById(R.id.label_attachment_type);

@@ -4,7 +4,6 @@ import java.util.ArrayList;
 
 import io.realm.Realm;
 import io.realm.RealmObject;
-import io.realm.RealmResults;
 import io.realm.annotations.PrimaryKey;
 
 /**
@@ -18,27 +17,12 @@ public class MessageCount extends RealmObject {
     private int mMessageCount;
     private int mUnreadMessages;
 
-    public MessageCount() {}
+    public MessageCount() {
+    }
 
     public MessageCount(int chatId, int unreadMessages) {
         this.mChatId = chatId;
         mMessageCount = 0;
-        mUnreadMessages = unreadMessages;
-    }
-
-    public int getMessageCount() {
-        return mMessageCount;
-    }
-
-    public int getUnreadMessages() {
-        return mUnreadMessages;
-    }
-
-    public void setMessageCount(int messageCount) {
-        mMessageCount = messageCount;
-    }
-
-    public void setUnreadMessages(int unreadMessages) {
         mUnreadMessages = unreadMessages;
     }
 
@@ -67,20 +51,38 @@ public class MessageCount extends RealmObject {
         }
     }
 
+    public static void addOneUnreadMessage(int chatId) {
+        Realm realm = Realm.getDefaultInstance();
+        MessageCount messageCount = realm.where(MessageCount.class).equalTo("mChatId", chatId).findFirst();
+        if (messageCount != null) {
+            realm.beginTransaction();
+            messageCount.setUnreadMessages(messageCount.getUnreadMessages() + 1);
+            realm.commitTransaction();
+        }
+    }
+
+    public int getMessageCount() {
+        return mMessageCount;
+    }
+
+    public void setMessageCount(int messageCount) {
+        mMessageCount = messageCount;
+    }
+
+    public int getUnreadMessages() {
+        return mUnreadMessages;
+    }
+
+    public void setUnreadMessages(int unreadMessages) {
+        mUnreadMessages = unreadMessages;
+    }
+
     public void update(Chat chat, int numberOfMessages, int numberOfUnreadMessages) {
         Realm realm = Realm.getDefaultInstance();
         realm.beginTransaction();
         MessageCount messageCount = MessageCount.findOne(chat);
         messageCount.setMessageCount(numberOfMessages);
         messageCount.setUnreadMessages(numberOfUnreadMessages);
-        realm.commitTransaction();
-    }
-
-    public static void addOneUnreadMessage(int chatId) {
-        Realm realm = Realm.getDefaultInstance();
-        MessageCount messageCount = realm.where(MessageCount.class).equalTo("mChatId", chatId).findFirst();
-        realm.beginTransaction();
-        messageCount.setUnreadMessages(messageCount.getUnreadMessages() + 1);
         realm.commitTransaction();
     }
 }

@@ -10,9 +10,6 @@ import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
@@ -21,7 +18,6 @@ import android.widget.Toast;
 
 import com.salatart.memeticame.Models.Chat;
 import com.salatart.memeticame.Models.ChatInvitation;
-import com.salatart.memeticame.Models.Message;
 import com.salatart.memeticame.Models.MessageCount;
 import com.salatart.memeticame.Models.User;
 import com.salatart.memeticame.R;
@@ -53,8 +49,6 @@ public class ChatsFragment extends Fragment {
     private ListView mChatsListView;
 
     private OnChatSelected mChatSelectedListener;
-    private Routes.OnLogout mOnLogoutListener;
-    private ChatsFragment.OnCreateGroupClicked mOnCreateGroupClickedListener;
 
     private BroadcastReceiver mChatsReceiver = new BroadcastReceiver() {
         @Override
@@ -130,27 +124,7 @@ public class ChatsFragment extends Fragment {
 
         showChats();
 
-        setHasOptionsMenu(true);
-
         return view;
-    }
-
-    @Override
-    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        inflater.inflate(R.menu.chats_fragment_menu, menu);
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        int id = item.getItemId();
-
-        if (id == R.id.action_logout) {
-            mOnLogoutListener.OnLogout();
-        } else if (id == R.id.action_create_group_chat) {
-            mOnCreateGroupClickedListener.OnCreateGroupClicked();
-        }
-
-        return super.onOptionsItemSelected(item);
     }
 
     @Override
@@ -158,8 +132,6 @@ public class ChatsFragment extends Fragment {
         super.onAttach(context);
         try {
             mChatSelectedListener = (OnChatSelected) context;
-            mOnLogoutListener = (Routes.OnLogout) context;
-            mOnCreateGroupClickedListener = (OnCreateGroupClicked) context;
         } catch (ClassCastException e) {
             throw new ClassCastException(context.toString() + " must implement onChatSelected");
         }
@@ -254,9 +226,5 @@ public class ChatsFragment extends Fragment {
 
     public interface OnChatSelected {
         void OnChatSelected(Chat chat);
-    }
-
-    public interface OnCreateGroupClicked {
-        void OnCreateGroupClicked();
     }
 }

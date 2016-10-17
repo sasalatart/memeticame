@@ -14,6 +14,7 @@ import com.salatart.memeticame.Utils.ZipManager;
  * Created by sasalatart on 9/14/16.
  */
 public class Attachment implements Parcelable {
+
     public static final Parcelable.Creator CREATOR = new Parcelable.Creator() {
         public Attachment createFromParcel(Parcel in) {
             return new Attachment(in);
@@ -88,28 +89,20 @@ public class Attachment implements Parcelable {
 
     public String getShowableStringUri(Context context) {
         if (isMemeaudio()) {
-            return getMemeaudioImageUri(context).toString();
+            return getMemeaudioPartUri(context, true).toString();
         } else {
             return getStringUri();
         }
     }
 
-    public Uri getMemeaudioImageUri(Context context) {
-        if (FileUtils.checkFileExistence(context, mName.split(ZipManager.SEPARATOR)[0])) {
-            return FileUtils.getUriFromFileName(context, mName.split(ZipManager.SEPARATOR)[0]);
-        } else if (ZipManager.fastUnzip(FileUtils.getMemeticameDirectory() + "/" + mName)) {
-            context.sendBroadcast(new Intent(FilterUtils.UNZIP_FILTER));
-            return FileUtils.getUriFromFileName(context, mName.split(ZipManager.SEPARATOR)[0]);
-        } else {
-            return null;
-        }
-    }
+    public Uri getMemeaudioPartUri(Context context, boolean image) {
+        int index = image ? 0 : 1;
 
-    public Uri getMemeaudioAudioUri(Context context) {
-        if (FileUtils.checkFileExistence(context, mName.split(ZipManager.SEPARATOR)[1])) {
-            return FileUtils.getUriFromFileName(context, mName.split(ZipManager.SEPARATOR)[1].replace(".zip", ""));
-        } else if (ZipManager.fastUnzip(FileUtils.getMemeticameDirectory() + "/" + mName)) {
-            return FileUtils.getUriFromFileName(context, mName.split(ZipManager.SEPARATOR)[1].replace(".zip", ""));
+        if (FileUtils.checkFileExistence(context, mName.split(ZipManager.SEPARATOR)[index].replace(".zip", ""))) {
+            return FileUtils.getUriFromFileName(context, mName.split(ZipManager.SEPARATOR)[index].replace(".zip", ""));
+        } else if (ZipManager.fastUnzip(FileUtils.getUriFromFileName(context, mName).getPath())) {
+            context.sendBroadcast(new Intent(FilterUtils.UNZIP_FILTER));
+            return FileUtils.getUriFromFileName(context, mName.split(ZipManager.SEPARATOR)[index].replace(".zip", ""));
         } else {
             return null;
         }

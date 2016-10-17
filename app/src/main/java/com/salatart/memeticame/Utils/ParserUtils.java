@@ -90,14 +90,19 @@ public class ParserUtils {
         return users;
     }
 
-    public static Attachment attachmentFromUri(Context context, Uri uri, boolean isZip) {
+    public static Attachment attachmentFromUri(Context context, Uri uri) {
         if (uri == null) {
             return null;
         }
 
-        String mimeType = isZip ? "zip/memeaudio" : FileUtils.getMimeType(context, uri);
+        String name = FileUtils.getName(context, uri);
+        String mimeType = FileUtils.getMimeType(uri);
+        if (name.contains(".zip") && name.contains(ZipManager.SEPARATOR)) {
+            mimeType = "zip/memeaudio";
+        }
+
         try {
-            return new Attachment(FileUtils.getName(context, uri),
+            return new Attachment(name,
                     mimeType,
                     FileUtils.encodeToBase64FromUri(context, uri),
                     uri.toString(),

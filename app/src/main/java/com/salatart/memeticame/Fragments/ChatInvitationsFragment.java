@@ -8,9 +8,6 @@ import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ListView;
@@ -45,8 +42,6 @@ public class ChatInvitationsFragment extends Fragment {
     private ChatInvitationsAdapter mAdapter;
     private ListView mChatInvitationsListView;
 
-    private Routes.OnLogout mOnLogoutListener;
-
     private BroadcastReceiver mChatInvitationsReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -66,7 +61,8 @@ public class ChatInvitationsFragment extends Fragment {
         }
     };
 
-    public ChatInvitationsFragment() {}
+    public ChatInvitationsFragment() {
+    }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -81,35 +77,7 @@ public class ChatInvitationsFragment extends Fragment {
 
         setChatInvitations();
 
-        setHasOptionsMenu(true);
-
         return view;
-    }
-
-    @Override
-    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        inflater.inflate(R.menu.basic_menu, menu);
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        int id = item.getItemId();
-
-        if (id == R.id.action_logout) {
-            mOnLogoutListener.OnLogout();
-        }
-
-        return super.onOptionsItemSelected(item);
-    }
-
-    @Override
-    public void onAttach(Context context) {
-        super.onAttach(context);
-        try {
-            mOnLogoutListener = (Routes.OnLogout) context;
-        } catch (ClassCastException e) {
-            throw new ClassCastException(context.toString() + " must implement onChatSelected");
-        }
     }
 
     @Override

@@ -6,12 +6,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
-import android.provider.ContactsContract;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
@@ -21,7 +17,6 @@ import com.salatart.memeticame.Models.User;
 import com.salatart.memeticame.R;
 import com.salatart.memeticame.Utils.ContactsUtils;
 import com.salatart.memeticame.Utils.FilterUtils;
-import com.salatart.memeticame.Utils.Routes;
 import com.salatart.memeticame.Views.ContactsAdapter;
 
 import java.util.ArrayList;
@@ -31,16 +26,12 @@ import java.util.ArrayList;
  */
 public class ContactsFragment extends Fragment {
 
-    public static final String CONTACTS_STATE = "contactsFragmentState";
-    public static final int REQUEST_NEW_CONTACT = 1;
-
     private ArrayList<User> mLocalContacts = new ArrayList<>();
     private ArrayList<User> mContacts = new ArrayList<>();
     private ContactsAdapter mAdapter;
     private ListView mContactsListView;
 
     private OnContactSelected mContactSelectedListener;
-    private Routes.OnLogout mOnLogoutListener;
 
     private BroadcastReceiver mUsersReceiver = new BroadcastReceiver() {
         @Override
@@ -75,28 +66,7 @@ public class ContactsFragment extends Fragment {
 
         setContacts();
 
-        setHasOptionsMenu(true);
-
         return view;
-    }
-
-    @Override
-    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        inflater.inflate(R.menu.contacts_fragment_menu, menu);
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        int id = item.getItemId();
-        if (id == R.id.action_add_contact) {
-            startActivityForResult(new Intent(Intent.ACTION_INSERT, ContactsContract.Contacts.CONTENT_URI), REQUEST_NEW_CONTACT);
-            return true;
-        } else if (id == R.id.action_logout) {
-            mOnLogoutListener.OnLogout();
-            return true;
-        }
-
-        return super.onOptionsItemSelected(item);
     }
 
     @Override
@@ -104,7 +74,6 @@ public class ContactsFragment extends Fragment {
         super.onAttach(context);
         try {
             mContactSelectedListener = (OnContactSelected) context;
-            mOnLogoutListener = (Routes.OnLogout) context;
         } catch (ClassCastException e) {
             throw new ClassCastException(context.toString() + " must implement onViewSelected");
         }
@@ -122,21 +91,6 @@ public class ContactsFragment extends Fragment {
         super.onPause();
         getActivity().unregisterReceiver(mUsersReceiver);
         getActivity().unregisterReceiver(mContactsReceiver);
-    }
-
-    @Override
-    public void onSaveInstanceState(Bundle savedInstanceState) {
-        super.onSaveInstanceState(savedInstanceState);
-        savedInstanceState.putParcelableArrayList(CONTACTS_STATE, mContacts);
-    }
-
-    @Override
-    public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-
-        if (requestCode == REQUEST_NEW_CONTACT) {
-            ContactsUtils.retrieveContacts(getActivity());
-        }
     }
 
     public void setContacts() {

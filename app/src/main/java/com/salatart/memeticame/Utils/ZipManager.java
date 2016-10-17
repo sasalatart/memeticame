@@ -24,7 +24,7 @@ import java.util.zip.ZipOutputStream;
  */
 
 public class ZipManager {
-    public static String SEPARATOR = "zipManagerSeparator";
+    public static String SEPARATOR = "-memeaudio-";
     public static int BUFFER_SIZE = 2048;
 
     public static Uri zip(String[] files, String zipFileName) throws IOException {

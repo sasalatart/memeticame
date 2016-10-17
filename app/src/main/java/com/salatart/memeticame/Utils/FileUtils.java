@@ -3,7 +3,6 @@ package com.salatart.memeticame.Utils;
 import android.annotation.SuppressLint;
 import android.app.DownloadManager;
 import android.content.ActivityNotFoundException;
-import android.content.ContentResolver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -17,6 +16,7 @@ import android.provider.OpenableColumns;
 import android.support.v7.app.AlertDialog;
 import android.util.Base64;
 import android.util.Log;
+import android.webkit.MimeTypeMap;
 import android.webkit.URLUtil;
 
 import com.salatart.memeticame.Models.Attachment;
@@ -26,12 +26,39 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 
 /**
  * Created by sasalatart on 9/13/16.
  */
 public class FileUtils {
+    public static String getMemeticameDirectory() {
+        return Environment.getExternalStorageDirectory() + "/Memeticame";
+    }
+
+    public static String getMemeticameDownloadsDirectory() {
+        return getMemeticameDirectory() + "/Downloads";
+    }
+
+    public static ArrayList<Attachment> getAllDownloadedAttachments(Context context) {
+        ArrayList<Attachment> attachments = new ArrayList<>();
+
+        File parentDir = new File(getMemeticameDownloadsDirectory());
+        if (!parentDir.exists()) {
+            parentDir.mkdirs();
+        }
+
+        File[] files = parentDir.listFiles();
+        if (files != null) {
+            for (File file : files) {
+                attachments.add(ParserUtils.attachmentFromUri(context, Uri.fromFile(file)));
+            }
+        }
+
+        return attachments;
+    }
+
     public static String getName(Context context, Uri uri) {
         String result = null;
 
@@ -57,9 +84,13 @@ public class FileUtils {
         return result;
     }
 
-    public static String getMimeType(Context context, Uri uri) {
-        ContentResolver cR = context.getContentResolver();
-        return cR.getType(uri);
+    public static String getMimeType(Uri uri) {
+        String type = null;
+        String extension = MimeTypeMap.getFileExtensionFromUrl(uri.toString());
+        if (extension != null) {
+            type = MimeTypeMap.getSingleton().getMimeTypeFromExtension(extension);
+        }
+        return type;
     }
 
     public static String encodeToBase64FromUri(Context context, Uri uri) throws IOException {
@@ -106,17 +137,19 @@ public class FileUtils {
     }
 
     public static boolean checkFileExistence(Context context, String name) {
-        File file1 = new File(FileUtils.getMemeticameDirectory() + "/" + name);
-        File file2 = new File(context.getExternalFilesDir(Environment.DIRECTORY_PICTURES) + "/" + name);
-        File file3 = new File(context.getExternalFilesDir(Environment.DIRECTORY_MUSIC) + "/" + name);
+        File file1 = new File(getMemeticameDirectory() + "/" + name);
+        File file2 = new File(getMemeticameDownloadsDirectory() + "/" + name);
+        File file3 = new File(context.getExternalFilesDir(Environment.DIRECTORY_PICTURES) + "/" + name);
+        File file4 = new File(context.getExternalFilesDir(Environment.DIRECTORY_MUSIC) + "/" + name);
 
-        return file1.exists() || file2.exists() || file3.exists();
+        return file1.exists() || file2.exists() || file3.exists() || file4.exists();
     }
 
     public static Uri getUriFromFileName(Context context, String name) {
-        File file1 = new File(FileUtils.getMemeticameDirectory() + "/" + name);
-        File file2 = new File(context.getExternalFilesDir(Environment.DIRECTORY_PICTURES) + "/" + name);
-        File file3 = new File(context.getExternalFilesDir(Environment.DIRECTORY_MUSIC) + "/" + name);
+        File file1 = new File(getMemeticameDirectory() + "/" + name);
+        File file2 = new File(getMemeticameDownloadsDirectory() + "/" + name);
+        File file3 = new File(context.getExternalFilesDir(Environment.DIRECTORY_PICTURES) + "/" + name);
+        File file4 = new File(context.getExternalFilesDir(Environment.DIRECTORY_MUSIC) + "/" + name);
 
         if (file1.exists()) {
             return Uri.fromFile(file1);
@@ -124,6 +157,8 @@ public class FileUtils {
             return Uri.fromFile(file2);
         } else if (file3.exists()) {
             return Uri.fromFile(file3);
+        } else if (file4.exists()) {
+            return Uri.fromFile(file4);
         } else {
             return null;
         }
@@ -134,8 +169,7 @@ public class FileUtils {
             return;
         }
 
-        File dir = new File(FileUtils.getMemeticameDirectory());
-
+        File dir = new File(getMemeticameDownloadsDirectory());
         if (!dir.exists()) {
             dir.mkdirs();
         }
@@ -149,7 +183,7 @@ public class FileUtils {
                 .setAllowedOverRoaming(false)
                 .setTitle(attachment.getName())
                 .setDescription("Downloaded with Memeticame")
-                .setDestinationInExternalPublicDir("/Memeticame", attachment.getName());
+                .setDestinationInExternalPublicDir("/Memeticame/Downloads", attachment.getName());
 
         downloadManager.enqueue(request);
     }
@@ -179,17 +213,17 @@ public class FileUtils {
     }
 
     public static boolean openFile(Context context, Attachment attachment) {
-        boolean fileExists = FileUtils.checkFileExistence(context, attachment.getName());
+        boolean fileExists = checkFileExistence(context, attachment.getName());
 
         if (!fileExists) {
             downloadAttachment(context, attachment);
         } else if (attachment.isAudio()) {
             RingtoneManager.getRingtone(context, Uri.parse(attachment.getStringUri())).play();
         } else if (attachment.isMemeaudio()) {
-            RingtoneManager.getRingtone(context, attachment.getMemeaudioAudioUri(context)).play();
+            RingtoneManager.getRingtone(context, attachment.getMemeaudioPartUri(context, false)).play();
         } else {
             try {
-                context.startActivity(FileUtils.getOpenFileIntent(Uri.parse(attachment.getStringUri()), attachment.getMimeType()));
+                context.startActivity(getOpenFileIntent(Uri.parse(attachment.getStringUri()), attachment.getMimeType()));
             } catch (ActivityNotFoundException e) {
                 return false;
             }
@@ -218,9 +252,5 @@ public class FileUtils {
         }
         cursor.close();
         return filePath;
-    }
-
-    public static String getMemeticameDirectory() {
-        return Environment.getExternalStorageDirectory() + "/Memeticame";
     }
 }

@@ -57,7 +57,8 @@
         <activity android:name=".Activities.NewChatGroupActivity" />
         <activity android:name=".Activities.ParticipantsActivity" />
         <activity android:name=".Activities.AddParticipantsActivity" />
-        <activity android:name=".Activities.MemeaudioActivity"></activity>
+        <activity android:name=".Activities.MemeaudioActivity" />
+        <activity android:name=".Activities.GalleryActivity"></activity>
     </application>
 
 </manifest>
