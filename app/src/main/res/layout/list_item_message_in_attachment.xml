@@ -10,8 +10,8 @@
         android:layout_height="wrap_content"
         android:layout_gravity="end"
         android:orientation="horizontal"
-        android:paddingTop="@dimen/message_padding"
-        android:paddingBottom="@dimen/message_padding">
+        android:paddingBottom="@dimen/message_padding"
+        android:paddingTop="@dimen/message_padding">
 
         <TextView
             android:id="@+id/label_sender"
@@ -75,11 +75,21 @@
                 android:id="@+id/thumbnail"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_gravity="end"
                 android:maxHeight="128dp"
                 android:maxWidth="128dp"
-                android:layout_gravity="end"
                 android:src="@drawable/ic_access_time_black_24dp" />
         </LinearLayout>
+
+        <TextView
+            android:id="@+id/size"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="end"
+            android:gravity="center"
+            android:text="@string/message_size"
+            android:textAppearance="?android:attr/textAppearanceSmall"
+            android:textColor="@color/inMessageColor" />
 
         <TextView
             android:id="@+id/message"

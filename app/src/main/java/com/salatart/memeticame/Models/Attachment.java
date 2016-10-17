@@ -23,18 +23,22 @@ public class Attachment implements Parcelable {
             return new Attachment[size];
         }
     };
+
     public static int IMAGE_SIZE = 480;
     public static int IMAGE_THUMB_SIZE = 48;
+
     private String mName;
     private String mMimeType;
     private String mBase64Content;
     private String mUri;
+    private long mSize;
 
-    public Attachment(String name, String mimeType, String base64Content, String uri) {
+    public Attachment(String name, String mimeType, String base64Content, String uri, long size) {
         this.mName = name;
         this.mMimeType = mimeType;
         this.mBase64Content = base64Content;
         this.mUri = uri;
+        this.mSize = size;
     }
 
     public Attachment(Parcel in) {
@@ -42,10 +46,11 @@ public class Attachment implements Parcelable {
         this.mMimeType = in.readString();
         this.mBase64Content = in.readString();
         this.mUri = in.readString();
+        this.mSize = in.readLong();
     }
 
     public Attachment clone() {
-        return new Attachment(mName, mMimeType, mBase64Content, mUri);
+        return new Attachment(mName, mMimeType, mBase64Content, mUri, mSize);
     }
 
     public String getName() {
@@ -62,6 +67,19 @@ public class Attachment implements Parcelable {
 
     public String getStringUri() {
         return mUri;
+    }
+
+    public long getSize() {
+        return mSize;
+    }
+
+    // Code from: http://stackoverflow.com/questions/3758606/how-to-convert-byte-size-into-human-readable-format-in-java
+    public String getHumanReadableByteCount(boolean si) {
+        int unit = si ? 1000 : 1024;
+        if (mSize < unit) return mSize + " B";
+        int exp = (int) (Math.log(mSize) / Math.log(unit));
+        String pre = (si ? "kMGTPE" : "KMGTPE").charAt(exp - 1) + (si ? "" : "i");
+        return String.format("%.1f %sB", mSize / Math.pow(unit, exp), pre);
     }
 
     public void setUri(String uri) {
@@ -128,5 +146,6 @@ public class Attachment implements Parcelable {
         dest.writeString(mMimeType);
         dest.writeString(mBase64Content);
         dest.writeString(mUri);
+        dest.writeLong(mSize);
     }
 }

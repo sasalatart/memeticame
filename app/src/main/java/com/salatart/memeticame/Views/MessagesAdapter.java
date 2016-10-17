@@ -12,11 +12,8 @@ import com.bumptech.glide.Glide;
 import com.salatart.memeticame.Models.Attachment;
 import com.salatart.memeticame.Models.Chat;
 import com.salatart.memeticame.Models.Message;
-import com.salatart.memeticame.Models.MessageCount;
 import com.salatart.memeticame.R;
 import com.salatart.memeticame.Utils.FileUtils;
-
-import io.realm.Realm;
 
 /**
  * Created by sasalatart on 9/4/16.
@@ -150,5 +147,8 @@ public class MessagesAdapter extends ArrayAdapter<Message> {
         } else {
             attachmentName.setVisibility(View.INVISIBLE);
         }
+
+        TextView attachmentSize = (TextView) view.findViewById(R.id.size);
+        attachmentSize.setText(attachment.getHumanReadableByteCount(false));
     }
 }

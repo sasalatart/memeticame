@@ -31,4 +31,5 @@
     <string name="admin">Admin</string>
     <string name="created_at">Created At</string>
     <string name="unread_count">Unread Count</string>
+    <string name="message_size">message size</string>
 </resources>

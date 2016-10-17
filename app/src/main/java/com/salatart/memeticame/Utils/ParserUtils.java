@@ -14,6 +14,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 
@@ -59,7 +60,8 @@ public class ParserUtils {
             message.setAttachment(new Attachment(jsonAttachment.getString("name"),
                     jsonAttachment.getString("mime_type"),
                     null,
-                    Routes.DOMAIN + jsonAttachment.getString("url")));
+                    Routes.DOMAIN + jsonAttachment.getString("url"),
+                    jsonAttachment.getLong("size")));
         }
 
         return message;
@@ -93,16 +95,13 @@ public class ParserUtils {
             return null;
         }
 
-        String mimeType = "zip/memeaudio";
-        if (!isZip) {
-            mimeType = FileUtils.getMimeType(context, uri);
-        }
-
+        String mimeType = isZip ? "zip/memeaudio" : FileUtils.getMimeType(context, uri);
         try {
             return new Attachment(FileUtils.getName(context, uri),
                     mimeType,
                     FileUtils.encodeToBase64FromUri(context, uri),
-                    uri.toString());
+                    uri.toString(),
+                    new File(uri.getPath()).length());
         } catch (IOException e) {
             Log.e("ERROR", e.toString());
             return null;
