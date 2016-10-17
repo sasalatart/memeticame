@@ -35,6 +35,7 @@ import com.salatart.memeticame.Models.Attachment;
 import com.salatart.memeticame.Models.Chat;
 import com.salatart.memeticame.Models.ChatInvitation;
 import com.salatart.memeticame.Models.Message;
+import com.salatart.memeticame.Models.MessageCount;
 import com.salatart.memeticame.Models.User;
 import com.salatart.memeticame.R;
 import com.salatart.memeticame.Utils.AudioManager;
@@ -74,6 +75,7 @@ public class ChatActivity extends AppCompatActivity {
     private String[] mPermissions = {"android.permission.RECORD_AUDIO", "android.permission.CAMERA", "android.permission.WRITE_EXTERNAL_STORAGE"};
 
     private Chat mChat;
+    private MessageCount mMessageCount;
     private MessagesAdapter mAdapter;
 
     private boolean mCurrentlyRecording;
@@ -93,12 +95,7 @@ public class ChatActivity extends AppCompatActivity {
         @Override
         public void onReceive(Context context, Intent intent) {
             Message newMessage = intent.getParcelableExtra(Message.PARCELABLE_KEY);
-
-            if (mChat.getId() != newMessage.getChatId()) {
-                return;
-            }
-
-            if (!newMessage.isMine(getApplicationContext())) {
+            if (mChat.getId() == newMessage.getChatId() && !newMessage.isMine(getApplicationContext())) {
                 mChat.getMessages().add(newMessage);
                 mAdapter.notifyDataSetChanged();
             }
@@ -127,7 +124,6 @@ public class ChatActivity extends AppCompatActivity {
         @Override
         public void onReceive(Context context, Intent intent) {
             ChatInvitation chatInvitation = intent.getParcelableExtra(ChatInvitation.PARCELABLE_KEY);
-
             if (chatInvitation.getChatId() == mChat.getId()) {
                 mChat.getParticipants().add(chatInvitation.getUser());
             }
@@ -167,6 +163,9 @@ public class ChatActivity extends AppCompatActivity {
 
         Bundle data = getIntent().getExtras();
         mChat = data.getParcelable(Chat.PARCELABLE_KEY);
+
+        mMessageCount = MessageCount.findOne(mChat);
+        mMessageCount.update(mChat, mChat.getMessages().size(), 0);
 
         setTitle(mChat.getTitle());
 
@@ -219,6 +218,7 @@ public class ChatActivity extends AppCompatActivity {
         unregisterReceiver(mUsersKickedReceiver);
         unregisterReceiver(mUserAcceptedInvitationReceiver);
         unregisterReceiver(mZipReceiver);
+        mMessageCount.update(mChat, mChat.getMessages().size(), 0);
         sIsActive = false;
     }
 

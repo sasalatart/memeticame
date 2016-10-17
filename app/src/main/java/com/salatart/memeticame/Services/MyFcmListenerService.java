@@ -9,11 +9,11 @@ import android.util.Log;
 import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
 import com.salatart.memeticame.Activities.ChatActivity;
-import com.salatart.memeticame.Fragments.ChatsFragment;
 import com.salatart.memeticame.Fragments.ContactsFragment;
 import com.salatart.memeticame.Models.Chat;
 import com.salatart.memeticame.Models.ChatInvitation;
 import com.salatart.memeticame.Models.Message;
+import com.salatart.memeticame.Models.MessageCount;
 import com.salatart.memeticame.Models.User;
 import com.salatart.memeticame.R;
 import com.salatart.memeticame.Utils.FilterUtils;
@@ -59,6 +59,7 @@ public class MyFcmListenerService extends FirebaseMessagingService {
         Intent intent = new Intent(FilterUtils.NEW_MESSAGE_FILTER);
         try {
             Message message = ParserUtils.messageFromJson(new JSONObject(data.get("message").toString()));
+            MessageCount.addOneUnreadMessage(message.getChatId());
             intent.putExtra(Message.PARCELABLE_KEY, message);
             getApplicationContext().sendBroadcast(intent);
 
@@ -76,7 +77,7 @@ public class MyFcmListenerService extends FirebaseMessagingService {
     }
 
     public void broadcastNewChat(Map data) {
-        Intent intent = new Intent(ChatsFragment.NEW_CHAT_FILTER);
+        Intent intent = new Intent(FilterUtils.NEW_CHAT_FILTER);
         try {
             intent.putExtra(Chat.PARCELABLE_KEY, ParserUtils.chatFromJson(new JSONObject(data.get("chat").toString())));
             getApplicationContext().sendBroadcast(intent);

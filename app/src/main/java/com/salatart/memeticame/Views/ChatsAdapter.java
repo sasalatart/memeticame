@@ -8,10 +8,13 @@ import android.widget.ArrayAdapter;
 import android.widget.TextView;
 
 import com.salatart.memeticame.Models.Chat;
+import com.salatart.memeticame.Models.MessageCount;
 import com.salatart.memeticame.R;
 import com.salatart.memeticame.Utils.TimeUtils;
 
 import java.util.ArrayList;
+
+import io.realm.Realm;
 
 /**
  * Created by sasalatart on 8/29/16.
@@ -40,14 +43,7 @@ public class ChatsAdapter extends ArrayAdapter<Chat> {
             }
         }
 
-        TextView titleView = (TextView) view.findViewById(R.id.label_title);
-        titleView.setText(chat.getTitle());
-
-        TextView adminView = (TextView) view.findViewById(R.id.label_admin);
-        adminView.setText("Admin: " + chat.getParticipantsHash().get(chat.getAdmin()));
-
-        TextView createdAt = (TextView) view.findViewById(R.id.label_created_at);
-        createdAt.setText("Created At: " + TimeUtils.parseISODate(chat.getCreatedAt()));
+        setTextViews(view, chat);
 
         return view;
     }
@@ -66,5 +62,20 @@ public class ChatsAdapter extends ArrayAdapter<Chat> {
         } else {
             return 1;
         }
+    }
+
+    private void setTextViews(View view, Chat chat) {
+        TextView titleView = (TextView) view.findViewById(R.id.label_title);
+        titleView.setText(chat.getTitle());
+
+        TextView adminView = (TextView) view.findViewById(R.id.label_admin);
+        adminView.setText("Admin: " + chat.getParticipantsHash().get(chat.getAdmin()));
+
+        TextView createdAtView = (TextView) view.findViewById(R.id.label_created_at);
+        createdAtView.setText("Created At: " + TimeUtils.parseISODate(chat.getCreatedAt()));
+
+        String unreadMessages = MessageCount.findOne(chat).getUnreadMessages() + "";
+        TextView unreadCountView = (TextView) view.findViewById(R.id.label_unread_count);
+        unreadCountView.setText(unreadMessages);
     }
 }

@@ -12,8 +12,11 @@ import com.bumptech.glide.Glide;
 import com.salatart.memeticame.Models.Attachment;
 import com.salatart.memeticame.Models.Chat;
 import com.salatart.memeticame.Models.Message;
+import com.salatart.memeticame.Models.MessageCount;
 import com.salatart.memeticame.R;
 import com.salatart.memeticame.Utils.FileUtils;
+
+import io.realm.Realm;
 
 /**
  * Created by sasalatart on 9/4/16.
@@ -71,7 +74,7 @@ public class MessagesAdapter extends ArrayAdapter<Message> {
         }
     }
 
-    public void setTextViews(View view, Message message) {
+    private void setTextViews(View view, Message message) {
         TextView senderLabel = (TextView) view.findViewById(R.id.label_sender);
         if (message.isMine(getContext())) {
             senderLabel.setText(R.string.me);
@@ -90,7 +93,7 @@ public class MessagesAdapter extends ArrayAdapter<Message> {
         ((TextView) view.findViewById(R.id.message)).setText(message.getContent());
     }
 
-    public void setAttachment(View view, Message message) {
+    private void setAttachment(View view, Message message) {
         Attachment attachment = message.getAttachment();
 
         if (attachment == null) {

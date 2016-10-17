@@ -30,4 +30,5 @@
     <string name="invitation_to">Invitation to...</string>
     <string name="admin">Admin</string>
     <string name="created_at">Created At</string>
+    <string name="unread_count">Unread Count</string>
 </resources>

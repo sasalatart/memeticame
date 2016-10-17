@@ -12,4 +12,5 @@ public class FilterUtils {
     public static final String NEW_MESSAGE_FILTER = "newMessageFilter";
     public static final String UNZIP_FILTER = "unzipFilter";
     public static final String USER_KICKED_FILTER = "userKickedFilter";
+    public static final String NEW_CHAT_FILTER = "newChatFilter";
 }
