@@ -10,57 +10,44 @@
     android:paddingTop="@dimen/activity_vertical_margin"
     tools:context="com.salatart.memeticame.Activities.MemeaudioActivity">
 
-    <RelativeLayout
-        android:id="@+id/group_step_1"
+    <ImageView
+        android:id="@+id/image_memeaudio"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_centerVertical="true"
-        android:visibility="visible">
+        android:layout_height="match_parent"
+        android:layout_gravity="center"
+        android:adjustViewBounds="true"
+        android:scaleType="matrix" />
 
-        <TextView
-            android:id="@+id/label_choose_meme"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_centerHorizontal="true"
-            android:text="@string/step_1_choose_an_image" />
+    <ImageButton
+        android:id="@+id/button_pause"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:onClick="onPause"
+        android:src="@drawable/ic_pause_circle_outline_black_24dp" />
 
-        <ImageButton
-            android:id="@+id/button_choose_image"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_below="@id/label_choose_meme"
-            android:layout_centerHorizontal="true"
-            android:onClick="chooseImage"
-            android:src="@drawable/ic_image_black_24dp" />
-    </RelativeLayout>
+    <ImageButton
+        android:id="@+id/button_play"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_alignParentBottom="true"
+        android:layout_marginEnd="25dp"
+        android:layout_marginRight="25dp"
+        android:layout_toLeftOf="@id/button_pause"
+        android:layout_toStartOf="@id/button_pause"
+        android:onClick="onPlay"
+        android:src="@drawable/ic_play_circle_outline_black_24dp" />
 
-    <RelativeLayout
-        android:id="@+id/group_step_2"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_centerVertical="true"
-        android:visibility="gone">
-
-        <ImageView
-            android:id="@+id/image_memeaudio"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_centerHorizontal="true" />
-
-        <TextView
-            android:id="@+id/label_choose_audio"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_centerHorizontal="true"
-            android:text="@string/step_2_record_your_audio" />
-
-        <ImageButton
-            android:id="@+id/button_record_audio"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_below="@id/label_choose_audio"
-            android:layout_centerHorizontal="true"
-            android:onClick="toggleRecording"
-            android:src="@drawable/ic_image_black_24dp" />
-    </RelativeLayout>
+    <ImageButton
+        android:id="@+id/button_stop"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_alignParentBottom="true"
+        android:layout_marginLeft="25dp"
+        android:layout_marginStart="25dp"
+        android:layout_toEndOf="@id/button_pause"
+        android:layout_toRightOf="@id/button_pause"
+        android:onClick="onStop"
+        android:src="@drawable/ic_stop_black_24dp" />
 </RelativeLayout>

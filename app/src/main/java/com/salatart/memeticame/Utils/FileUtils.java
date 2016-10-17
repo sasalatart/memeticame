@@ -20,6 +20,7 @@ import android.util.Log;
 import android.webkit.MimeTypeMap;
 import android.webkit.URLUtil;
 
+import com.salatart.memeticame.Activities.MemeaudioActivity;
 import com.salatart.memeticame.Models.Attachment;
 
 import java.io.ByteArrayOutputStream;
@@ -228,7 +229,7 @@ public class FileUtils {
         } else if (attachment.isAudio()) {
             RingtoneManager.getRingtone(context, Uri.parse(attachment.getStringUri())).play();
         } else if (attachment.isMemeaudio()) {
-            RingtoneManager.getRingtone(context, attachment.getMemeaudioPartUri(context, false)).play();
+            context.startActivity(MemeaudioActivity.getIntent(context, attachment));
         } else {
             try {
                 context.startActivity(getOpenFileIntent(Uri.parse(attachment.getStringUri()), attachment.getMimeType()));

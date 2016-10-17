@@ -25,6 +25,7 @@ public class Attachment implements Parcelable {
         }
     };
 
+    public static String PARCELABLE_KEY = "com.salatart.memeticamea.Models.Attachment";
     public static int IMAGE_SIZE = 480;
     public static int IMAGE_THUMB_SIZE = 48;
 

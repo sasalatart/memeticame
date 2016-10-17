@@ -23,7 +23,6 @@ public class User extends RealmObject implements Parcelable {
     };
 
     public static String PARCELABLE_KEY = "com.salatart.memeticamea.Models.User";
-    public static String PARCELABLE_KEY_ARRAY_LIST = "com.salatart.memeticamea.Models.UserArrayList";
 
     @PrimaryKey
     private int mId;

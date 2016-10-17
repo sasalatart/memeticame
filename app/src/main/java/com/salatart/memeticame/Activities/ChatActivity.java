@@ -47,6 +47,7 @@ import com.salatart.memeticame.Utils.MessageUtils;
 import com.salatart.memeticame.Utils.ParserUtils;
 import com.salatart.memeticame.Utils.Routes;
 import com.salatart.memeticame.Utils.SessionUtils;
+import com.salatart.memeticame.Utils.ZipManager;
 import com.salatart.memeticame.Views.MessagesAdapter;
 
 import org.json.JSONException;
@@ -371,7 +372,7 @@ public class ChatActivity extends AppCompatActivity {
     }
 
     public void dispatchTakeMemeaudioIntent(View view) {
-        Intent takeMemeaudioIntent = new Intent(ChatActivity.this, MemeaudioActivity.class);
+        Intent takeMemeaudioIntent = new Intent(ChatActivity.this, NewMemeaudioActivity.class);
         startActivityForResult(takeMemeaudioIntent, FilterUtils.REQUEST_MEMEAUDIO_FILE);
     }
 
@@ -490,7 +491,7 @@ public class ChatActivity extends AppCompatActivity {
         } else if (requestCode == FilterUtils.REQUEST_VIDEO_CAPTURE && resultCode == RESULT_OK) {
             setCurrentAttachmentFromUri(mCurrentVideoUri);
         } else if (requestCode == FilterUtils.REQUEST_MEMEAUDIO_FILE && resultCode == RESULT_OK && data != null) {
-            Uri memeaudioZipUri = (Uri) data.getExtras().get(MemeaudioActivity.MEMEAUDIO_ZIP);
+            Uri memeaudioZipUri = (Uri) data.getExtras().get(ZipManager.PARCELABLE_KEY);
             setCurrentAttachmentFromUri(memeaudioZipUri);
         }
     }

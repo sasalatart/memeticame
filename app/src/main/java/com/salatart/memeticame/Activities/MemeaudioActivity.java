@@ -1,46 +1,48 @@
 package com.salatart.memeticame.Activities;
 
-import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
+import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageButton;
 import android.widget.ImageView;
-import android.widget.RelativeLayout;
 
 import com.bumptech.glide.Glide;
+import com.salatart.memeticame.Models.Attachment;
 import com.salatart.memeticame.R;
-import com.salatart.memeticame.Utils.AudioManager;
-import com.salatart.memeticame.Utils.FileUtils;
-import com.salatart.memeticame.Utils.ZipManager;
-
-import java.io.File;
-import java.io.IOException;
+import com.salatart.memeticame.Utils.Touch;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-import static com.salatart.memeticame.Utils.FilterUtils.REQUEST_PICK_FILE;
-
 public class MemeaudioActivity extends AppCompatActivity {
-    public static final String MEMEAUDIO_ZIP = "MemeaudioZip";
 
-    @BindView(R.id.group_step_1) RelativeLayout mGroup1Layout;
-    @BindView(R.id.group_step_2) RelativeLayout mGroup2Layout;
-    @BindView(R.id.image_memeaudio) ImageView mImageMemeaudio;
-    @BindView(R.id.button_record_audio) ImageButton mRecordButton;
+    @BindView(R.id.image_memeaudio) ImageView mImage;
+    @BindView(R.id.button_play) ImageButton mPlayButton;
+    @BindView(R.id.button_pause) ImageButton mPauseButton;
+    @BindView(R.id.button_stop) ImageButton mStopButton;
 
-    private boolean mCurrentlyRecording;
-    private AudioManager mAudioManager;
+    private MediaPlayer mMediaPlayer;
 
-    private Uri mAudioUri;
+    private Attachment mAttachment;
     private Uri mImageUri;
+    private Uri mAudioUri;
+
+    public static Intent getIntent(Context context, Attachment attachment) {
+        if (!attachment.isMemeaudio()) {
+            return null;
+        }
+
+        Intent intent = new Intent(context, MemeaudioActivity.class);
+        intent.putExtra(Attachment.PARCELABLE_KEY, attachment);
+        return intent;
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -49,62 +51,86 @@ public class MemeaudioActivity extends AppCompatActivity {
 
         ButterKnife.bind(this);
 
+        Bundle data = getIntent().getExtras();
+        mAttachment = data.getParcelable(Attachment.PARCELABLE_KEY);
+        if (!mAttachment.isMemeaudio()) {
+            finish();
+        }
+
         ActionBar actionBar = getSupportActionBar();
         actionBar.setDisplayHomeAsUpEnabled(true);
 
-        mAudioManager = new AudioManager();
-        mCurrentlyRecording = false;
+        setTitle("Memeaudio");
+        setImage();
+        setAudio();
     }
 
     public boolean onOptionsItemSelected(MenuItem item) {
-        setResult(Activity.RESULT_CANCELED, new Intent());
+        if (mMediaPlayer != null) {
+            mMediaPlayer.stop();
+        }
+
         finish();
         return true;
     }
 
-    public void chooseImage(View view) {
-        startActivityForResult(FileUtils.getSelectFileIntent("image/jpeg"), REQUEST_PICK_FILE);
+    public void setImage() {
+        mImageUri = mAttachment.getMemeaudioPartUri(MemeaudioActivity.this, true);
+
+        Glide.with(MemeaudioActivity.this)
+                .load(mImageUri)
+                .placeholder(R.drawable.ic_access_time_black_24dp)
+                .crossFade()
+                .into(mImage);
+
+        mImage.setOnTouchListener(new Touch());
     }
 
-    public void toggleRecording(View view) {
-        if (mCurrentlyRecording) {
-            File audioFile = mAudioManager.stopAudioRecording();
-            mAudioUri = mAudioManager.addRecordingToMediaLibrary(MemeaudioActivity.this, audioFile);
-            mRecordButton.setColorFilter(Color.BLACK);
+    public void setAudio() {
+        mAudioUri = mAttachment.getMemeaudioPartUri(MemeaudioActivity.this, false);
+        setMediaPlayer();
+    }
 
-            try {
-                String zipFileName = FileUtils.getName(MemeaudioActivity.this, mImageUri) + ZipManager.SEPARATOR + FileUtils.getName(MemeaudioActivity.this, mAudioUri) + ".zip";
-                String audioPath = audioFile.getAbsolutePath();
-                String imagePath = FileUtils.getRealPathFromURI(MemeaudioActivity.this, mImageUri);
-                Uri memeaudioZipUri = ZipManager.zip(new String[]{audioPath, imagePath}, zipFileName);
-
-                Intent returnIntent = new Intent();
-                returnIntent.putExtra(MEMEAUDIO_ZIP, memeaudioZipUri);
-                setResult(Activity.RESULT_OK, returnIntent);
-                finish();
-            } catch (IOException e) {
-                Log.e("ERROR", e.toString());
+    public void setMediaPlayer() {
+        mMediaPlayer = MediaPlayer.create(MemeaudioActivity.this, mAudioUri);
+        mMediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+            @Override
+            public void onCompletion(MediaPlayer mp) {
+                setMediaPlayer();
             }
-        } else {
-            mAudioManager.startAudioRecording(MemeaudioActivity.this);
-            mRecordButton.setColorFilter(Color.RED);
-        }
-        mCurrentlyRecording = !mCurrentlyRecording;
+        });
+
+        setEnabled(true, false, false);
+        setColors(Color.BLACK, Color.BLACK, Color.BLACK);
     }
 
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
+    public void onPlay(View view) {
+        setEnabled(false, true, true);
+        setColors(Color.RED, Color.BLACK, Color.BLACK);
+        mMediaPlayer.start();
+    }
 
-        if (requestCode == REQUEST_PICK_FILE && resultCode == RESULT_OK && data != null) {
-            mImageUri = data.getData();
-            mGroup1Layout.setVisibility(View.GONE);
-            mGroup2Layout.setVisibility(View.VISIBLE);
+    public void onPause(View view) {
+        setEnabled(true, false, true);
+        setColors(Color.BLACK, Color.RED, Color.BLACK);
+        mMediaPlayer.pause();
+    }
 
-            Glide.with(MemeaudioActivity.this)
-                    .load(mImageUri)
-                    .crossFade()
-                    .into(mImageMemeaudio);
-        }
+    public void onStop(View view) {
+        setEnabled(true, false, false);
+        mMediaPlayer.stop();
+        setMediaPlayer();
+    }
+
+    public void setEnabled(boolean playButtonEnabled, boolean pauseButtonEnabled, boolean stopButtonEnabled) {
+        mPlayButton.setEnabled(playButtonEnabled);
+        mPauseButton.setEnabled(pauseButtonEnabled);
+        mStopButton.setEnabled(stopButtonEnabled);
+    }
+
+    public void setColors(int playColor, int pauseColor, int stopColor) {
+        mPlayButton.setColorFilter(playColor);
+        mPauseButton.setColorFilter(pauseColor);
+        mStopButton.setColorFilter(stopColor);
     }
 }
