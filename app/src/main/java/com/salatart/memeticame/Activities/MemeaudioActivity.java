@@ -26,7 +26,7 @@ import java.io.IOException;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-import static com.salatart.memeticame.Activities.ChatActivity.REQUEST_PICK_FILE;
+import static com.salatart.memeticame.Utils.FilterUtils.REQUEST_PICK_FILE;
 
 public class MemeaudioActivity extends AppCompatActivity {
     public static final String MEMEAUDIO_ZIP = "MemeaudioZip";

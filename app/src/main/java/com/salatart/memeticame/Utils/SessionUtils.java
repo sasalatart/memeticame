@@ -20,7 +20,7 @@ import okhttp3.Response;
  */
 public class SessionUtils {
 
-    public static String PREFERENCES = "SESSION";
+    private static String PREFERENCES = "SESSION";
 
     public static String getToken(Context context) {
         if (context == null) {

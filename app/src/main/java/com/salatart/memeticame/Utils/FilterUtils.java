@@ -17,4 +17,8 @@ public class FilterUtils {
     public static final String NEW_USER_FILTER = "newUserFilter";
 
     public static final int REQUEST_NEW_CONTACT = 1;
+    public static final int REQUEST_PICK_FILE = 1;
+    public static final int REQUEST_IMAGE_CAPTURE = 2;
+    public static final int REQUEST_VIDEO_CAPTURE = 3;
+    public static final int REQUEST_MEMEAUDIO_FILE = 4;
 }

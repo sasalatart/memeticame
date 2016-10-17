@@ -96,7 +96,7 @@ public class ParserUtils {
         }
 
         String name = FileUtils.getName(context, uri);
-        String mimeType = FileUtils.getMimeType(uri);
+        String mimeType = FileUtils.getMimeType(context, uri);
         if (name.contains(".zip") && name.contains(ZipManager.SEPARATOR)) {
             mimeType = "zip/memeaudio";
         }

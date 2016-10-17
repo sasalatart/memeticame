@@ -19,6 +19,7 @@ import android.support.v4.content.FileProvider;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.view.ContextMenu;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -42,6 +43,7 @@ import com.salatart.memeticame.Utils.AudioManager;
 import com.salatart.memeticame.Utils.FileUtils;
 import com.salatart.memeticame.Utils.FilterUtils;
 import com.salatart.memeticame.Utils.HttpClient;
+import com.salatart.memeticame.Utils.MessageUtils;
 import com.salatart.memeticame.Utils.ParserUtils;
 import com.salatart.memeticame.Utils.Routes;
 import com.salatart.memeticame.Utils.SessionUtils;
@@ -53,21 +55,25 @@ import org.json.JSONObject;
 import java.io.File;
 import java.io.IOException;
 
+import butterknife.BindView;
+import butterknife.ButterKnife;
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.Request;
 import okhttp3.Response;
 
 public class ChatActivity extends AppCompatActivity {
-    public static final int REQUEST_PICK_FILE = 1;
-    public static final int REQUEST_IMAGE_CAPTURE = 2;
-    public static final int REQUEST_VIDEO_CAPTURE = 3;
-    public static final int REQUEST_MEMEAUDIO_FILE = 4;
     public static final int PERMISSIONS_CODE = 200;
     public static final String PICTURE_STATE = "pictureState";
     public static final String VIDEO_STATE = "videoState";
 
     public static boolean sIsActive = false;
+
+    @BindView(R.id.input_message) EditText mMessageInput;
+    @BindView(R.id.attachment) ImageView mAttachmentImageView;
+    @BindView(R.id.button_cancel_attachment) ImageButton mCancelButton;
+    @BindView(R.id.take_audio) ImageButton mRecordButton;
+    @BindView(R.id.list_view_messages) ListView mMessagesListView;
 
     private boolean mPermissionToRecordAudio = false;
     private boolean mPermissionToUseCamera = false;
@@ -84,12 +90,6 @@ public class ChatActivity extends AppCompatActivity {
     private Attachment mCurrentAttachment;
     private Uri mCurrentImageUri;
     private Uri mCurrentVideoUri;
-
-    private EditText mMessageInput;
-    private ImageView mAttachmentImageView;
-    private ImageButton mCancelButton;
-    private ImageButton mRecordButton;
-    private ListView mMessagesListView;
 
     private BroadcastReceiver mMessageReceiver = new BroadcastReceiver() {
         @Override
@@ -149,6 +149,8 @@ public class ChatActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_chat);
 
+        ButterKnife.bind(this);
+
         if (savedInstanceState != null) {
             mCurrentImageUri = savedInstanceState.getParcelable(PICTURE_STATE);
             mCurrentVideoUri = savedInstanceState.getParcelable(VIDEO_STATE);
@@ -169,27 +171,10 @@ public class ChatActivity extends AppCompatActivity {
 
         setTitle(mChat.getTitle());
 
-        mMessagesListView = (ListView) findViewById(R.id.list_view_messages);
-        mAdapter = new MessagesAdapter(ChatActivity.this, R.layout.list_item_message_in_text, mChat);
-        mMessagesListView.setAdapter(mAdapter);
-
-        mMessageInput = (EditText) findViewById(R.id.input_message);
-        mAttachmentImageView = (ImageView) findViewById(R.id.attachment);
-        mCancelButton = (ImageButton) findViewById(R.id.button_cancel_attachment);
-        mRecordButton = (ImageButton) findViewById(R.id.take_audio);
-
-        mMessagesListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                Attachment attachment = mAdapter.getItem(position).getAttachment();
-                if (attachment != null && !FileUtils.openFile(ChatActivity.this, attachment)) {
-                    Toast.makeText(ChatActivity.this, "Can't open this file.", Toast.LENGTH_SHORT).show();
-                }
-            }
-        });
-
         mAudioManager = new AudioManager();
         mCurrentlyRecording = false;
+
+        setAdapter();
     }
 
     @Override
@@ -348,7 +333,7 @@ public class ChatActivity extends AppCompatActivity {
         Message message = Message.createFake(getApplicationContext(), content, mChat.getId());
         if (mCurrentAttachment != null) {
             message.setAttachment(mCurrentAttachment.clone());
-            toggleAttachmentVisibilities();
+            toggleAttachmentVisibilities(false);
             mCurrentAttachment = null;
         }
 
@@ -358,12 +343,12 @@ public class ChatActivity extends AppCompatActivity {
     }
 
     public void cancelAttachment(View view) {
-        toggleAttachmentVisibilities();
+        toggleAttachmentVisibilities(false);
     }
 
-    public void toggleAttachmentVisibilities() {
-        mCancelButton.setVisibility(mCancelButton.getVisibility() == View.GONE ? View.VISIBLE : View.GONE);
-        mAttachmentImageView.setVisibility(mAttachmentImageView.getVisibility() == View.GONE ? View.VISIBLE : View.GONE);
+    public void toggleAttachmentVisibilities(boolean show) {
+        mCancelButton.setVisibility(show ? View.VISIBLE : View.GONE);
+        mAttachmentImageView.setVisibility(show ? View.VISIBLE : View.GONE);
 
         if (mAttachmentImageView.getVisibility() == View.VISIBLE) {
             if (mCurrentAttachment.isImage() || mCurrentAttachment.isVideo() || mCurrentAttachment.isMemeaudio()) {
@@ -382,12 +367,12 @@ public class ChatActivity extends AppCompatActivity {
     }
 
     public void selectMediaResource(View view) {
-        startActivityForResult(FileUtils.getSelectFileIntent("*/*"), REQUEST_PICK_FILE);
+        startActivityForResult(FileUtils.getSelectFileIntent("*/*"), FilterUtils.REQUEST_PICK_FILE);
     }
 
     public void dispatchTakeMemeaudioIntent(View view) {
         Intent takeMemeaudioIntent = new Intent(ChatActivity.this, MemeaudioActivity.class);
-        startActivityForResult(takeMemeaudioIntent, REQUEST_MEMEAUDIO_FILE);
+        startActivityForResult(takeMemeaudioIntent, FilterUtils.REQUEST_MEMEAUDIO_FILE);
     }
 
     public void dispatchTakePictureIntent(View view) {
@@ -397,7 +382,7 @@ public class ChatActivity extends AppCompatActivity {
             if (photoFile != null) {
                 mCurrentImageUri = FileProvider.getUriForFile(this, "com.salatart.memeticame.fileprovider", photoFile);
                 takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, mCurrentImageUri);
-                startActivityForResult(takePictureIntent, REQUEST_IMAGE_CAPTURE);
+                startActivityForResult(takePictureIntent, FilterUtils.REQUEST_IMAGE_CAPTURE);
             }
         }
     }
@@ -409,7 +394,7 @@ public class ChatActivity extends AppCompatActivity {
             if (videoFile != null) {
                 mCurrentVideoUri = FileProvider.getUriForFile(this, "com.salatart.memeticame.fileprovider", videoFile);
                 takeVideoIntent.putExtra(MediaStore.EXTRA_OUTPUT, mCurrentVideoUri);
-                startActivityForResult(takeVideoIntent, REQUEST_VIDEO_CAPTURE);
+                startActivityForResult(takeVideoIntent, FilterUtils.REQUEST_VIDEO_CAPTURE);
             }
         }
     }
@@ -434,20 +419,77 @@ public class ChatActivity extends AppCompatActivity {
             return;
         }
 
-        toggleAttachmentVisibilities();
+        toggleAttachmentVisibilities(true);
+    }
+
+    public void setAdapter() {
+        mAdapter = new MessagesAdapter(ChatActivity.this, R.layout.list_item_message_in_text, mChat);
+        mMessagesListView.setAdapter(mAdapter);
+
+        mMessagesListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                Attachment attachment = mAdapter.getItem(position).getAttachment();
+                if (attachment != null && !FileUtils.openFile(ChatActivity.this, attachment)) {
+                    Toast.makeText(ChatActivity.this, "Can't open this file.", Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
+
+        registerForContextMenu(mMessagesListView);
+        registerForContextMenu(mMessageInput);
+    }
+
+    @Override
+    public void onCreateContextMenu(ContextMenu menu, View view, ContextMenu.ContextMenuInfo menuInfo) {
+        menu.setHeaderIcon(R.drawable.ic_textsms_black_24dp);
+        menu.setHeaderTitle("Actions");
+
+        if (view.getId() == R.id.list_view_messages) {
+            menu.add(Menu.NONE, 1, 0, "Copy");
+            menu.add(Menu.NONE, 0, 1, "Cancel");
+        } else if (view.getId() == R.id.input_message) {
+            menu.add(Menu.NONE, 2, 0, "Paste");
+            menu.add(Menu.NONE, 0, 1, "Cancel");
+        }
+    }
+
+    @Override
+    public boolean onContextItemSelected(MenuItem item) {
+        AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) item.getMenuInfo();
+
+        int menuItemId = item.getItemId();
+        if (menuItemId == 1) {
+            Message message = mChat.getMessages().get(info.position);
+            MessageUtils.copyMessage(ChatActivity.this, message);
+        } else if (menuItemId == 2) {
+            String[] messageData = MessageUtils.retrieveMessage(ChatActivity.this);
+
+            if (messageData == null) {
+                return false;
+            }
+
+            mMessageInput.setText(messageData[0]);
+            if (messageData[1] != null) {
+                mCurrentAttachment = ParserUtils.attachmentFromUri(ChatActivity.this, Uri.parse(messageData[1]));
+                toggleAttachmentVisibilities(true);
+            }
+        }
+
+        return true;
     }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
-        if (requestCode == REQUEST_PICK_FILE && resultCode == RESULT_OK && data != null) {
+        if (requestCode == FilterUtils.REQUEST_PICK_FILE && resultCode == RESULT_OK && data != null) {
             setCurrentAttachmentFromUri(data.getData());
-        } else if (requestCode == REQUEST_IMAGE_CAPTURE && resultCode == RESULT_OK) {
+        } else if (requestCode == FilterUtils.REQUEST_IMAGE_CAPTURE && resultCode == RESULT_OK) {
             setCurrentAttachmentFromUri(mCurrentImageUri);
-        } else if (requestCode == REQUEST_VIDEO_CAPTURE && resultCode == RESULT_OK) {
+        } else if (requestCode == FilterUtils.REQUEST_VIDEO_CAPTURE && resultCode == RESULT_OK) {
             setCurrentAttachmentFromUri(mCurrentVideoUri);
-        } else if (requestCode == REQUEST_MEMEAUDIO_FILE && resultCode == RESULT_OK && data != null) {
+        } else if (requestCode == FilterUtils.REQUEST_MEMEAUDIO_FILE && resultCode == RESULT_OK && data != null) {
             Uri memeaudioZipUri = (Uri) data.getExtras().get(MemeaudioActivity.MEMEAUDIO_ZIP);
             setCurrentAttachmentFromUri(memeaudioZipUri);
         }

@@ -3,6 +3,7 @@ package com.salatart.memeticame.Utils;
 import android.annotation.SuppressLint;
 import android.app.DownloadManager;
 import android.content.ActivityNotFoundException;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -84,12 +85,19 @@ public class FileUtils {
         return result;
     }
 
-    public static String getMimeType(Uri uri) {
+    public static String getMimeType(Context context, Uri uri) {
         String type = null;
+
         String extension = MimeTypeMap.getFileExtensionFromUrl(uri.toString());
         if (extension != null) {
             type = MimeTypeMap.getSingleton().getMimeTypeFromExtension(extension);
         }
+
+        if (type == null) {
+            ContentResolver cR = context.getContentResolver();
+            type = cR.getType(uri);
+        }
+
         return type;
     }
 
