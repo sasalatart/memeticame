@@ -31,7 +31,6 @@ import okhttp3.Response;
  */
 public class ContactsUtils {
     public static final int PERMISSIONS_REQUEST_READ_CONTACTS = 101;
-    public static final String RETRIEVE_CONTACTS_FILTER = "retrieveContactsFilter";
     public static final String LOCAL_CONTACTS_PARCELABLE_KEY = "localContactsParcelableKey";
     public static final String INTERSECTED_CONTACTS_PARCELABLE_KEY = "intersectedContactsParcelableKey";
 
@@ -66,10 +65,11 @@ public class ContactsUtils {
 
                                 ArrayList<User> localContacts = contacts;
                                 ArrayList<User> intersectedContacts = User.intersect(contacts, ParserUtils.usersFromJsonArray(new JSONArray(response.body().string())));
-                                Intent intent = new Intent(RETRIEVE_CONTACTS_FILTER);
+                                Intent intent = new Intent(FilterUtils.RETRIEVE_CONTACTS_FILTER);
                                 intent.putExtra(LOCAL_CONTACTS_PARCELABLE_KEY, localContacts);
                                 intent.putExtra(INTERSECTED_CONTACTS_PARCELABLE_KEY, intersectedContacts);
                                 activity.sendBroadcast(intent);
+                                User.moveOrUpdateAll(intersectedContacts);
                             } catch (JSONException | IOException e) {
                                 Log.e("ERROR", e.toString());
                             } finally {

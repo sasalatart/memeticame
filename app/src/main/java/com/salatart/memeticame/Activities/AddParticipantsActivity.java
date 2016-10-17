@@ -40,11 +40,11 @@ import okhttp3.Response;
 
 public class AddParticipantsActivity extends AppCompatActivity {
 
+    @BindView(R.id.list_view_users_to_add) ListView mUsersListView;
+
     private ArrayList<User> mUsers = new ArrayList<>();
     private ArrayList<User> mSelectedUsers = new ArrayList<>();
     private ArrayList<User> mInvitedUsers = new ArrayList<>();
-
-    @BindView(R.id.list_view_users_to_add) ListView mUsersListView;
     private ContactsSelectAdapter mAdapter;
 
     private Chat mChat;
@@ -54,13 +54,7 @@ public class AddParticipantsActivity extends AppCompatActivity {
         public void onReceive(Context context, Intent intent) {
             mUsers = intent.getParcelableArrayListExtra(ContactsUtils.INTERSECTED_CONTACTS_PARCELABLE_KEY);
             mUsers = User.difference(mUsers, mChat.getParticipants());
-            mAdapter = new ContactsSelectAdapter(AddParticipantsActivity.this, R.layout.list_item_contact, mUsers, mSelectedUsers, mInvitedUsers);
-            AddParticipantsActivity.this.runOnUiThread(new Runnable() {
-                public void run() {
-                    mUsersListView.setAdapter(mAdapter);
-                }
-            });
-            getInvitations();
+            setAdapter();
         }
     };
 
@@ -121,20 +115,7 @@ public class AddParticipantsActivity extends AppCompatActivity {
         Bundle data = getIntent().getExtras();
         mChat = data.getParcelable(Chat.PARCELABLE_KEY);
 
-        mUsersListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                User selectedContact = mUsers.get(position);
-                if (mSelectedUsers.contains(selectedContact)) {
-                    mSelectedUsers.remove(selectedContact);
-                } else {
-                    mSelectedUsers.add(selectedContact);
-                }
-                mAdapter.notifyDataSetChanged();
-            }
-        });
-
-        ContactsUtils.retrieveContacts(AddParticipantsActivity.this);
+        setContacts();
 
         ActionBar actionBar = getSupportActionBar();
         actionBar.setDisplayHomeAsUpEnabled(true);
@@ -145,7 +126,7 @@ public class AddParticipantsActivity extends AppCompatActivity {
     @Override
     public void onResume() {
         super.onResume();
-        AddParticipantsActivity.this.registerReceiver(mContactsReceiver, new IntentFilter(ContactsUtils.RETRIEVE_CONTACTS_FILTER));
+        AddParticipantsActivity.this.registerReceiver(mContactsReceiver, new IntentFilter(FilterUtils.RETRIEVE_CONTACTS_FILTER));
         AddParticipantsActivity.this.registerReceiver(mUsersKickedReceiver, new IntentFilter(FilterUtils.USER_KICKED_FILTER));
         AddParticipantsActivity.this.registerReceiver(mNewChatInvitationsReceiver, new IntentFilter(FilterUtils.NEW_CHAT_INVITATION_FILTER));
         AddParticipantsActivity.this.registerReceiver(mChatInvitationAcceptedReceiver, new IntentFilter(FilterUtils.CHAT_INVITATION_ACCEPTED_FILTER));
@@ -191,7 +172,7 @@ public class AddParticipantsActivity extends AppCompatActivity {
                                 mAdapter.notifyDataSetChanged();
                             }
                         });
-                    } catch(JSONException e) {
+                    } catch (JSONException e) {
                         Log.e("ERROR", e.toString());
                     }
                 } else {
@@ -228,6 +209,35 @@ public class AddParticipantsActivity extends AppCompatActivity {
                     });
                 }
                 response.body().close();
+            }
+        });
+    }
+
+    public void setContacts() {
+        mUsersListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                User selectedContact = mUsers.get(position);
+                if (mSelectedUsers.contains(selectedContact)) {
+                    mSelectedUsers.remove(selectedContact);
+                } else {
+                    mSelectedUsers.add(selectedContact);
+                }
+                mAdapter.notifyDataSetChanged();
+            }
+        });
+
+        mUsers = User.difference(User.findAll(), mChat.getParticipants());
+        setAdapter();
+        getInvitations();
+        ContactsUtils.retrieveContacts(AddParticipantsActivity.this);
+    }
+
+    public void setAdapter() {
+        mAdapter = new ContactsSelectAdapter(AddParticipantsActivity.this, R.layout.list_item_contact, mUsers, mSelectedUsers, mInvitedUsers);
+        AddParticipantsActivity.this.runOnUiThread(new Runnable() {
+            public void run() {
+                mUsersListView.setAdapter(mAdapter);
             }
         });
     }

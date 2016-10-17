@@ -5,7 +5,6 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.provider.ContactsContract;
 import android.support.v4.app.Fragment;
@@ -21,19 +20,17 @@ import android.widget.ListView;
 import com.salatart.memeticame.Models.User;
 import com.salatart.memeticame.R;
 import com.salatart.memeticame.Utils.ContactsUtils;
+import com.salatart.memeticame.Utils.FilterUtils;
 import com.salatart.memeticame.Utils.Routes;
 import com.salatart.memeticame.Views.ContactsAdapter;
 
 import java.util.ArrayList;
-
-import static com.salatart.memeticame.Utils.ContactsUtils.PERMISSIONS_REQUEST_READ_CONTACTS;
 
 /**
  * A simple {@link Fragment} subclass.
  */
 public class ContactsFragment extends Fragment {
 
-    public static final String NEW_USER_FILTER = "newUserFilter";
     public static final String CONTACTS_STATE = "contactsFragmentState";
     public static final int REQUEST_NEW_CONTACT = 1;
 
@@ -61,26 +58,12 @@ public class ContactsFragment extends Fragment {
         public void onReceive(Context context, Intent intent) {
             mLocalContacts = intent.getParcelableArrayListExtra(ContactsUtils.LOCAL_CONTACTS_PARCELABLE_KEY);
             mContacts = intent.getParcelableArrayListExtra(ContactsUtils.INTERSECTED_CONTACTS_PARCELABLE_KEY);
-            mAdapter = new ContactsAdapter(getContext(), R.layout.list_item_contact, mContacts);
-            getActivity().runOnUiThread(new Runnable() {
-                public void run() {
-                    mContactsListView.setAdapter(mAdapter);
-                }
-            });
+            setAdapter();
         }
     };
 
 
     public ContactsFragment() {
-        // Required empty public constructor
-    }
-
-    public void onActivityCreated(Bundle savedInstanceState) {
-        super.onActivityCreated(savedInstanceState);
-
-        if (savedInstanceState != null) {
-            mContacts = savedInstanceState.getParcelableArrayList(CONTACTS_STATE);
-        }
     }
 
     @Override
@@ -89,23 +72,8 @@ public class ContactsFragment extends Fragment {
         final View view = inflater.inflate(R.layout.fragment_contacts, container, false);
 
         mContactsListView = (ListView) view.findViewById(R.id.contacts_list_view);
-        mContactsListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                mContactSelectedListener.onContactSelected(mContacts.get(position));
-            }
-        });
 
-        if (savedInstanceState != null) {
-            mContacts = savedInstanceState.getParcelableArrayList(CONTACTS_STATE);
-        }
-
-        if (mContacts != null && mContacts.size() != 0) {
-            mAdapter = new ContactsAdapter(getContext(), R.layout.list_item_contact, mContacts);
-            mContactsListView.setAdapter(mAdapter);
-        } else {
-            ContactsUtils.retrieveContacts(getActivity());
-        }
+        setContacts();
 
         setHasOptionsMenu(true);
 
@@ -145,8 +113,8 @@ public class ContactsFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
-        getActivity().registerReceiver(mUsersReceiver, new IntentFilter(NEW_USER_FILTER));
-        getActivity().registerReceiver(mContactsReceiver, new IntentFilter(ContactsUtils.RETRIEVE_CONTACTS_FILTER));
+        getActivity().registerReceiver(mUsersReceiver, new IntentFilter(FilterUtils.NEW_USER_FILTER));
+        getActivity().registerReceiver(mContactsReceiver, new IntentFilter(FilterUtils.RETRIEVE_CONTACTS_FILTER));
     }
 
     @Override
@@ -171,19 +139,22 @@ public class ContactsFragment extends Fragment {
         }
     }
 
-    @Override
-    public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
-        switch (requestCode) {
-            case PERMISSIONS_REQUEST_READ_CONTACTS: {
-                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    ContactsUtils.retrieveContacts(getActivity());
-                } else {
-                    // Disable the functionality that depends on this permission.
-                }
-
-                return;
+    public void setContacts() {
+        mContactsListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                mContactSelectedListener.onContactSelected(mContacts.get(position));
             }
-        }
+        });
+
+        mContacts = User.findAll();
+        setAdapter();
+        ContactsUtils.retrieveContacts(getActivity());
+    }
+
+    public void setAdapter() {
+        mAdapter = new ContactsAdapter(getContext(), R.layout.list_item_contact, mContacts);
+        mContactsListView.setAdapter(mAdapter);
     }
 
     public interface OnContactSelected {

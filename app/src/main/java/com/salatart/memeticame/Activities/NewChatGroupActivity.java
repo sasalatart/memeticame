@@ -18,6 +18,7 @@ import com.salatart.memeticame.Models.Chat;
 import com.salatart.memeticame.Models.User;
 import com.salatart.memeticame.R;
 import com.salatart.memeticame.Utils.ContactsUtils;
+import com.salatart.memeticame.Utils.FilterUtils;
 import com.salatart.memeticame.Utils.Routes;
 import com.salatart.memeticame.Views.ContactsSelectAdapter;
 
@@ -29,20 +30,16 @@ public class NewChatGroupActivity extends AppCompatActivity {
 
     private ArrayList<User> mContacts = new ArrayList<>();
     private ArrayList<User> mSelectedContacts = new ArrayList<>();
+    private ContactsSelectAdapter mAdapter;
+
     private EditText mGroupNameInput;
     private ListView mContactsListView;
-    private ContactsSelectAdapter mAdapter;
 
     private BroadcastReceiver mContactsReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
             mContacts = intent.getParcelableArrayListExtra(ContactsUtils.INTERSECTED_CONTACTS_PARCELABLE_KEY);
-            mAdapter = new ContactsSelectAdapter(NewChatGroupActivity.this, R.layout.list_item_contact, mContacts, mSelectedContacts, new ArrayList<User>());
-            NewChatGroupActivity.this.runOnUiThread(new Runnable() {
-                public void run() {
-                    mContactsListView.setAdapter(mAdapter);
-                }
-            });
+            setAdapter();
         }
     };
 
@@ -56,22 +53,8 @@ public class NewChatGroupActivity extends AppCompatActivity {
         setContentView(R.layout.activity_new_chat_group);
 
         mGroupNameInput = (EditText) findViewById(R.id.group_name_input);
-
         mContactsListView = (ListView) findViewById(R.id.contacts_list_view);
-        mContactsListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                User selectedContact = mContacts.get(position);
-                if (mSelectedContacts.contains(selectedContact)) {
-                    mSelectedContacts.remove(selectedContact);
-                } else {
-                    mSelectedContacts.add(selectedContact);
-                }
-                mAdapter.notifyDataSetChanged();
-            }
-        });
-
-        ContactsUtils.retrieveContacts(NewChatGroupActivity.this);
+        setContacts();
 
         ActionBar actionBar = getSupportActionBar();
         actionBar.setDisplayHomeAsUpEnabled(true);
@@ -82,7 +65,7 @@ public class NewChatGroupActivity extends AppCompatActivity {
     @Override
     public void onResume() {
         super.onResume();
-        NewChatGroupActivity.this.registerReceiver(mContactsReceiver, new IntentFilter(ContactsUtils.RETRIEVE_CONTACTS_FILTER));
+        NewChatGroupActivity.this.registerReceiver(mContactsReceiver, new IntentFilter(FilterUtils.RETRIEVE_CONTACTS_FILTER));
     }
 
     @Override
@@ -110,5 +93,34 @@ public class NewChatGroupActivity extends AppCompatActivity {
 
         Request request = Routes.chatsCreateRequest(getApplicationContext(), title, mSelectedContacts, true);
         Chat.createFromRequest(NewChatGroupActivity.this, request);
+    }
+
+    public void setContacts() {
+        mContacts = User.findAll();
+        setAdapter();
+
+        mContactsListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                User selectedContact = mContacts.get(position);
+                if (mSelectedContacts.contains(selectedContact)) {
+                    mSelectedContacts.remove(selectedContact);
+                } else {
+                    mSelectedContacts.add(selectedContact);
+                }
+                mAdapter.notifyDataSetChanged();
+            }
+        });
+
+        ContactsUtils.retrieveContacts(NewChatGroupActivity.this);
+    }
+
+    public void setAdapter() {
+        mAdapter = new ContactsSelectAdapter(NewChatGroupActivity.this, R.layout.list_item_contact, mContacts, mSelectedContacts, new ArrayList<User>());
+        NewChatGroupActivity.this.runOnUiThread(new Runnable() {
+            public void run() {
+                mContactsListView.setAdapter(mAdapter);
+            }
+        });
     }
 }

@@ -1,6 +1,7 @@
 package com.salatart.memeticame.Activities;
 
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.support.design.widget.TabLayout;
 import android.support.v4.view.ViewPager;
@@ -13,6 +14,7 @@ import com.salatart.memeticame.Fragments.ContactsFragment;
 import com.salatart.memeticame.Models.Chat;
 import com.salatart.memeticame.Models.User;
 import com.salatart.memeticame.R;
+import com.salatart.memeticame.Utils.ContactsUtils;
 import com.salatart.memeticame.Utils.HttpClient;
 import com.salatart.memeticame.Utils.Routes;
 import com.salatart.memeticame.Utils.SessionUtils;
@@ -25,6 +27,8 @@ import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.Request;
 import okhttp3.Response;
+
+import static com.salatart.memeticame.Utils.ContactsUtils.PERMISSIONS_REQUEST_READ_CONTACTS;
 
 public class MainActivity extends AppCompatActivity implements ChatsFragment.OnChatSelected,
         ChatsFragment.OnCreateGroupClicked, ContactsFragment.OnContactSelected, Routes.OnLogout {
@@ -45,15 +49,7 @@ public class MainActivity extends AppCompatActivity implements ChatsFragment.OnC
             MainActivity.this.finish();
         }
 
-        this.mChatsFragments = new ChatsFragment();
-        this.mContactsFragments = new ContactsFragment();
-        this.mChatInvitationsFragment = new ChatInvitationsFragment();
-
-        ViewPager viewPager = (ViewPager) findViewById(R.id.viewpager);
-        setupViewPager(viewPager);
-
-        TabLayout tabLayout = (TabLayout) findViewById(R.id.tabs);
-        tabLayout.setupWithViewPager(viewPager);
+        setupViewPager();
     }
 
     @Override
@@ -65,7 +61,13 @@ public class MainActivity extends AppCompatActivity implements ChatsFragment.OnC
         }
     }
 
-    private void setupViewPager(ViewPager viewPager) {
+    private void setupViewPager() {
+        ViewPager viewPager = (ViewPager) findViewById(R.id.viewpager);
+
+        this.mChatsFragments = new ChatsFragment();
+        this.mContactsFragments = new ContactsFragment();
+        this.mChatInvitationsFragment = new ChatInvitationsFragment();
+
         ViewPagerAdapter adapter = new ViewPagerAdapter(getSupportFragmentManager());
 
         adapter.addFragment(this.mChatsFragments, "Chats");
@@ -73,6 +75,9 @@ public class MainActivity extends AppCompatActivity implements ChatsFragment.OnC
         adapter.addFragment(this.mChatInvitationsFragment, "Chat Invitations");
 
         viewPager.setAdapter(adapter);
+
+        TabLayout tabLayout = (TabLayout) findViewById(R.id.tabs);
+        tabLayout.setupWithViewPager(viewPager);
     }
 
     @Override
@@ -110,5 +115,18 @@ public class MainActivity extends AppCompatActivity implements ChatsFragment.OnC
                 response.body().close();
             }
         });
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
+        switch (requestCode) {
+            case PERMISSIONS_REQUEST_READ_CONTACTS: {
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    ContactsUtils.retrieveContacts(MainActivity.this);
+                } else {
+                    // Disable the functionality that depends on this permission.
+                }
+            }
+        }
     }
 }

@@ -52,7 +52,6 @@ public class ChatInvitationsFragment extends Fragment {
         public void onReceive(Context context, Intent intent) {
             ArrayList<ChatInvitation> chatInvitations = intent.getParcelableArrayListExtra(ChatInvitation.PARCELABLE_KEY_ARRAY_LIST);
             ChatInvitation myChatInvitation = ChatInvitation.includesUser(chatInvitations, SessionUtils.getPhoneNumber(getContext()));
-
             if (myChatInvitation != null) {
                 mChatInvitations.add(myChatInvitation);
                 mAdapter.notifyDataSetChanged();
@@ -67,8 +66,7 @@ public class ChatInvitationsFragment extends Fragment {
         }
     };
 
-    public ChatInvitationsFragment() {
-    }
+    public ChatInvitationsFragment() {}
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -81,7 +79,7 @@ public class ChatInvitationsFragment extends Fragment {
 
         mChatInvitationsListView = (ListView) view.findViewById(R.id.list_view_chat_invitations);
 
-        showChatInvitations();
+        setChatInvitations();
 
         setHasOptionsMenu(true);
 
@@ -128,7 +126,7 @@ public class ChatInvitationsFragment extends Fragment {
         getActivity().unregisterReceiver(mAdapterResponseReceiver);
     }
 
-    public void showChatInvitations() {
+    public void setChatInvitations() {
         Request request = Routes.chatInvitationIndexRequest(getActivity());
         HttpClient.getInstance().newCall(request).enqueue(new Callback() {
             @Override

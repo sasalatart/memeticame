@@ -6,10 +6,12 @@ import android.os.Parcelable;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Created by Andres Matte on 8/10/2016.
- */
-public class User implements Parcelable {
+import io.realm.Realm;
+import io.realm.RealmObject;
+import io.realm.RealmResults;
+import io.realm.annotations.PrimaryKey;
+
+public class User extends RealmObject implements Parcelable {
     public static final Parcelable.Creator CREATOR = new Parcelable.Creator() {
         public User createFromParcel(Parcel in) {
             return new User(in);
@@ -23,9 +25,13 @@ public class User implements Parcelable {
     public static String PARCELABLE_KEY = "com.salatart.memeticamea.Models.User";
     public static String PARCELABLE_KEY_ARRAY_LIST = "com.salatart.memeticamea.Models.UserArrayList";
 
-    private final int mId;
+    @PrimaryKey
+    private int mId;
     private String mName;
     private String mPhoneNumber;
+
+    public User() {
+    }
 
     public User(int id, String name, String phoneNumber) {
         this.mId = id;
@@ -94,6 +100,23 @@ public class User implements Parcelable {
 
     public static boolean comparePhones(String phone1, String phone2) {
         return phone1.replaceAll("[^\\d.]", "").equals(phone2.replaceAll("[^\\d.]", ""));
+    }
+
+    public static ArrayList<User> findAll() {
+        ArrayList<User> users = new ArrayList<>();
+        Realm realm = Realm.getDefaultInstance();
+        RealmResults<User> userResults = realm.where(User.class).findAll();
+        users.addAll(userResults.subList(0, userResults.size()));
+        return users;
+    }
+
+    public static void moveOrUpdateAll(ArrayList<User> users) {
+        Realm realm = Realm.getDefaultInstance();
+        realm.beginTransaction();
+        for (User user : users) {
+            realm.copyToRealmOrUpdate(user);
+        }
+        realm.commitTransaction();
     }
 
     public int getId() {
