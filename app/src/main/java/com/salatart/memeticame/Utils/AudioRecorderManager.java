@@ -16,12 +16,12 @@ import java.io.IOException;
  * Created by sasalatart on 9/23/16.
  */
 
-public class AudioManager {
+public class AudioRecorderManager {
 
     private MediaRecorder mAudioRecorder;
     private File mAudioFile;
 
-    public AudioManager() {
+    public AudioRecorderManager() {
         mAudioRecorder = new MediaRecorder();
     }
 

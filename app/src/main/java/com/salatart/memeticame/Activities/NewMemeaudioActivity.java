@@ -16,7 +16,7 @@ import android.widget.RelativeLayout;
 
 import com.bumptech.glide.Glide;
 import com.salatart.memeticame.R;
-import com.salatart.memeticame.Utils.AudioManager;
+import com.salatart.memeticame.Utils.AudioRecorderManager;
 import com.salatart.memeticame.Utils.FileUtils;
 import com.salatart.memeticame.Utils.ZipManager;
 
@@ -36,7 +36,7 @@ public class NewMemeaudioActivity extends AppCompatActivity {
     @BindView(R.id.button_record_audio) ImageButton mRecordButton;
 
     private boolean mCurrentlyRecording;
-    private AudioManager mAudioManager;
+    private AudioRecorderManager mAudioRecorderManager;
 
     private Uri mAudioUri;
     private Uri mImageUri;
@@ -53,7 +53,7 @@ public class NewMemeaudioActivity extends AppCompatActivity {
 
         setTitle("New Memeaudio");
 
-        mAudioManager = new AudioManager();
+        mAudioRecorderManager = new AudioRecorderManager();
         mCurrentlyRecording = false;
     }
 
@@ -69,8 +69,8 @@ public class NewMemeaudioActivity extends AppCompatActivity {
 
     public void toggleRecording(View view) {
         if (mCurrentlyRecording) {
-            File audioFile = mAudioManager.stopAudioRecording();
-            mAudioUri = mAudioManager.addRecordingToMediaLibrary(NewMemeaudioActivity.this, audioFile);
+            File audioFile = mAudioRecorderManager.stopAudioRecording();
+            mAudioUri = mAudioRecorderManager.addRecordingToMediaLibrary(NewMemeaudioActivity.this, audioFile);
             mRecordButton.setColorFilter(Color.BLACK);
 
             try {
@@ -87,7 +87,7 @@ public class NewMemeaudioActivity extends AppCompatActivity {
                 Log.e("ERROR", e.toString());
             }
         } else {
-            mAudioManager.startAudioRecording(NewMemeaudioActivity.this);
+            mAudioRecorderManager.startAudioRecording(NewMemeaudioActivity.this);
             mRecordButton.setColorFilter(Color.RED);
         }
         mCurrentlyRecording = !mCurrentlyRecording;

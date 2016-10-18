@@ -8,7 +8,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
-import android.media.RingtoneManager;
+import android.media.MediaMetadataRetriever;
 import android.net.Uri;
 import android.os.Environment;
 import android.provider.DocumentsContract;
@@ -62,8 +62,6 @@ public class FileUtils {
 
         if (!fileExists) {
             downloadAttachment(context, attachment);
-        } else if (attachment.isAudio()) {
-            RingtoneManager.getRingtone(context, Uri.parse(attachment.getStringUri())).play();
         } else if (attachment.isMemeaudio()) {
             context.startActivity(MemeaudioActivity.getIntent(context, attachment));
         } else {
@@ -113,6 +111,14 @@ public class FileUtils {
         if (type == null) {
             ContentResolver cR = context.getContentResolver();
             type = cR.getType(uri);
+        }
+
+        if (type != null && type.contains("video")) {
+            MediaMetadataRetriever metadataRetriever = new MediaMetadataRetriever();
+            metadataRetriever.setDataSource(context, uri);
+            if (metadataRetriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_HAS_VIDEO) == null) {
+                type = type.replace("video", "audio");
+            }
         }
 
         return type;

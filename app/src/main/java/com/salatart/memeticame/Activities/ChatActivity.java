@@ -39,7 +39,7 @@ import com.salatart.memeticame.Models.Message;
 import com.salatart.memeticame.Models.MessageCount;
 import com.salatart.memeticame.Models.User;
 import com.salatart.memeticame.R;
-import com.salatart.memeticame.Utils.AudioManager;
+import com.salatart.memeticame.Utils.AudioRecorderManager;
 import com.salatart.memeticame.Utils.FileUtils;
 import com.salatart.memeticame.Utils.FilterUtils;
 import com.salatart.memeticame.Utils.HttpClient;
@@ -86,7 +86,7 @@ public class ChatActivity extends AppCompatActivity {
     private MessagesAdapter mAdapter;
 
     private boolean mCurrentlyRecording;
-    private AudioManager mAudioManager;
+    private AudioRecorderManager mAudioRecorderManager;
 
     private Attachment mCurrentAttachment;
     private Uri mCurrentImageUri;
@@ -177,7 +177,7 @@ public class ChatActivity extends AppCompatActivity {
 
         setTitle(mChat.getTitle());
 
-        mAudioManager = new AudioManager();
+        mAudioRecorderManager = new AudioRecorderManager();
         mCurrentlyRecording = false;
 
         setAdapter();
@@ -407,12 +407,12 @@ public class ChatActivity extends AppCompatActivity {
 
     public void toggleRecording(View view) {
         if (mCurrentlyRecording) {
-            File audioFile = mAudioManager.stopAudioRecording();
-            Uri uri = mAudioManager.addRecordingToMediaLibrary(ChatActivity.this, audioFile);
+            File audioFile = mAudioRecorderManager.stopAudioRecording();
+            Uri uri = mAudioRecorderManager.addRecordingToMediaLibrary(ChatActivity.this, audioFile);
             setCurrentAttachmentFromUri(uri);
             mRecordButton.setColorFilter(Color.BLACK);
         } else {
-            mAudioManager.startAudioRecording(ChatActivity.this);
+            mAudioRecorderManager.startAudioRecording(ChatActivity.this);
             mRecordButton.setColorFilter(Color.RED);
         }
         mCurrentlyRecording = !mCurrentlyRecording;

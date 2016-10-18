@@ -121,9 +121,6 @@ public class ChatsFragment extends Fragment {
             }
         });
 
-
-        showChats();
-
         return view;
     }
 
@@ -144,6 +141,7 @@ public class ChatsFragment extends Fragment {
         getActivity().registerReceiver(mMessageReceiver, new IntentFilter(FilterUtils.NEW_MESSAGE_FILTER));
         getActivity().registerReceiver(mUsersKickedReceiver, new IntentFilter(FilterUtils.USER_KICKED_FILTER));
         getActivity().registerReceiver(mUserAcceptedInvitationReceiver, new IntentFilter(FilterUtils.CHAT_INVITATION_ACCEPTED_FILTER));
+        showChats();
     }
 
     @Override

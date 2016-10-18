@@ -31,7 +31,6 @@ public class MemeaudioActivity extends AppCompatActivity {
     private MediaPlayer mMediaPlayer;
 
     private Attachment mAttachment;
-    private Uri mImageUri;
     private Uri mAudioUri;
 
     public static Intent getIntent(Context context, Attachment attachment) {
@@ -75,7 +74,7 @@ public class MemeaudioActivity extends AppCompatActivity {
     }
 
     public void setImage() {
-        mImageUri = mAttachment.getMemeaudioPartUri(MemeaudioActivity.this, true);
+        Uri mImageUri = mAttachment.getMemeaudioPartUri(MemeaudioActivity.this, true);
 
         Glide.with(MemeaudioActivity.this)
                 .load(mImageUri)
