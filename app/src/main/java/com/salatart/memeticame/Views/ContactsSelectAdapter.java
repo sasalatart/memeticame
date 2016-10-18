@@ -57,7 +57,7 @@ public class ContactsSelectAdapter extends ArrayAdapter<User> {
         nameView.setText(user.getName());
         phoneView.setText(user.getPhoneNumber());
 
-        isCheckedView.setVisibility(mSelectedContacts.contains(user) ? View.VISIBLE : View.INVISIBLE);
+        isCheckedView.setVisibility(User.isPresent(mSelectedContacts, user.getPhoneNumber()) ? View.VISIBLE : View.INVISIBLE);
 
         return view;
     }

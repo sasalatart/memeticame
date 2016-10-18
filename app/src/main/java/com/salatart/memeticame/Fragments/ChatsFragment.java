@@ -214,9 +214,9 @@ public class ChatsFragment extends Fragment {
                                         } else {
                                             Toast.makeText(getActivity(), HttpClient.parseErrorMessage(response), Toast.LENGTH_SHORT).show();
                                         }
-                                        response.body().close();
                                     }
                                 });
+                                response.body().close();
                             }
                         });
                     }

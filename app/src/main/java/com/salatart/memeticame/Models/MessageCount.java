@@ -57,6 +57,7 @@ public class MessageCount extends RealmObject {
         if (messageCount != null) {
             realm.beginTransaction();
             messageCount.setUnreadMessages(messageCount.getUnreadMessages() + 1);
+            messageCount.setMessageCount(messageCount.getMessageCount() + 1);
             realm.commitTransaction();
         }
     }

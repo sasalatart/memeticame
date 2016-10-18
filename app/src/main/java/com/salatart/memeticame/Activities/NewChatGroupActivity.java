@@ -80,11 +80,6 @@ public class NewChatGroupActivity extends AppCompatActivity {
     }
 
     public void createGroup(View view) {
-        if (mSelectedContacts.size() == 0) {
-            Toast.makeText(NewChatGroupActivity.this, "You must add participants before creating a group.", Toast.LENGTH_LONG).show();
-            return;
-        }
-
         String title = mGroupNameInput.getText().toString();
         if (title.isEmpty()) {
             Toast.makeText(NewChatGroupActivity.this, "You must choose a name before creating a group.", Toast.LENGTH_LONG).show();
@@ -103,8 +98,8 @@ public class NewChatGroupActivity extends AppCompatActivity {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 User selectedContact = mContacts.get(position);
-                if (mSelectedContacts.contains(selectedContact)) {
-                    mSelectedContacts.remove(selectedContact);
+                if (User.isPresent(mSelectedContacts, selectedContact.getPhoneNumber())) {
+                    User.removeFromList(mSelectedContacts, selectedContact);
                 } else {
                     mSelectedContacts.add(selectedContact);
                 }
