@@ -51,6 +51,8 @@ public class NewMemeaudioActivity extends AppCompatActivity {
         ActionBar actionBar = getSupportActionBar();
         actionBar.setDisplayHomeAsUpEnabled(true);
 
+        setTitle("New Memeaudio");
+
         mAudioManager = new AudioManager();
         mCurrentlyRecording = false;
     }

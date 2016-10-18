@@ -35,4 +35,5 @@
     <string name="attachment_size">attachment size</string>
     <string name="mime_type">mime type</string>
     <string name="see_gallery">See gallery</string>
+    <string name="click_to_download">(click to download)</string>
 </resources>

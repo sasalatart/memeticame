@@ -103,10 +103,23 @@ public class ChatActivity extends AppCompatActivity {
         }
     };
 
-    private BroadcastReceiver mOnDownloadReceiver = new BroadcastReceiver() {
+    private BroadcastReceiver mDownloadReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            mAdapter.notifyDataSetChanged();
+            ChatActivity.this.runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    mAdapter.notifyDataSetChanged();
+                }
+            });
+        }
+    };
+
+    private BroadcastReceiver mZipReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            finish();
+            startActivity(getIntent());
         }
     };
 
@@ -128,14 +141,6 @@ public class ChatActivity extends AppCompatActivity {
             if (chatInvitation.getChatId() == mChat.getId()) {
                 mChat.getParticipants().add(chatInvitation.getUser());
             }
-        }
-    };
-
-    private BroadcastReceiver mZipReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            finish();
-            startActivity(getIntent());
         }
     };
 
@@ -188,22 +193,22 @@ public class ChatActivity extends AppCompatActivity {
 
         getChat();
 
+        registerReceiver(mDownloadReceiver, new IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE));
+        registerReceiver(mZipReceiver, new IntentFilter(FilterUtils.UNZIP_FILTER));
         registerReceiver(mMessageReceiver, new IntentFilter(FilterUtils.NEW_MESSAGE_FILTER));
-        registerReceiver(mOnDownloadReceiver, new IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE));
         registerReceiver(mUsersKickedReceiver, new IntentFilter(FilterUtils.USER_KICKED_FILTER));
         registerReceiver(mUserAcceptedInvitationReceiver, new IntentFilter(FilterUtils.CHAT_INVITATION_ACCEPTED_FILTER));
-        registerReceiver(mZipReceiver, new IntentFilter(FilterUtils.UNZIP_FILTER));
         sIsActive = true;
     }
 
     @Override
     public void onPause() {
         super.onPause();
+        unregisterReceiver(mDownloadReceiver);
+        unregisterReceiver(mZipReceiver);
         unregisterReceiver(mMessageReceiver);
-        unregisterReceiver(mOnDownloadReceiver);
         unregisterReceiver(mUsersKickedReceiver);
         unregisterReceiver(mUserAcceptedInvitationReceiver);
-        unregisterReceiver(mZipReceiver);
         mMessageCount.update(mChat, mChat.getMessages().size(), 0);
         sIsActive = false;
     }

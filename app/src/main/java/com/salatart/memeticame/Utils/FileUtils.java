@@ -43,22 +43,38 @@ public class FileUtils {
         return getMemeticameDirectory() + "/Downloads";
     }
 
-    public static ArrayList<Attachment> getAllDownloadedAttachments(Context context) {
-        ArrayList<Attachment> attachments = new ArrayList<>();
+    public static Intent getOpenFileIntent(Uri uri, String mimeType) {
+        Intent openIntent = new Intent(Intent.ACTION_VIEW);
+        openIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        openIntent.setDataAndType(uri, mimeType);
+        return openIntent;
+    }
 
-        File parentDir = new File(getMemeticameDownloadsDirectory());
-        if (!parentDir.exists()) {
-            parentDir.mkdirs();
-        }
+    public static Intent getSelectFileIntent(String type) {
+        Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
+        intent.addCategory(Intent.CATEGORY_OPENABLE);
+        intent.setType(type);
+        return intent;
+    }
 
-        File[] files = parentDir.listFiles();
-        if (files != null) {
-            for (File file : files) {
-                attachments.add(ParserUtils.attachmentFromUri(context, Uri.fromFile(file)));
+    public static boolean openFile(Context context, Attachment attachment) {
+        boolean fileExists = checkFileExistence(context, attachment.getName());
+
+        if (!fileExists) {
+            downloadAttachment(context, attachment);
+        } else if (attachment.isAudio()) {
+            RingtoneManager.getRingtone(context, Uri.parse(attachment.getStringUri())).play();
+        } else if (attachment.isMemeaudio()) {
+            context.startActivity(MemeaudioActivity.getIntent(context, attachment));
+        } else {
+            try {
+                context.startActivity(getOpenFileIntent(Uri.parse(attachment.getStringUri()), attachment.getMimeType()));
+            } catch (ActivityNotFoundException e) {
+                return false;
             }
         }
 
-        return attachments;
+        return true;
     }
 
     public static String getName(Context context, Uri uri) {
@@ -118,13 +134,6 @@ public class FileUtils {
         }
 
         return byteBuffer.toByteArray();
-    }
-
-    public static Intent getSelectFileIntent(String type) {
-        Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
-        intent.addCategory(Intent.CATEGORY_OPENABLE);
-        intent.setType(type);
-        return intent;
     }
 
     public static File createMediaFile(Context context, String extension, String directory) {
@@ -214,31 +223,22 @@ public class FileUtils {
                 .setNegativeButton(android.R.string.no, null).show();
     }
 
-    public static Intent getOpenFileIntent(Uri uri, String mimeType) {
-        Intent openIntent = new Intent(Intent.ACTION_VIEW);
-        openIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-        openIntent.setDataAndType(uri, mimeType);
-        return openIntent;
-    }
+    public static ArrayList<Attachment> getAllDownloadedAttachments(Context context) {
+        ArrayList<Attachment> attachments = new ArrayList<>();
 
-    public static boolean openFile(Context context, Attachment attachment) {
-        boolean fileExists = checkFileExistence(context, attachment.getName());
+        File parentDir = new File(getMemeticameDownloadsDirectory());
+        if (!parentDir.exists()) {
+            parentDir.mkdirs();
+        }
 
-        if (!fileExists) {
-            downloadAttachment(context, attachment);
-        } else if (attachment.isAudio()) {
-            RingtoneManager.getRingtone(context, Uri.parse(attachment.getStringUri())).play();
-        } else if (attachment.isMemeaudio()) {
-            context.startActivity(MemeaudioActivity.getIntent(context, attachment));
-        } else {
-            try {
-                context.startActivity(getOpenFileIntent(Uri.parse(attachment.getStringUri()), attachment.getMimeType()));
-            } catch (ActivityNotFoundException e) {
-                return false;
+        File[] files = parentDir.listFiles();
+        if (files != null) {
+            for (File file : files) {
+                attachments.add(ParserUtils.attachmentFromUri(context, Uri.fromFile(file)));
             }
         }
 
-        return true;
+        return attachments;
     }
 
     @SuppressLint("NewApi")

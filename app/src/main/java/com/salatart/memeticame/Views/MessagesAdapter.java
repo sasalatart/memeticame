@@ -98,7 +98,6 @@ public class MessagesAdapter extends ArrayAdapter<Message> {
         }
 
         boolean fileExists = FileUtils.checkFileExistence(getContext(), attachment.getName());
-
         boolean isImage = attachment.isImage();
         boolean isVideo = attachment.isVideo();
         boolean isAudio = attachment.isAudio();
@@ -150,5 +149,8 @@ public class MessagesAdapter extends ArrayAdapter<Message> {
 
         TextView attachmentSize = (TextView) view.findViewById(R.id.size);
         attachmentSize.setText(attachment.getHumanReadableByteCount(false));
+
+        TextView labelDownloadAvailable = (TextView) view.findViewById(R.id.label_download_available);
+        labelDownloadAvailable.setVisibility(fileExists ? View.GONE : View.VISIBLE);
     }
 }

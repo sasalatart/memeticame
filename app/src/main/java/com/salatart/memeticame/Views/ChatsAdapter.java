@@ -14,8 +14,6 @@ import com.salatart.memeticame.Utils.TimeUtils;
 
 import java.util.ArrayList;
 
-import io.realm.Realm;
-
 /**
  * Created by sasalatart on 8/29/16.
  */
@@ -28,7 +26,6 @@ public class ChatsAdapter extends ArrayAdapter<Chat> {
         mChats = chats;
         mLayoutInflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
     }
-
 
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
@@ -69,10 +66,10 @@ public class ChatsAdapter extends ArrayAdapter<Chat> {
         titleView.setText(chat.getTitle());
 
         TextView adminView = (TextView) view.findViewById(R.id.label_admin);
-        adminView.setText("Admin: " + chat.getParticipantsHash().get(chat.getAdmin()));
+        adminView.setText(chat.getParticipantsHash().get(chat.getAdmin()));
 
         TextView createdAtView = (TextView) view.findViewById(R.id.label_created_at);
-        createdAtView.setText("Created At: " + TimeUtils.parseISODate(chat.getCreatedAt()));
+        createdAtView.setText(TimeUtils.parseISODate(chat.getCreatedAt()));
 
         String unreadMessages = MessageCount.findOne(chat).getUnreadMessages() + "";
         TextView unreadCountView = (TextView) view.findViewById(R.id.label_unread_count);
