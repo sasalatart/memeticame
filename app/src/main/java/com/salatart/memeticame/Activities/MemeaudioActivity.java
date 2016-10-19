@@ -30,7 +30,7 @@ public class MemeaudioActivity extends AppCompatActivity {
 
     private MediaPlayer mMediaPlayer;
 
-    private Attachment mAttachment;
+    private Uri mImageUri;
     private Uri mAudioUri;
 
     public static Intent getIntent(Context context, Attachment attachment) {
@@ -39,7 +39,8 @@ public class MemeaudioActivity extends AppCompatActivity {
         }
 
         Intent intent = new Intent(context, MemeaudioActivity.class);
-        intent.putExtra(Attachment.PARCELABLE_KEY, attachment);
+        intent.putExtra(Attachment.IMAGE_URI_KEY, attachment.getMemeaudioPartUri(context, true));
+        intent.putExtra(Attachment.AUDIO_URI_KEY, attachment.getMemeaudioPartUri(context, false));
         return intent;
     }
 
@@ -51,17 +52,15 @@ public class MemeaudioActivity extends AppCompatActivity {
         ButterKnife.bind(this);
 
         Bundle data = getIntent().getExtras();
-        mAttachment = data.getParcelable(Attachment.PARCELABLE_KEY);
-        if (!mAttachment.isMemeaudio()) {
-            finish();
-        }
+        mImageUri = data.getParcelable(Attachment.IMAGE_URI_KEY);
+        mAudioUri = data.getParcelable(Attachment.AUDIO_URI_KEY);
 
         ActionBar actionBar = getSupportActionBar();
         actionBar.setDisplayHomeAsUpEnabled(true);
 
         setTitle("Memeaudio");
         setImage();
-        setAudio();
+        setMediaPlayer();
     }
 
     public boolean onOptionsItemSelected(MenuItem item) {
@@ -74,8 +73,6 @@ public class MemeaudioActivity extends AppCompatActivity {
     }
 
     public void setImage() {
-        Uri mImageUri = mAttachment.getMemeaudioPartUri(MemeaudioActivity.this, true);
-
         Glide.with(MemeaudioActivity.this)
                 .load(mImageUri)
                 .placeholder(R.drawable.ic_access_time_black_24dp)
@@ -83,11 +80,6 @@ public class MemeaudioActivity extends AppCompatActivity {
                 .into(mImage);
 
         mImage.setOnTouchListener(new Touch());
-    }
-
-    public void setAudio() {
-        mAudioUri = mAttachment.getMemeaudioPartUri(MemeaudioActivity.this, false);
-        setMediaPlayer();
     }
 
     public void setMediaPlayer() {
