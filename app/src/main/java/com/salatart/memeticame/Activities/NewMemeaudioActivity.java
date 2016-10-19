@@ -30,6 +30,8 @@ import static com.salatart.memeticame.Utils.FilterUtils.REQUEST_PICK_FILE;
 
 public class NewMemeaudioActivity extends AppCompatActivity {
 
+    public static final String IMAGE_STATE = "imageState";
+
     @BindView(R.id.group_step_1) RelativeLayout mGroup1Layout;
     @BindView(R.id.group_step_2) RelativeLayout mGroup2Layout;
     @BindView(R.id.image_memeaudio) ImageView mImageMemeaudio;
@@ -48,6 +50,13 @@ public class NewMemeaudioActivity extends AppCompatActivity {
 
         ButterKnife.bind(this);
 
+        if (savedInstanceState != null) {
+            Uri uri = savedInstanceState.getParcelable(IMAGE_STATE);
+            if (uri != null) {
+                startStep2(uri);
+            }
+        }
+
         ActionBar actionBar = getSupportActionBar();
         actionBar.setDisplayHomeAsUpEnabled(true);
 
@@ -55,6 +64,12 @@ public class NewMemeaudioActivity extends AppCompatActivity {
 
         mAudioRecorderManager = new AudioRecorderManager();
         mCurrentlyRecording = false;
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle savedInstanceState) {
+        savedInstanceState.putParcelable(IMAGE_STATE, mImageUri);
+        super.onSaveInstanceState(savedInstanceState);
     }
 
     public boolean onOptionsItemSelected(MenuItem item) {
@@ -93,19 +108,23 @@ public class NewMemeaudioActivity extends AppCompatActivity {
         mCurrentlyRecording = !mCurrentlyRecording;
     }
 
+    public void startStep2(Uri uri) {
+        mGroup1Layout.setVisibility(View.GONE);
+        mGroup2Layout.setVisibility(View.VISIBLE);
+
+        mImageUri = uri;
+        Glide.with(NewMemeaudioActivity.this)
+                .load(mImageUri)
+                .crossFade()
+                .into(mImageMemeaudio);
+    }
+
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
         if (requestCode == REQUEST_PICK_FILE && resultCode == RESULT_OK && data != null) {
-            mImageUri = data.getData();
-            mGroup1Layout.setVisibility(View.GONE);
-            mGroup2Layout.setVisibility(View.VISIBLE);
-
-            Glide.with(NewMemeaudioActivity.this)
-                    .load(mImageUri)
-                    .crossFade()
-                    .into(mImageMemeaudio);
+            startStep2(data.getData());
         }
     }
 }
