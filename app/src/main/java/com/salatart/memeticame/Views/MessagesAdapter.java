@@ -12,6 +12,7 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.salatart.memeticame.Models.Attachment;
@@ -19,6 +20,7 @@ import com.salatart.memeticame.Models.Chat;
 import com.salatart.memeticame.Models.Message;
 import com.salatart.memeticame.R;
 import com.salatart.memeticame.Utils.FileUtils;
+import com.salatart.memeticame.Utils.MessageUtils;
 
 /**
  * Created by sasalatart on 9/4/16.
@@ -31,6 +33,7 @@ public class MessagesAdapter extends ArrayAdapter<Message> {
     private ImageButton mPlayButton;
     private ImageButton mPauseButton;
     private ImageButton mStopButton;
+    private ImageButton mCopyButton;
 
     public MessagesAdapter(Context context, int resource, Chat parentChat) {
         super(context, resource, parentChat.getMessages());
@@ -100,7 +103,7 @@ public class MessagesAdapter extends ArrayAdapter<Message> {
         ((TextView) view.findViewById(R.id.message)).setText(message.getContent());
     }
 
-    private void setAttachment(View view, Message message) {
+    private void setAttachment(View view, final Message message) {
         Attachment attachment = message.getAttachment();
 
         if (attachment == null) {
@@ -166,6 +169,15 @@ public class MessagesAdapter extends ArrayAdapter<Message> {
 
         TextView labelDownloadAvailable = (TextView) view.findViewById(R.id.label_download_available);
         labelDownloadAvailable.setVisibility(fileExists ? View.GONE : View.VISIBLE);
+
+        mCopyButton = ((ImageButton) view.findViewById(R.id.button_copy));
+        mCopyButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                MessageUtils.copyMessage(getContext(), message);
+                Toast.makeText(getContext(), "Message copied", Toast.LENGTH_LONG).show();
+            }
+        });
     }
 
     private void setMediaPlayer(final View view, final Uri audioUri) {

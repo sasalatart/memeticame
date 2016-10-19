@@ -78,6 +78,12 @@
                 android:layout_width="48dp"
                 android:layout_height="48dp"
                 android:src="@drawable/ic_stop_black_24dp" />
+
+            <ImageButton
+                android:id="@+id/button_copy"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:src="@drawable/ic_content_copy_black_24dp" />
         </LinearLayout>
 
         <LinearLayout
