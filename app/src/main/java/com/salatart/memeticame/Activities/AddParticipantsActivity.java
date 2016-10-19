@@ -72,11 +72,13 @@ public class AddParticipantsActivity extends AppCompatActivity {
     private BroadcastReceiver mNewChatInvitationsReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            ChatInvitation chatInvitation = intent.getParcelableExtra(ChatInvitation.PARCELABLE_KEY);
-            if (chatInvitation.getChatId() == mChat.getId()) {
-                mInvitedUsers.add(chatInvitation.getUser());
-                mAdapter.notifyDataSetChanged();
+            ArrayList<ChatInvitation> chatInvitations = intent.getParcelableArrayListExtra(ChatInvitation.PARCELABLE_KEY_ARRAY_LIST);
+            for (ChatInvitation chatInvitation : chatInvitations) {
+                if (chatInvitation.getChatId() == mChat.getId()) {
+                    mInvitedUsers.add(chatInvitation.getUser());
+                }
             }
+            mAdapter.notifyDataSetChanged();
         }
     };
 
@@ -183,30 +185,27 @@ public class AddParticipantsActivity extends AppCompatActivity {
         });
     }
 
-    public void addParticipants(View view) {
+    public void addParticipants(final View view) {
         if (mSelectedUsers.size() == 0) {
             Toast.makeText(AddParticipantsActivity.this, "You must select at least one participant.", Toast.LENGTH_LONG).show();
             return;
         }
 
+        view.setEnabled(false);
         Request request = Routes.inviteUsersRequest(AddParticipantsActivity.this, mChat, mSelectedUsers);
         HttpClient.getInstance().newCall(request).enqueue(new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
-                Log.e("ERROR", e.toString());
+                HttpClient.onUnsuccessfulSubmit(AddParticipantsActivity.this, "Error", view);
             }
 
             @Override
             public void onResponse(Call call, final Response response) throws IOException {
                 if (response.isSuccessful()) {
                     startActivity(ChatActivity.getIntent(AddParticipantsActivity.this, mChat));
+                    finish();
                 } else {
-                    AddParticipantsActivity.this.runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            Toast.makeText(AddParticipantsActivity.this, HttpClient.parseErrorMessage(response), Toast.LENGTH_SHORT).show();
-                        }
-                    });
+                    HttpClient.onUnsuccessfulSubmit(AddParticipantsActivity.this, HttpClient.parseErrorMessage(response), view);
                 }
                 response.body().close();
             }

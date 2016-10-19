@@ -11,6 +11,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ListView;
+import android.widget.Toast;
 
 import com.salatart.memeticame.Models.ChatInvitation;
 import com.salatart.memeticame.R;
@@ -118,7 +119,7 @@ public class ChatInvitationsFragment extends Fragment {
                         Log.e("ERROR", e.toString());
                     }
                 } else {
-                    HttpClient.parseErrorMessage(response);
+                    Toast.makeText(getActivity(), HttpClient.parseErrorMessage(response), Toast.LENGTH_SHORT).show();
                 }
 
                 response.body().close();

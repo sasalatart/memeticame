@@ -4,7 +4,7 @@ import android.app.Activity;
 import android.content.Intent;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.util.Log;
+import android.view.View;
 
 import com.salatart.memeticame.Activities.ChatActivity;
 import com.salatart.memeticame.Activities.MainActivity;
@@ -71,30 +71,32 @@ public class Chat implements Parcelable {
         in.readTypedList(this.mMessages, Message.CREATOR);
     }
 
-    public static void createFromRequest(final Activity activity, Request request) {
+    public static void createFromRequest(final Activity activity, Request request, final View submitButton) {
         HttpClient.getInstance().newCall(request).enqueue(new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
-                Log.e("ERROR", e.toString());
+                HttpClient.onUnsuccessfulSubmit(activity, "Error", submitButton);
             }
 
             @Override
             public void onResponse(Call call, Response response) throws IOException {
-                try {
-                    JSONObject jsonChat = new JSONObject(response.body().string());
-                    activity.startActivity(ChatActivity.getIntent(activity, ParserUtils.chatFromJson(jsonChat)));
-                    activity.finish();
-                } catch (JSONException e) {
-                    Log.e("ERROR", e.toString());
-                } finally {
-                    response.body().close();
+                if (response.isSuccessful()) {
+                    try {
+                        JSONObject jsonChat = new JSONObject(response.body().string());
+                        activity.startActivity(ChatActivity.getIntent(activity, ParserUtils.chatFromJson(jsonChat)));
+                        activity.finish();
+                    } catch (JSONException e) {
+                        HttpClient.onUnsuccessfulSubmit(activity, "Error", submitButton);
+                    }
+                } else {
+                    HttpClient.onUnsuccessfulSubmit(activity, "Invalid credentials", submitButton);
                 }
+                response.body().close();
             }
         });
     }
 
     public boolean onUserRemoved(final Activity activity, User user) {
-
         for (User localUser : mParticipants) {
             if (localUser.getId() == user.getId()) {
                 mParticipants.remove(localUser);

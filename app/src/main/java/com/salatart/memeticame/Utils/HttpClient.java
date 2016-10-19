@@ -1,5 +1,9 @@
 package com.salatart.memeticame.Utils;
 
+import android.app.Activity;
+import android.view.View;
+import android.widget.Toast;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -38,6 +42,19 @@ public class HttpClient {
         } catch (IOException | JSONException e) {
             return "Error";
         }
+    }
+
+    public static void onUnsuccessfulSubmit(final Activity activity, final String message, final View submitButton) {
+        if (activity == null) {
+            return;
+        }
+
+        activity.runOnUiThread(new Runnable() {
+            public void run() {
+                Toast.makeText(activity, message, Toast.LENGTH_SHORT).show();
+                submitButton.setEnabled(true);
+            }
+        });
     }
 }
 

@@ -5,7 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.util.Log;
-import android.widget.Toast;
+import android.view.View;
 
 import com.salatart.memeticame.Activities.LoginActivity;
 import com.salatart.memeticame.Activities.MainActivity;
@@ -80,7 +80,8 @@ public class SessionUtils {
         });
     }
 
-    public static void login(final Activity activity, final String phoneNumber, String password) {
+    public static void login(final Activity activity, final String phoneNumber, String password, final View submitButton) {
+        submitButton.setEnabled(false);
         Request request = Routes.loginRequest(phoneNumber, password);
         HttpClient.getInstance().newCall(request).enqueue(new Callback() {
             @Override
@@ -103,14 +104,10 @@ public class SessionUtils {
                         activity.startActivity(new Intent(activity, MainActivity.class));
                         activity.finish();
                     } catch (JSONException e) {
-                        Log.e("ERROR", e.toString());
+                        HttpClient.onUnsuccessfulSubmit(activity, "Error", submitButton);
                     }
                 } else {
-                    activity.runOnUiThread(new Runnable() {
-                        public void run() {
-                            Toast.makeText(activity, "Invalid credentials", Toast.LENGTH_SHORT).show();
-                        }
-                    });
+                    HttpClient.onUnsuccessfulSubmit(activity, "Invalid credentials", submitButton);
                 }
                 response.body().close();
             }

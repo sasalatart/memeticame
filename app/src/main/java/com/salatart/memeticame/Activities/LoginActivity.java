@@ -4,33 +4,17 @@ import android.content.Intent;
 import android.databinding.DataBindingUtil;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.ProgressBar;
-import android.widget.Toast;
 
 import com.salatart.memeticame.Models.LoginForm;
 import com.salatart.memeticame.R;
-import com.salatart.memeticame.Utils.HttpClient;
-import com.salatart.memeticame.Utils.Routes;
 import com.salatart.memeticame.Utils.SessionUtils;
 import com.salatart.memeticame.databinding.ActivityLoginBinding;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import java.io.IOException;
-
-import okhttp3.Call;
-import okhttp3.Callback;
-import okhttp3.Request;
-import okhttp3.Response;
-
 public class LoginActivity extends AppCompatActivity {
-
     private LoginForm mLoginForm;
 
     @Override
@@ -70,6 +54,6 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     public void login(final View view) {
-        SessionUtils.login(LoginActivity.this, mLoginForm.getPhoneNumber(), mLoginForm.getPassword());
+        SessionUtils.login(LoginActivity.this, mLoginForm.getPhoneNumber(), mLoginForm.getPassword(), view);
     }
 }

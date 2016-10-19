@@ -28,7 +28,6 @@ import okhttp3.Request;
 import okhttp3.Response;
 
 public class SignupActivity extends AppCompatActivity {
-
     private SignupForm mSignupForm;
 
     @Override
@@ -68,6 +67,7 @@ public class SignupActivity extends AppCompatActivity {
             return;
         }
 
+        view.setEnabled(false);
         Request request = Routes.signupRequest(mSignupForm.getName(),
                 mSignupForm.getPhoneNumber(),
                 mSignupForm.getPassword(),
@@ -81,18 +81,22 @@ public class SignupActivity extends AppCompatActivity {
 
             @Override
             public void onResponse(Call call, Response response) throws IOException {
-                try {
-                    JSONObject jsonResponse = new JSONObject(response.body().string());
-                    SessionUtils.saveToken(jsonResponse.getString("api_key"), getApplicationContext());
-                    SessionUtils.savePhoneNumber(mSignupForm.getPhoneNumber(), getApplicationContext());
-                    SessionUtils.registerFCMToken(getApplicationContext());
-                    startActivity(new Intent(view.getContext(), MainActivity.class));
-                    SignupActivity.this.finish();
-                } catch (Exception e) {
-                    Log.e("ERROR", e.toString());
-                } finally {
-                    response.body().close();
+                if (response.isSuccessful()) {
+                    try {
+                        JSONObject jsonResponse = new JSONObject(response.body().string());
+                        SessionUtils.saveToken(jsonResponse.getString("api_key"), getApplicationContext());
+                        SessionUtils.savePhoneNumber(mSignupForm.getPhoneNumber(), getApplicationContext());
+                        SessionUtils.registerFCMToken(getApplicationContext());
+                        startActivity(new Intent(view.getContext(), MainActivity.class));
+                        SignupActivity.this.finish();
+                    } catch (Exception e) {
+                        HttpClient.onUnsuccessfulSubmit(SignupActivity.this, "Error", view);
+                    }
+                } else {
+                    HttpClient.onUnsuccessfulSubmit(SignupActivity.this, "Error", view);
                 }
+
+                response.body().close();
             }
         });
     }

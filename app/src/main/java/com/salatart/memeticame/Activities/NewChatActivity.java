@@ -23,17 +23,21 @@ import com.salatart.memeticame.Views.ChatsAdapter;
 import java.util.ArrayList;
 import java.util.Arrays;
 
+import butterknife.BindView;
+import butterknife.ButterKnife;
 import okhttp3.Request;
 
 public class NewChatActivity extends AppCompatActivity {
+    @BindView(R.id.input_chat_name) EditText mChatNameInput;
 
     private User mUser;
-    private EditText mChatNameInput;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_new_chat);
+
+        ButterKnife.bind(this);
 
         ActionBar actionBar = getSupportActionBar();
         actionBar.setDisplayHomeAsUpEnabled(true);
@@ -58,7 +62,6 @@ public class NewChatActivity extends AppCompatActivity {
             });
         }
 
-        mChatNameInput = (EditText) findViewById(R.id.input_chat_name);
         mChatNameInput.setText("Chat with " + mUser.getName(), TextView.BufferType.EDITABLE);
     }
 
@@ -78,14 +81,14 @@ public class NewChatActivity extends AppCompatActivity {
     }
 
     public void createChat(View view) {
-
         String title = this.mChatNameInput.getText().toString();
         if (title.isEmpty()) {
             Toast.makeText(getApplicationContext(), "Title can't be blank", Toast.LENGTH_SHORT).show();
             return;
         }
 
+        view.setEnabled(false);
         Request request = Routes.chatsCreateRequest(getApplicationContext(), title, new ArrayList<>(Arrays.asList(mUser)), false);
-        Chat.createFromRequest(NewChatActivity.this, request);
+        Chat.createFromRequest(NewChatActivity.this, request, view);
     }
 }

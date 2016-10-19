@@ -24,16 +24,18 @@ import com.salatart.memeticame.Views.ContactsSelectAdapter;
 
 import java.util.ArrayList;
 
+import butterknife.BindView;
+import butterknife.ButterKnife;
 import okhttp3.Request;
 
 public class NewChatGroupActivity extends AppCompatActivity {
 
+    @BindView(R.id.group_name_input) EditText mGroupNameInput;
+    @BindView(R.id.contacts_list_view) ListView mContactsListView;
+
     private ArrayList<User> mContacts = new ArrayList<>();
     private ArrayList<User> mSelectedContacts = new ArrayList<>();
     private ContactsSelectAdapter mAdapter;
-
-    private EditText mGroupNameInput;
-    private ListView mContactsListView;
 
     private BroadcastReceiver mContactsReceiver = new BroadcastReceiver() {
         @Override
@@ -52,14 +54,14 @@ public class NewChatGroupActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_new_chat_group);
 
-        mGroupNameInput = (EditText) findViewById(R.id.group_name_input);
-        mContactsListView = (ListView) findViewById(R.id.contacts_list_view);
-        setContacts();
+        ButterKnife.bind(this);
 
         ActionBar actionBar = getSupportActionBar();
         actionBar.setDisplayHomeAsUpEnabled(true);
 
         setTitle("New Group Chat");
+
+        setContacts();
     }
 
     @Override
@@ -86,8 +88,9 @@ public class NewChatGroupActivity extends AppCompatActivity {
             return;
         }
 
+        view.setEnabled(false);
         Request request = Routes.chatsCreateRequest(getApplicationContext(), title, mSelectedContacts, true);
-        Chat.createFromRequest(NewChatGroupActivity.this, request);
+        Chat.createFromRequest(NewChatGroupActivity.this, request, view);
     }
 
     public void setContacts() {
