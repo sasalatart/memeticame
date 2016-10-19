@@ -71,8 +71,9 @@ public class ChatInvitationsAdapter extends ArrayAdapter<ChatInvitation> {
         ImageButton rejectButton = (ImageButton) convertView.findViewById(R.id.button_reject_chat_invitation);
         rejectButton.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View v) {
-                Request request = Routes.rejectChatInvitationRequest(getContext(), chatInvitation);
+            public void onClick(View rejectButton) {
+                rejectButton.setEnabled(false);
+                Request request = Routes.rejectChatInvitation(getContext(), chatInvitation);
                 HttpClient.getInstance().newCall(request).enqueue(callback);
             }
         });
@@ -80,8 +81,9 @@ public class ChatInvitationsAdapter extends ArrayAdapter<ChatInvitation> {
         ImageButton acceptButton = (ImageButton) convertView.findViewById(R.id.button_accept_chat_invitation);
         acceptButton.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View v) {
-                Request request = Routes.acceptChatInvitationRequest(getContext(), chatInvitation);
+            public void onClick(View acceptButton) {
+                acceptButton.setEnabled(false);
+                Request request = Routes.acceptChatInvitation(getContext(), chatInvitation);
                 HttpClient.getInstance().newCall(request).enqueue(callback);
             }
         });

@@ -4,15 +4,14 @@ import android.Manifest;
 import android.app.Activity;
 import android.content.ContentResolver;
 import android.content.Context;
-import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.provider.ContactsContract;
 import android.support.v4.content.ContextCompat;
-import android.util.Log;
 
+import com.salatart.memeticame.Listeners.OnContactsReadListener;
 import com.salatart.memeticame.Models.User;
 
 import org.json.JSONArray;
@@ -42,39 +41,40 @@ public class ContactsUtils {
         new GetContactsTask(context, listener).execute();
     }
 
-    public static void retrieveContacts(final Activity activity) {
+    public static void retrieveContacts(final Activity activity, final OnContactsReadListener listener) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && !hasContactsPermissions(activity)) {
             activity.requestPermissions(new String[]{Manifest.permission.READ_CONTACTS}, PERMISSIONS_REQUEST_READ_CONTACTS);
         } else {
             ContactsUtils.getContacts(activity, new ContactsUtils.ContactsProviderListener() {
                 @Override
                 public void OnContactsReady(final ArrayList<User> contacts) {
-                    Request request = Routes.userIndexRequest(activity);
+                    Request request = Routes.usersIndex(activity);
                     HttpClient.getInstance().newCall(request).enqueue(new Callback() {
                         @Override
                         public void onFailure(Call call, IOException e) {
-                            Log.e("ERROR", e.toString());
+                            HttpClient.onUnsuccessfulRequest(activity, "Error");
                         }
 
                         @Override
                         public void onResponse(Call call, final Response response) throws IOException {
-                            try {
-                                if (activity == null) {
-                                    return;
-                                }
-
-                                ArrayList<User> localContacts = contacts;
-                                ArrayList<User> intersectedContacts = User.intersect(contacts, ParserUtils.usersFromJsonArray(new JSONArray(response.body().string())));
-                                Intent intent = new Intent(FilterUtils.RETRIEVE_CONTACTS_FILTER);
-                                intent.putExtra(LOCAL_CONTACTS_PARCELABLE_KEY, localContacts);
-                                intent.putExtra(INTERSECTED_CONTACTS_PARCELABLE_KEY, intersectedContacts);
-                                activity.sendBroadcast(intent);
-                                User.moveOrUpdateAll(intersectedContacts);
-                            } catch (JSONException | IOException e) {
-                                Log.e("ERROR", e.toString());
-                            } finally {
+                            if (activity == null) {
                                 response.body().close();
+                                return;
                             }
+
+                            if (response.isSuccessful()) {
+                                try {
+                                    ArrayList<User> intersectedContacts = User.intersect(contacts, ParserUtils.usersFromJsonArray(new JSONArray(response.body().string())));
+                                    listener.OnRead(intersectedContacts, contacts);
+                                    User.moveOrUpdateAll(intersectedContacts);
+                                } catch(JSONException e) {
+                                    HttpClient.onUnsuccessfulRequest(activity, "Error");
+                                }
+                            } else {
+                                HttpClient.onUnsuccessfulRequest(activity, "Error");
+                            }
+
+                            response.body().close();
                         }
                     });
                 }

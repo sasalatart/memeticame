@@ -7,7 +7,6 @@ import android.provider.ContactsContract;
 import android.support.design.widget.TabLayout;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 
@@ -17,7 +16,6 @@ import com.salatart.memeticame.Fragments.ContactsFragment;
 import com.salatart.memeticame.Models.Chat;
 import com.salatart.memeticame.Models.User;
 import com.salatart.memeticame.R;
-import com.salatart.memeticame.Utils.ContactsUtils;
 import com.salatart.memeticame.Utils.SessionUtils;
 import com.salatart.memeticame.Views.ViewPagerAdapter;
 
@@ -28,8 +26,8 @@ import static com.salatart.memeticame.Utils.FilterUtils.REQUEST_NEW_CONTACT;
 
 public class MainActivity extends AppCompatActivity implements ChatsFragment.OnChatSelected, ContactsFragment.OnContactSelected {
 
-    private ChatsFragment mChatsFragments;
-    private ContactsFragment mContactsFragments;
+    private ChatsFragment mChatsFragment;
+    private ContactsFragment mContactsFragment;
     private ChatInvitationsFragment mChatInvitationsFragment;
 
     @Override
@@ -77,14 +75,14 @@ public class MainActivity extends AppCompatActivity implements ChatsFragment.OnC
     private void setupViewPager() {
         ViewPager viewPager = (ViewPager) findViewById(R.id.viewpager);
 
-        this.mChatsFragments = new ChatsFragment();
-        this.mContactsFragments = new ContactsFragment();
+        this.mChatsFragment = new ChatsFragment();
+        this.mContactsFragment = new ContactsFragment();
         this.mChatInvitationsFragment = new ChatInvitationsFragment();
 
         ViewPagerAdapter adapter = new ViewPagerAdapter(getSupportFragmentManager());
 
-        adapter.addFragment(this.mChatsFragments, "Chats");
-        adapter.addFragment(this.mContactsFragments, "Contacts");
+        adapter.addFragment(this.mChatsFragment, "Chats");
+        adapter.addFragment(this.mContactsFragment, "Contacts");
         adapter.addFragment(this.mChatInvitationsFragment, "Chat Invitations");
 
         viewPager.setAdapter(adapter);
@@ -97,7 +95,7 @@ public class MainActivity extends AppCompatActivity implements ChatsFragment.OnC
     public void onContactSelected(User user) {
         Intent intent = new Intent(this, NewChatActivity.class);
         intent.putExtra(User.PARCELABLE_KEY, user);
-        intent.putParcelableArrayListExtra(Chat.PARCELABLE_ARRAY_KEY, user.findChats(mChatsFragments.getChats()));
+        intent.putParcelableArrayListExtra(Chat.PARCELABLE_ARRAY_KEY, user.findChats(mChatsFragment.getChats()));
         startActivity(intent);
     }
 
@@ -111,7 +109,7 @@ public class MainActivity extends AppCompatActivity implements ChatsFragment.OnC
         super.onActivityResult(requestCode, resultCode, data);
 
         if (requestCode == REQUEST_NEW_CONTACT) {
-            ContactsUtils.retrieveContacts(MainActivity.this);
+            mContactsFragment.setContacts();
         }
     }
 
@@ -120,7 +118,7 @@ public class MainActivity extends AppCompatActivity implements ChatsFragment.OnC
         switch (requestCode) {
             case PERMISSIONS_REQUEST_READ_CONTACTS: {
                 if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    ContactsUtils.retrieveContacts(MainActivity.this);
+                    mContactsFragment.setContacts();
                 } else {
                     // Disable the functionality that depends on this permission.
                 }

@@ -44,6 +44,19 @@ public class HttpClient {
         }
     }
 
+    public static void onUnsuccessfulRequest(final Activity activity, final String message) {
+        if (activity == null) {
+            return;
+        }
+
+        activity.runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                Toast.makeText(activity, message, Toast.LENGTH_LONG).show();
+            }
+        });
+    }
+
     public static void onUnsuccessfulSubmit(final Activity activity, final String message, final View submitButton) {
         if (activity == null) {
             return;
@@ -51,7 +64,7 @@ public class HttpClient {
 
         activity.runOnUiThread(new Runnable() {
             public void run() {
-                Toast.makeText(activity, message, Toast.LENGTH_SHORT).show();
+                Toast.makeText(activity, message, Toast.LENGTH_LONG).show();
                 submitButton.setEnabled(true);
             }
         });

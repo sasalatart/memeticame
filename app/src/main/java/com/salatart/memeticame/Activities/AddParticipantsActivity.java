@@ -7,36 +7,29 @@ import android.content.IntentFilter;
 import android.os.Bundle;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.Toast;
 
+import com.salatart.memeticame.Listeners.OnContactsReadListener;
+import com.salatart.memeticame.Listeners.OnRequestIndexListener;
 import com.salatart.memeticame.Models.Chat;
 import com.salatart.memeticame.Models.ChatInvitation;
 import com.salatart.memeticame.Models.User;
 import com.salatart.memeticame.R;
+import com.salatart.memeticame.Utils.ChatInvitationsUtils;
 import com.salatart.memeticame.Utils.ContactsUtils;
 import com.salatart.memeticame.Utils.FilterUtils;
-import com.salatart.memeticame.Utils.HttpClient;
-import com.salatart.memeticame.Utils.ParserUtils;
 import com.salatart.memeticame.Utils.Routes;
 import com.salatart.memeticame.Views.ContactsSelectAdapter;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-
-import java.io.IOException;
 import java.util.ArrayList;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
-import okhttp3.Call;
-import okhttp3.Callback;
 import okhttp3.Request;
-import okhttp3.Response;
 
 public class AddParticipantsActivity extends AppCompatActivity {
 
@@ -48,15 +41,6 @@ public class AddParticipantsActivity extends AppCompatActivity {
     private ContactsSelectAdapter mAdapter;
 
     private Chat mChat;
-
-    private BroadcastReceiver mContactsReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            mUsers = intent.getParcelableArrayListExtra(ContactsUtils.INTERSECTED_CONTACTS_PARCELABLE_KEY);
-            mUsers = User.difference(mUsers, mChat.getParticipants());
-            setAdapter();
-        }
-    };
 
     private BroadcastReceiver mUsersKickedReceiver = new BroadcastReceiver() {
         @Override
@@ -117,7 +101,7 @@ public class AddParticipantsActivity extends AppCompatActivity {
         Bundle data = getIntent().getExtras();
         mChat = data.getParcelable(Chat.PARCELABLE_KEY);
 
-        setContacts();
+        setParticipants();
 
         ActionBar actionBar = getSupportActionBar();
         actionBar.setDisplayHomeAsUpEnabled(true);
@@ -128,7 +112,6 @@ public class AddParticipantsActivity extends AppCompatActivity {
     @Override
     public void onResume() {
         super.onResume();
-        AddParticipantsActivity.this.registerReceiver(mContactsReceiver, new IntentFilter(FilterUtils.RETRIEVE_CONTACTS_FILTER));
         AddParticipantsActivity.this.registerReceiver(mUsersKickedReceiver, new IntentFilter(FilterUtils.USER_KICKED_FILTER));
         AddParticipantsActivity.this.registerReceiver(mNewChatInvitationsReceiver, new IntentFilter(FilterUtils.NEW_CHAT_INVITATION_FILTER));
         AddParticipantsActivity.this.registerReceiver(mChatInvitationAcceptedReceiver, new IntentFilter(FilterUtils.CHAT_INVITATION_ACCEPTED_FILTER));
@@ -138,7 +121,6 @@ public class AddParticipantsActivity extends AppCompatActivity {
     @Override
     public void onPause() {
         super.onPause();
-        AddParticipantsActivity.this.unregisterReceiver(mContactsReceiver);
         AddParticipantsActivity.this.unregisterReceiver(mUsersKickedReceiver);
         AddParticipantsActivity.this.unregisterReceiver(mNewChatInvitationsReceiver);
         AddParticipantsActivity.this.unregisterReceiver(mChatInvitationAcceptedReceiver);
@@ -152,67 +134,35 @@ public class AddParticipantsActivity extends AppCompatActivity {
     }
 
     public void getInvitations() {
-        Request request = Routes.chatInvitationsFromChatRequest(AddParticipantsActivity.this, mChat);
-        HttpClient.getInstance().newCall(request).enqueue(new Callback() {
+        Request request = Routes.chatInvitationsFromChat(AddParticipantsActivity.this, mChat);
+        ChatInvitationsUtils.indexRequest(AddParticipantsActivity.this, request, new OnRequestIndexListener<ChatInvitation>() {
             @Override
-            public void onFailure(Call call, IOException e) {
-                Log.e("ERROR", e.toString());
-            }
-
-            @Override
-            public void onResponse(Call call, Response response) throws IOException {
-                if (response.isSuccessful()) {
-                    try {
-                        ArrayList<ChatInvitation> chatInvitations = ParserUtils.chatInvitationsFromJsonArray(new JSONArray(response.body().string()));
-                        for (ChatInvitation chatInvitation : chatInvitations) {
-                            mInvitedUsers.add(chatInvitation.getUser());
-                        }
-
-                        runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                mAdapter.notifyDataSetChanged();
-                            }
-                        });
-                    } catch (JSONException e) {
-                        Log.e("ERROR", e.toString());
-                    }
-                } else {
-                    HttpClient.parseErrorMessage(response);
+            public void OnSuccess(ArrayList<ChatInvitation> chatInvitations) {
+                for (ChatInvitation chatInvitation : chatInvitations) {
+                    mInvitedUsers.add(chatInvitation.getUser());
                 }
-                response.body().close();
+
+                AddParticipantsActivity.this.runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        mAdapter.notifyDataSetChanged();
+                    }
+                });
             }
         });
     }
 
-    public void addParticipants(final View view) {
+    public void addParticipants(final View submitButton) {
         if (mSelectedUsers.size() == 0) {
             Toast.makeText(AddParticipantsActivity.this, "You must select at least one participant.", Toast.LENGTH_LONG).show();
             return;
         }
 
-        view.setEnabled(false);
-        Request request = Routes.inviteUsersRequest(AddParticipantsActivity.this, mChat, mSelectedUsers);
-        HttpClient.getInstance().newCall(request).enqueue(new Callback() {
-            @Override
-            public void onFailure(Call call, IOException e) {
-                HttpClient.onUnsuccessfulSubmit(AddParticipantsActivity.this, "Error", view);
-            }
-
-            @Override
-            public void onResponse(Call call, final Response response) throws IOException {
-                if (response.isSuccessful()) {
-                    startActivity(ChatActivity.getIntent(AddParticipantsActivity.this, mChat));
-                    finish();
-                } else {
-                    HttpClient.onUnsuccessfulSubmit(AddParticipantsActivity.this, HttpClient.parseErrorMessage(response), view);
-                }
-                response.body().close();
-            }
-        });
+        Request request = Routes.inviteUsers(AddParticipantsActivity.this, mChat, mSelectedUsers);
+        ChatInvitationsUtils.addParticipantsRequest(AddParticipantsActivity.this, request, mChat, submitButton);
     }
 
-    public void setContacts() {
+    public void setParticipants() {
         mUsersListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
@@ -228,8 +178,16 @@ public class AddParticipantsActivity extends AppCompatActivity {
 
         mUsers = User.difference(User.findAll(), mChat.getParticipants());
         setAdapter();
+
         getInvitations();
-        ContactsUtils.retrieveContacts(AddParticipantsActivity.this);
+
+        ContactsUtils.retrieveContacts(AddParticipantsActivity.this, new OnContactsReadListener() {
+            @Override
+            public void OnRead(ArrayList<User> intersectedContacts, ArrayList<User> localContacts) {
+                mUsers = User.difference(intersectedContacts, mChat.getParticipants());
+                setAdapter();
+            }
+        });
     }
 
     public void setAdapter() {

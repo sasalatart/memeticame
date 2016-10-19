@@ -1,9 +1,7 @@
 package com.salatart.memeticame.Activities;
 
-import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.os.Bundle;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
@@ -14,11 +12,11 @@ import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.Toast;
 
-import com.salatart.memeticame.Models.Chat;
+import com.salatart.memeticame.Listeners.OnContactsReadListener;
 import com.salatart.memeticame.Models.User;
 import com.salatart.memeticame.R;
+import com.salatart.memeticame.Utils.ChatUtils;
 import com.salatart.memeticame.Utils.ContactsUtils;
-import com.salatart.memeticame.Utils.FilterUtils;
 import com.salatart.memeticame.Utils.Routes;
 import com.salatart.memeticame.Views.ContactsSelectAdapter;
 
@@ -36,14 +34,6 @@ public class NewChatGroupActivity extends AppCompatActivity {
     private ArrayList<User> mContacts = new ArrayList<>();
     private ArrayList<User> mSelectedContacts = new ArrayList<>();
     private ContactsSelectAdapter mAdapter;
-
-    private BroadcastReceiver mContactsReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            mContacts = intent.getParcelableArrayListExtra(ContactsUtils.INTERSECTED_CONTACTS_PARCELABLE_KEY);
-            setAdapter();
-        }
-    };
 
     public static Intent getIntent(Context context) {
         return new Intent(context, NewChatGroupActivity.class);
@@ -64,18 +54,6 @@ public class NewChatGroupActivity extends AppCompatActivity {
         setContacts();
     }
 
-    @Override
-    public void onResume() {
-        super.onResume();
-        NewChatGroupActivity.this.registerReceiver(mContactsReceiver, new IntentFilter(FilterUtils.RETRIEVE_CONTACTS_FILTER));
-    }
-
-    @Override
-    public void onPause() {
-        super.onPause();
-        NewChatGroupActivity.this.unregisterReceiver(mContactsReceiver);
-    }
-
     public boolean onOptionsItemSelected(MenuItem item) {
         startActivity(new Intent(this, MainActivity.class));
         return true;
@@ -88,9 +66,8 @@ public class NewChatGroupActivity extends AppCompatActivity {
             return;
         }
 
-        view.setEnabled(false);
-        Request request = Routes.chatsCreateRequest(getApplicationContext(), title, mSelectedContacts, true);
-        Chat.createFromRequest(NewChatGroupActivity.this, request, view);
+        Request request = Routes.chatsCreate(getApplicationContext(), title, mSelectedContacts, true);
+        ChatUtils.createRequest(NewChatGroupActivity.this, request, view);
     }
 
     public void setContacts() {
@@ -110,7 +87,13 @@ public class NewChatGroupActivity extends AppCompatActivity {
             }
         });
 
-        ContactsUtils.retrieveContacts(NewChatGroupActivity.this);
+        ContactsUtils.retrieveContacts(NewChatGroupActivity.this, new OnContactsReadListener() {
+            @Override
+            public void OnRead(ArrayList<User> intersectedContacts, ArrayList<User> localContacts) {
+                mContacts = intersectedContacts;
+                setAdapter();
+            }
+        });
     }
 
     public void setAdapter() {

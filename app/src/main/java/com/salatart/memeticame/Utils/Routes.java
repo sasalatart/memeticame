@@ -29,7 +29,7 @@ public class Routes {
     //static String DOMAIN = "http://10.0.2.2:3000";
     private static MediaType JSON = MediaType.parse("application/json; charset=utf-8");
 
-    public static Request loginRequest(String phoneNumber, String password) {
+    public static Request login(String phoneNumber, String password) {
         Map<String, String> params = new HashMap<>();
         params.put("phone_number", phoneNumber);
         params.put("password", password);
@@ -42,7 +42,7 @@ public class Routes {
                 .build();
     }
 
-    public static Request signupRequest(String name, String phoneNumber, String password, String passwordConfirmation) {
+    public static Request signup(String name, String phoneNumber, String password, String passwordConfirmation) {
         Map<String, String> params = new HashMap<>();
         params.put("name", name);
         params.put("phone_number", phoneNumber);
@@ -57,7 +57,7 @@ public class Routes {
                 .build();
     }
 
-    public static Request userIndexRequest(Context context) {
+    public static Request usersIndex(Context context) {
         return new Request.Builder()
                 .url(DOMAIN + "/users")
                 .addHeader("content-type", "application/json")
@@ -65,7 +65,7 @@ public class Routes {
                 .build();
     }
 
-    public static Request chatsIndexRequest(Context context) {
+    public static Request chatsIndex(Context context) {
         return new Request.Builder()
                 .url(DOMAIN + "/chats")
                 .addHeader("content-type", "application/json")
@@ -73,7 +73,7 @@ public class Routes {
                 .build();
     }
 
-    public static Request chatsCreateRequest(Context context, String title, ArrayList<User> participants, boolean isGroup) {
+    public static Request chatsCreate(Context context, String title, ArrayList<User> participants, boolean isGroup) {
         ArrayList<String> phoneNumbers = new ArrayList<>();
         for (User u : participants) {
             phoneNumbers.add(u.getPhoneNumber());
@@ -96,7 +96,7 @@ public class Routes {
                 .build();
     }
 
-    public static Request chatRequest(Context context, Chat chat) {
+    public static Request chatShow(Context context, Chat chat) {
         return new Request.Builder()
                 .url(DOMAIN + "/chats/" + chat.getId())
                 .addHeader("content-type", "application/json")
@@ -104,7 +104,7 @@ public class Routes {
                 .build();
     }
 
-    public static Request messagesCreateRequest(Context context, Message message) {
+    public static Request messagesCreate(Context context, Message message) {
 
         JSONObject params = new JSONObject();
         try {
@@ -131,7 +131,7 @@ public class Routes {
                 .build();
     }
 
-    public static Request chatLeaveRequest(Context context, int chatId) {
+    public static Request chatLeave(Context context, int chatId) {
         return new Request.Builder()
                 .url(DOMAIN + "/chats/" + chatId + "/leave")
                 .addHeader("content-type", "application/json")
@@ -140,7 +140,7 @@ public class Routes {
                 .build();
     }
 
-    public static Request kickUserRequest(Context context, Chat chat, User user) {
+    public static Request kickUser(Context context, Chat chat, User user) {
         return new Request.Builder()
                 .url(DOMAIN + "/chats/" + chat.getId() + "/users/" + user.getId() + "/kick")
                 .addHeader("content-type", "application/json")
@@ -149,7 +149,7 @@ public class Routes {
                 .build();
     }
 
-    public static Request inviteUsersRequest(Context context, Chat chat, ArrayList<User> users) {
+    public static Request inviteUsers(Context context, Chat chat, ArrayList<User> users) {
         FormBody.Builder formBuilder = new FormBody.Builder();
         for (int i = 0; i < users.size(); i++) {
             formBuilder.add("users[" + i + "]", users.get(i).getPhoneNumber());
@@ -163,7 +163,7 @@ public class Routes {
                 .build();
     }
 
-    public static Request chatInvitationIndexRequest(Context context) {
+    public static Request chatInvitationsIndex(Context context) {
         return new Request.Builder()
                 .url(DOMAIN + "/chat_invitations")
                 .addHeader("content-type", "application/json")
@@ -171,7 +171,7 @@ public class Routes {
                 .build();
     }
 
-    public static Request chatInvitationsFromChatRequest(Context context, Chat chat) {
+    public static Request chatInvitationsFromChat(Context context, Chat chat) {
         return new Request.Builder()
                 .url(DOMAIN + "/chats/" + chat.getId() + "/invitations")
                 .addHeader("content-type", "application/json")
@@ -179,7 +179,7 @@ public class Routes {
                 .build();
     }
 
-    public static Request rejectChatInvitationRequest(Context context, ChatInvitation chatInvitation) {
+    public static Request rejectChatInvitation(Context context, ChatInvitation chatInvitation) {
         return new Request.Builder()
                 .url(DOMAIN + "/chat_invitations/" + chatInvitation.getId() + "/reject")
                 .addHeader("content-type", "application/json")
@@ -188,7 +188,7 @@ public class Routes {
                 .build();
     }
 
-    public static Request acceptChatInvitationRequest(Context context, ChatInvitation chatInvitation) {
+    public static Request acceptChatInvitation(Context context, ChatInvitation chatInvitation) {
         return new Request.Builder()
                 .url(DOMAIN + "/chat_invitations/" + chatInvitation.getId() + "/accept")
                 .addHeader("content-type", "application/json")
@@ -197,7 +197,7 @@ public class Routes {
                 .build();
     }
 
-    public static Request logoutRequest(Context context) {
+    public static Request logout(Context context) {
         return new Request.Builder()
                 .url(DOMAIN + "/logout")
                 .addHeader("content-type", "application/json")
@@ -205,7 +205,7 @@ public class Routes {
                 .build();
     }
 
-    public static Request fcmRegisterRequest(Context context, String token) {
+    public static Request fcmRegister(Context context, String token) {
         Map<String, String> params = new HashMap<String, String>();
         params.put("registration_token", token);
 
@@ -216,9 +216,5 @@ public class Routes {
                 .addHeader("authorization", "Token token=" + SessionUtils.getToken(context))
                 .post(body)
                 .build();
-    }
-
-    public interface OnLogout {
-        void OnLogout();
     }
 }

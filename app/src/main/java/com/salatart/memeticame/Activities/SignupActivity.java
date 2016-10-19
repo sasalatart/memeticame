@@ -4,7 +4,6 @@ import android.content.Intent;
 import android.databinding.DataBindingUtil;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -13,19 +12,11 @@ import android.widget.Toast;
 
 import com.salatart.memeticame.Models.SignupForm;
 import com.salatart.memeticame.R;
-import com.salatart.memeticame.Utils.HttpClient;
 import com.salatart.memeticame.Utils.Routes;
-import com.salatart.memeticame.Utils.SessionUtils;
+import com.salatart.memeticame.Utils.UserUtils;
 import com.salatart.memeticame.databinding.ActivitySignupBinding;
 
-import org.json.JSONObject;
-
-import java.io.IOException;
-
-import okhttp3.Call;
-import okhttp3.Callback;
 import okhttp3.Request;
-import okhttp3.Response;
 
 public class SignupActivity extends AppCompatActivity {
     private SignupForm mSignupForm;
@@ -61,43 +52,13 @@ public class SignupActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
-    public void signup(final View view) {
+    public void signup(final View submitButton) {
         if (!mSignupForm.getPassword().equals(mSignupForm.getPasswordConfirmation())) {
             Toast.makeText(getApplicationContext(), "Password must match its confirmation.", Toast.LENGTH_SHORT).show();
             return;
         }
 
-        view.setEnabled(false);
-        Request request = Routes.signupRequest(mSignupForm.getName(),
-                mSignupForm.getPhoneNumber(),
-                mSignupForm.getPassword(),
-                mSignupForm.getPasswordConfirmation());
-
-        HttpClient.getInstance().newCall(request).enqueue(new Callback() {
-            @Override
-            public void onFailure(Call call, IOException e) {
-                Log.e("ERROR", "Failed to signup");
-            }
-
-            @Override
-            public void onResponse(Call call, Response response) throws IOException {
-                if (response.isSuccessful()) {
-                    try {
-                        JSONObject jsonResponse = new JSONObject(response.body().string());
-                        SessionUtils.saveToken(jsonResponse.getString("api_key"), getApplicationContext());
-                        SessionUtils.savePhoneNumber(mSignupForm.getPhoneNumber(), getApplicationContext());
-                        SessionUtils.registerFCMToken(getApplicationContext());
-                        startActivity(new Intent(view.getContext(), MainActivity.class));
-                        SignupActivity.this.finish();
-                    } catch (Exception e) {
-                        HttpClient.onUnsuccessfulSubmit(SignupActivity.this, "Error", view);
-                    }
-                } else {
-                    HttpClient.onUnsuccessfulSubmit(SignupActivity.this, "Error", view);
-                }
-
-                response.body().close();
-            }
-        });
+        Request request = Routes.signup(mSignupForm.getName(), mSignupForm.getPhoneNumber(), mSignupForm.getPassword(), mSignupForm.getPasswordConfirmation());
+        UserUtils.signup(SignupActivity.this, request, mSignupForm.getPhoneNumber(), mSignupForm.getPassword(), submitButton);
     }
 }

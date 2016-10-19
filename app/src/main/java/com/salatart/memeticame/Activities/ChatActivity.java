@@ -32,6 +32,7 @@ import android.widget.ListView;
 import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
+import com.salatart.memeticame.Listeners.OnRequestShowListener;
 import com.salatart.memeticame.Models.Attachment;
 import com.salatart.memeticame.Models.Chat;
 import com.salatart.memeticame.Models.ChatInvitation;
@@ -40,6 +41,7 @@ import com.salatart.memeticame.Models.MessageCount;
 import com.salatart.memeticame.Models.User;
 import com.salatart.memeticame.R;
 import com.salatart.memeticame.Utils.AudioRecorderManager;
+import com.salatart.memeticame.Utils.ChatUtils;
 import com.salatart.memeticame.Utils.FileUtils;
 import com.salatart.memeticame.Utils.FilterUtils;
 import com.salatart.memeticame.Utils.HttpClient;
@@ -250,31 +252,17 @@ public class ChatActivity extends AppCompatActivity {
     }
 
     public void getChat() {
-        Request request = Routes.chatRequest(getApplicationContext(), mChat);
-        HttpClient.getInstance().newCall(request).enqueue(new Callback() {
+        ChatUtils.showRequest(ChatActivity.this, mChat, new OnRequestShowListener() {
             @Override
-            public void onFailure(Call call, IOException e) {
-                Log.e("ERROR", e.toString());
-            }
-
-            @Override
-            public void onResponse(Call call, Response response) throws IOException {
-                if (response.isSuccessful()) {
-                    try {
-                        mChat = ParserUtils.chatFromJson(new JSONObject(response.body().string()));
-                        mAdapter = new MessagesAdapter(getApplicationContext(), R.layout.list_item_message_in_text, mChat);
-                        ChatActivity.this.runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                mMessagesListView.setAdapter(mAdapter);
-                            }
-                        });
-                    } catch (JSONException e) {
-                        Log.e("ERROR", e.toString());
+            public void OnSuccess(Object chat) {
+                mChat = (Chat) chat;
+                mAdapter = new MessagesAdapter(getApplicationContext(), R.layout.list_item_message_in_text, mChat);
+                ChatActivity.this.runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        mMessagesListView.setAdapter(mAdapter);
                     }
-                } else {
-                    Log.e("ERROR", "Could not retrieve chat");
-                }
+                });
             }
         });
     }
@@ -294,7 +282,7 @@ public class ChatActivity extends AppCompatActivity {
             }
         });
 
-        Request request = Routes.messagesCreateRequest(getApplicationContext(), message);
+        Request request = Routes.messagesCreate(getApplicationContext(), message);
         HttpClient.getInstance().newCall(request).enqueue(new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {

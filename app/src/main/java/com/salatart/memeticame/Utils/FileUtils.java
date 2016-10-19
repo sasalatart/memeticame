@@ -36,11 +36,20 @@ import java.util.Date;
  */
 public class FileUtils {
     public static String getMemeticameDirectory() {
-        return Environment.getExternalStorageDirectory() + "/Memeticame";
+        return checkAndReturnDir(Environment.getExternalStorageDirectory() + "/Memeticame");
     }
 
     public static String getMemeticameDownloadsDirectory() {
-        return getMemeticameDirectory() + "/Downloads";
+        return checkAndReturnDir(getMemeticameDirectory() + "/Downloads");
+    }
+
+    private static String checkAndReturnDir(String path) {
+        File dir = new File(path);
+        if (!dir.exists()) {
+            dir.mkdirs();
+        }
+
+        return path;
     }
 
     public static Intent getOpenFileIntent(Uri uri, String mimeType) {

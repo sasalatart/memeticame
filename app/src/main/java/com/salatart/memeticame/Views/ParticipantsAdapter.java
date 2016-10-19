@@ -51,7 +51,7 @@ public class ParticipantsAdapter extends ContactsAdapter {
                 @Override
                 public void onClick(View v) {
                     final User userToRemove = mChat.getParticipants().get(position);
-                    Request request = Routes.kickUserRequest(getContext(), mChat, userToRemove);
+                    Request request = Routes.kickUser(getContext(), mChat, userToRemove);
                     HttpClient.getInstance().newCall(request).enqueue(new Callback() {
                         @Override
                         public void onFailure(Call call, IOException e) {

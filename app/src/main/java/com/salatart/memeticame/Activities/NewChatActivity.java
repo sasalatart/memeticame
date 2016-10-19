@@ -8,7 +8,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.EditText;
-import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -16,6 +15,7 @@ import android.widget.Toast;
 import com.salatart.memeticame.Models.Chat;
 import com.salatart.memeticame.Models.User;
 import com.salatart.memeticame.R;
+import com.salatart.memeticame.Utils.ChatUtils;
 import com.salatart.memeticame.Utils.Routes;
 import com.salatart.memeticame.Utils.SessionUtils;
 import com.salatart.memeticame.Views.ChatsAdapter;
@@ -48,21 +48,8 @@ public class NewChatActivity extends AppCompatActivity {
         mUser = data.getParcelable(User.PARCELABLE_KEY);
         final ArrayList<Chat> currentChats = data.getParcelableArrayList(Chat.PARCELABLE_ARRAY_KEY);
 
-        LinearLayout existingChatsLayout = (LinearLayout) findViewById(R.id.existing_chats);
-        ListView currentChatsListView = (ListView) findViewById(R.id.list_view_existing_chats);
-        if (currentChats.size() > 0) {
-            existingChatsLayout.setVisibility(View.VISIBLE);
-            ChatsAdapter mAdapter = new ChatsAdapter(getApplicationContext(), R.layout.list_item_chat, currentChats);
-            currentChatsListView.setAdapter(mAdapter);
-            currentChatsListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-                @Override
-                public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                    startActivity(ChatActivity.getIntent(getApplicationContext(), currentChats.get(position)));
-                }
-            });
-        }
-
         mChatNameInput.setText("Chat with " + mUser.getName(), TextView.BufferType.EDITABLE);
+        setCurrentChats(currentChats);
     }
 
     @Override
@@ -87,8 +74,21 @@ public class NewChatActivity extends AppCompatActivity {
             return;
         }
 
-        view.setEnabled(false);
-        Request request = Routes.chatsCreateRequest(getApplicationContext(), title, new ArrayList<>(Arrays.asList(mUser)), false);
-        Chat.createFromRequest(NewChatActivity.this, request, view);
+        Request request = Routes.chatsCreate(getApplicationContext(), title, new ArrayList<>(Arrays.asList(mUser)), false);
+        ChatUtils.createRequest(NewChatActivity.this, request, view);
+    }
+
+    public void setCurrentChats(final ArrayList<Chat> currentChats) {
+        ListView currentChatsListView = (ListView) findViewById(R.id.list_view_existing_chats);
+        if (currentChats.size() > 0) {
+            ChatsAdapter mAdapter = new ChatsAdapter(getApplicationContext(), R.layout.list_item_chat, currentChats);
+            currentChatsListView.setAdapter(mAdapter);
+            currentChatsListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                @Override
+                public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                    startActivity(ChatActivity.getIntent(getApplicationContext(), currentChats.get(position)));
+                }
+            });
+        }
     }
 }

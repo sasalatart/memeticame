@@ -154,7 +154,7 @@ public class ChatsFragment extends Fragment {
     }
 
     public void showChats() {
-        Request request = Routes.chatsIndexRequest(getActivity());
+        Request request = Routes.chatsIndex(getActivity());
         HttpClient.getInstance().newCall(request).enqueue(new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
@@ -193,7 +193,7 @@ public class ChatsFragment extends Fragment {
                 .setIcon(android.R.drawable.ic_dialog_alert)
                 .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int whichButton) {
-                        Request request = Routes.chatLeaveRequest(getActivity(), chat.getId());
+                        Request request = Routes.chatLeave(getActivity(), chat.getId());
                         HttpClient.getInstance().newCall(request).enqueue(new Callback() {
                             @Override
                             public void onFailure(Call call, IOException e) {

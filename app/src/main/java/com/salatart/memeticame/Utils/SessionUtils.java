@@ -66,7 +66,7 @@ public class SessionUtils {
     }
 
     public static void registerFCMToken(Context context) {
-        Request request = Routes.fcmRegisterRequest(context, getFCMToken(context));
+        Request request = Routes.fcmRegister(context, getFCMToken(context));
         HttpClient.getInstance().newCall(request).enqueue(new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
@@ -82,7 +82,7 @@ public class SessionUtils {
 
     public static void login(final Activity activity, final String phoneNumber, String password, final View submitButton) {
         submitButton.setEnabled(false);
-        Request request = Routes.loginRequest(phoneNumber, password);
+        Request request = Routes.login(phoneNumber, password);
         HttpClient.getInstance().newCall(request).enqueue(new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
@@ -115,7 +115,7 @@ public class SessionUtils {
     }
 
     public static void logout(final Activity activity) {
-        Request request = Routes.logoutRequest(activity);
+        Request request = Routes.logout(activity);
         HttpClient.getInstance().newCall(request).enqueue(new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {

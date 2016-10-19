@@ -96,7 +96,7 @@ public class ChatInvitationsFragment extends Fragment {
     }
 
     public void setChatInvitations() {
-        Request request = Routes.chatInvitationIndexRequest(getActivity());
+        Request request = Routes.chatInvitationsIndex(getActivity());
         HttpClient.getInstance().newCall(request).enqueue(new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {

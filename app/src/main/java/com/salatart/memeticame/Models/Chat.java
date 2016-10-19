@@ -71,31 +71,6 @@ public class Chat implements Parcelable {
         in.readTypedList(this.mMessages, Message.CREATOR);
     }
 
-    public static void createFromRequest(final Activity activity, Request request, final View submitButton) {
-        HttpClient.getInstance().newCall(request).enqueue(new Callback() {
-            @Override
-            public void onFailure(Call call, IOException e) {
-                HttpClient.onUnsuccessfulSubmit(activity, "Error", submitButton);
-            }
-
-            @Override
-            public void onResponse(Call call, Response response) throws IOException {
-                if (response.isSuccessful()) {
-                    try {
-                        JSONObject jsonChat = new JSONObject(response.body().string());
-                        activity.startActivity(ChatActivity.getIntent(activity, ParserUtils.chatFromJson(jsonChat)));
-                        activity.finish();
-                    } catch (JSONException e) {
-                        HttpClient.onUnsuccessfulSubmit(activity, "Error", submitButton);
-                    }
-                } else {
-                    HttpClient.onUnsuccessfulSubmit(activity, "Invalid credentials", submitButton);
-                }
-                response.body().close();
-            }
-        });
-    }
-
     public boolean onUserRemoved(final Activity activity, User user) {
         for (User localUser : mParticipants) {
             if (localUser.getId() == user.getId()) {

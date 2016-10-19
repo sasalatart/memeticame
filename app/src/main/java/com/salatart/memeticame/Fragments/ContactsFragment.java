@@ -13,6 +13,7 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ListView;
 
+import com.salatart.memeticame.Listeners.OnContactsReadListener;
 import com.salatart.memeticame.Models.User;
 import com.salatart.memeticame.R;
 import com.salatart.memeticame.Utils.ContactsUtils;
@@ -21,9 +22,6 @@ import com.salatart.memeticame.Views.ContactsAdapter;
 
 import java.util.ArrayList;
 
-/**
- * A simple {@link Fragment} subclass.
- */
 public class ContactsFragment extends Fragment {
 
     private ArrayList<User> mLocalContacts = new ArrayList<>();
@@ -41,15 +39,6 @@ public class ContactsFragment extends Fragment {
                 mContacts.add(user);
                 mAdapter.notifyDataSetChanged();
             }
-        }
-    };
-
-    private BroadcastReceiver mContactsReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            mLocalContacts = intent.getParcelableArrayListExtra(ContactsUtils.LOCAL_CONTACTS_PARCELABLE_KEY);
-            mContacts = intent.getParcelableArrayListExtra(ContactsUtils.INTERSECTED_CONTACTS_PARCELABLE_KEY);
-            setAdapter();
         }
     };
 
@@ -83,14 +72,12 @@ public class ContactsFragment extends Fragment {
     public void onResume() {
         super.onResume();
         getActivity().registerReceiver(mUsersReceiver, new IntentFilter(FilterUtils.NEW_USER_FILTER));
-        getActivity().registerReceiver(mContactsReceiver, new IntentFilter(FilterUtils.RETRIEVE_CONTACTS_FILTER));
     }
 
     @Override
     public void onPause() {
         super.onPause();
         getActivity().unregisterReceiver(mUsersReceiver);
-        getActivity().unregisterReceiver(mContactsReceiver);
     }
 
     public void setContacts() {
@@ -103,12 +90,24 @@ public class ContactsFragment extends Fragment {
 
         mContacts = User.findAll();
         setAdapter();
-        ContactsUtils.retrieveContacts(getActivity());
+        ContactsUtils.retrieveContacts(getActivity(), new OnContactsReadListener() {
+            @Override
+            public void OnRead(ArrayList<User> intersectedContacts, ArrayList<User> localContacts) {
+                mLocalContacts = localContacts;
+                mContacts = intersectedContacts;
+                setAdapter();
+            }
+        });
     }
 
     public void setAdapter() {
-        mAdapter = new ContactsAdapter(getContext(), R.layout.list_item_contact, mContacts);
-        mContactsListView.setAdapter(mAdapter);
+        getActivity().runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                mAdapter = new ContactsAdapter(getContext(), R.layout.list_item_contact, mContacts);
+                mContactsListView.setAdapter(mAdapter);
+            }
+        });
     }
 
     public interface OnContactSelected {

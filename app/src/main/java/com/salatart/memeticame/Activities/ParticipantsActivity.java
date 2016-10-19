@@ -56,9 +56,7 @@ public class ParticipantsActivity extends AppCompatActivity {
         Bundle data = getIntent().getExtras();
         mChat = data.getParcelable(Chat.PARCELABLE_KEY);
 
-        ListView mContactsListView = (ListView) findViewById(R.id.list_view_participants);
-        mAdapter = new ParticipantsAdapter(ParticipantsActivity.this, R.layout.list_item_participant, mChat);
-        mContactsListView.setAdapter(mAdapter);
+        setAdapter();
     }
 
     public boolean onOptionsItemSelected(MenuItem item) {
@@ -78,5 +76,11 @@ public class ParticipantsActivity extends AppCompatActivity {
         super.onPause();
         unregisterReceiver(mUsersKickedReceiver);
         unregisterReceiver(mUserAcceptedInvitation);
+    }
+
+    public void setAdapter() {
+        ListView mContactsListView = (ListView) findViewById(R.id.list_view_participants);
+        mAdapter = new ParticipantsAdapter(ParticipantsActivity.this, R.layout.list_item_participant, mChat);
+        mContactsListView.setAdapter(mAdapter);
     }
 }
