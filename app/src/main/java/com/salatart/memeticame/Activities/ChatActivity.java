@@ -187,7 +187,8 @@ public class ChatActivity extends AppCompatActivity {
     public void onResume() {
         super.onResume();
 
-        if (SessionUtils.getToken(getApplicationContext()).isEmpty()) {
+        if (!SessionUtils.loggedIn(getApplicationContext())) {
+            startActivity(new Intent(this, LoginActivity.class));
             ChatActivity.this.finish();
         }
 

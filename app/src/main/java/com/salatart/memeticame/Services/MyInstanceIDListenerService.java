@@ -34,7 +34,7 @@ public class MyInstanceIDListenerService extends FirebaseInstanceIdService {
         Log.i("INFO", "Refreshed token: " + refreshedToken);
         SessionUtils.saveFCMToken(refreshedToken, getApplicationContext());
 
-        if (!SessionUtils.getToken(getApplicationContext()).isEmpty()) {
+        if (SessionUtils.loggedIn(getApplicationContext())) {
             SessionUtils.registerFCMToken(getApplicationContext());
         }
     }

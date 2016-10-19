@@ -32,19 +32,16 @@ import okhttp3.Response;
 public class LoginActivity extends AppCompatActivity {
 
     private LoginForm mLoginForm;
-    private ProgressBar progressBar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
 
-        if (!SessionUtils.getToken(getApplicationContext()).isEmpty()) {
+        if (SessionUtils.loggedIn(getApplicationContext())) {
             startActivity(new Intent(this, MainActivity.class));
             LoginActivity.this.finish();
         } else {
-            progressBar = (ProgressBar) findViewById(R.id.progress_bar);
-
             ActivityLoginBinding binding = DataBindingUtil.setContentView(this, R.layout.activity_login);
             mLoginForm = new LoginForm("", "");
             binding.setLoginForm(mLoginForm);
@@ -73,38 +70,6 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     public void login(final View view) {
-        Request request = Routes.loginRequest(mLoginForm.getPhoneNumber(), mLoginForm.getPassword());
-
-        progressBar.setVisibility(View.VISIBLE);
-
-        HttpClient.getInstance().newCall(request).enqueue(new Callback() {
-            @Override
-            public void onFailure(Call call, IOException e) {
-                Log.e("ERROR", "Failed to login");
-            }
-
-            @Override
-            public void onResponse(Call call, final Response response) throws IOException {
-                if (response.isSuccessful()) {
-                    try {
-                        JSONObject jsonResponse = new JSONObject(response.body().string());
-                        SessionUtils.saveToken(jsonResponse.getString("api_key"), getApplicationContext());
-                        SessionUtils.savePhoneNumber(mLoginForm.getPhoneNumber(), getApplicationContext());
-                        SessionUtils.registerFCMToken(getApplicationContext());
-                        startActivity(new Intent(view.getContext(), MainActivity.class));
-                        LoginActivity.this.finish();
-                    } catch (JSONException e) {
-                        Log.e("ERROR", e.toString());
-                    }
-                } else {
-                    LoginActivity.this.runOnUiThread(new Runnable() {
-                        public void run() {
-                            Toast.makeText(getApplicationContext(), "Invalid credentials", Toast.LENGTH_SHORT).show();
-                        }
-                    });
-                }
-                response.body().close();
-            }
-        });
+        SessionUtils.login(LoginActivity.this, mLoginForm.getPhoneNumber(), mLoginForm.getPassword());
     }
 }

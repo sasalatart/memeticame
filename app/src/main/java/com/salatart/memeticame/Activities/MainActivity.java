@@ -7,6 +7,7 @@ import android.provider.ContactsContract;
 import android.support.design.widget.TabLayout;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 
@@ -38,11 +39,6 @@ public class MainActivity extends AppCompatActivity implements ChatsFragment.OnC
 
         Realm.init(this);
 
-        if (SessionUtils.getToken(getApplicationContext()).isEmpty()) {
-            startActivity(new Intent(this, LoginActivity.class));
-            MainActivity.this.finish();
-        }
-
         setupViewPager();
     }
 
@@ -72,7 +68,8 @@ public class MainActivity extends AppCompatActivity implements ChatsFragment.OnC
     public void onResume() {
         super.onResume();
 
-        if (SessionUtils.getToken(getApplicationContext()).isEmpty()) {
+        if (!SessionUtils.loggedIn(MainActivity.this)) {
+            startActivity(new Intent(this, LoginActivity.class));
             MainActivity.this.finish();
         }
     }

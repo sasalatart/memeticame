@@ -37,6 +37,10 @@ public class MyFcmListenerService extends FirebaseMessagingService {
         Map data = message.getData();
         String collapseKey = message.getCollapseKey();
 
+        if (!SessionUtils.loggedIn(getApplicationContext())) {
+            return;
+        }
+
         if (collapseKey.equals("message_created")) {
             broadcastNewMessage(data);
         } else if (collapseKey.equals("chat_created")) {

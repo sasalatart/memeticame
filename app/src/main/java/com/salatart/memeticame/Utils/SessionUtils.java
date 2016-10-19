@@ -5,8 +5,13 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.util.Log;
+import android.widget.Toast;
 
 import com.salatart.memeticame.Activities.LoginActivity;
+import com.salatart.memeticame.Activities.MainActivity;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.IOException;
 
@@ -21,6 +26,10 @@ import okhttp3.Response;
 public class SessionUtils {
 
     private static String PREFERENCES = "SESSION";
+
+    public static boolean loggedIn(Context context) {
+        return context != null && !context.getSharedPreferences(PREFERENCES, 0).getString("Token", "").isEmpty();
+    }
 
     public static String getToken(Context context) {
         if (context == null) {
@@ -66,6 +75,43 @@ public class SessionUtils {
 
             @Override
             public void onResponse(Call call, Response response) throws IOException {
+                response.body().close();
+            }
+        });
+    }
+
+    public static void login(final Activity activity, final String phoneNumber, String password) {
+        Request request = Routes.loginRequest(phoneNumber, password);
+        HttpClient.getInstance().newCall(request).enqueue(new Callback() {
+            @Override
+            public void onFailure(Call call, IOException e) {
+                Log.e("ERROR", "Failed to login");
+            }
+
+            @Override
+            public void onResponse(Call call, final Response response) throws IOException {
+                if (activity == null) {
+                    return;
+                }
+
+                if (response.isSuccessful()) {
+                    try {
+                        JSONObject jsonResponse = new JSONObject(response.body().string());
+                        SessionUtils.saveToken(jsonResponse.getString("api_key"), activity);
+                        SessionUtils.savePhoneNumber(phoneNumber, activity);
+                        SessionUtils.registerFCMToken(activity);
+                        activity.startActivity(new Intent(activity, MainActivity.class));
+                        activity.finish();
+                    } catch (JSONException e) {
+                        Log.e("ERROR", e.toString());
+                    }
+                } else {
+                    activity.runOnUiThread(new Runnable() {
+                        public void run() {
+                            Toast.makeText(activity, "Invalid credentials", Toast.LENGTH_SHORT).show();
+                        }
+                    });
+                }
                 response.body().close();
             }
         });
