@@ -5,6 +5,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.salatart.memeticame.Models.Chat;
@@ -33,11 +34,7 @@ public class ChatsAdapter extends ArrayAdapter<Chat> {
         Chat chat = mChats.get(position);
 
         if (view == null) {
-            if (chat.isGroup()) {
-                view = mLayoutInflater.inflate(R.layout.list_item_chat_group, parent, false);
-            } else {
-                view = mLayoutInflater.inflate(R.layout.list_item_chat, parent, false);
-            }
+            view = mLayoutInflater.inflate(R.layout.list_item_chat, parent, false);
         }
 
         setTextViews(view, chat);
@@ -45,23 +42,12 @@ public class ChatsAdapter extends ArrayAdapter<Chat> {
         return view;
     }
 
-    @Override
-    public int getViewTypeCount() {
-        return 2;
-    }
-
-    @Override
-    public int getItemViewType(int position) {
-        Chat chat = getItem(position);
-
-        if (chat.isGroup()) {
-            return 0;
-        } else {
-            return 1;
-        }
-    }
-
     private void setTextViews(View view, Chat chat) {
+        if (chat.isGroup()) {
+            ImageView iconView = (ImageView) view.findViewById(R.id.chat_icon);
+            iconView.setImageResource(R.drawable.ic_people_black_24dp);
+        }
+
         TextView titleView = (TextView) view.findViewById(R.id.label_title);
         titleView.setText(chat.getTitle());
 

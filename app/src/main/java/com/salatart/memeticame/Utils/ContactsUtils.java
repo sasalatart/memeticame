@@ -30,8 +30,6 @@ import okhttp3.Response;
  */
 public class ContactsUtils {
     public static final int PERMISSIONS_REQUEST_READ_CONTACTS = 101;
-    public static final String LOCAL_CONTACTS_PARCELABLE_KEY = "localContactsParcelableKey";
-    public static final String INTERSECTED_CONTACTS_PARCELABLE_KEY = "intersectedContactsParcelableKey";
 
     public static boolean hasContactsPermissions(Context context) {
         return ContextCompat.checkSelfPermission(context, Manifest.permission.READ_CONTACTS) == PackageManager.PERMISSION_GRANTED;
