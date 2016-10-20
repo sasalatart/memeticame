@@ -8,6 +8,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -27,13 +28,7 @@ import com.salatart.memeticame.Utils.MessageUtils;
  */
 public class MessagesAdapter extends ArrayAdapter<Message> {
     private Chat mParentChat;
-    private MediaPlayer mMediaPlayer;
     private LayoutInflater mLayoutInflater;
-
-    private ImageButton mPlayButton;
-    private ImageButton mPauseButton;
-    private ImageButton mStopButton;
-    private ImageButton mCopyButton;
 
     public MessagesAdapter(Context context, int resource, Chat parentChat) {
         super(context, resource, parentChat.getMessages());
@@ -48,13 +43,13 @@ public class MessagesAdapter extends ArrayAdapter<Message> {
 
         if (view == null) {
             if (message.isMine(getContext()) && message.getAttachment() == null) {
-                view = mLayoutInflater.inflate(R.layout.list_item_message_out_text, parent, false);
+                view = mLayoutInflater.inflate(R.layout.list_item_message_out, parent, false);
             } else if (message.isMine(getContext())) {
-                view = mLayoutInflater.inflate(R.layout.list_item_message_out_attachment, parent, false);
+                view = mLayoutInflater.inflate(R.layout.list_item_attachment_out, parent, false);
             } else if (!message.isMine(getContext()) && message.getAttachment() == null) {
-                view = mLayoutInflater.inflate(R.layout.list_item_message_in_text, parent, false);
+                view = mLayoutInflater.inflate(R.layout.list_item_message_in, parent, false);
             } else if (!message.isMine(getContext())) {
-                view = mLayoutInflater.inflate(R.layout.list_item_message_in_attachment, parent, false);
+                view = mLayoutInflater.inflate(R.layout.list_item_attachment_in, parent, false);
             }
         }
 
@@ -104,7 +99,7 @@ public class MessagesAdapter extends ArrayAdapter<Message> {
     }
 
     private void setAttachment(View view, final Message message) {
-        Attachment attachment = message.getAttachment();
+        final Attachment attachment = message.getAttachment();
 
         if (attachment == null) {
             return;
@@ -115,7 +110,6 @@ public class MessagesAdapter extends ArrayAdapter<Message> {
         boolean isVideo = attachment.isVideo();
         boolean isAudio = attachment.isAudio();
         boolean isMemeaudio = attachment.isMemeaudio();
-        boolean isNotMedia = attachment.isNotMedia();
 
         if (fileExists && !isMemeaudio) {
             attachment.setUri(FileUtils.getUriFromFileName(getContext(), attachment.getName()).toString());
@@ -137,10 +131,6 @@ public class MessagesAdapter extends ArrayAdapter<Message> {
         }
 
         ImageView thumbnail = (ImageView) view.findViewById(R.id.thumbnail);
-        LinearLayout groupAudioButtons = (LinearLayout) view.findViewById(R.id.group_audio_buttons);
-
-        thumbnail.setVisibility((!fileExists || !isAudio) ? View.VISIBLE : View.GONE);
-        groupAudioButtons.setVisibility((isAudio && fileExists) ? View.VISIBLE : View.GONE);
         if (isImage || (fileExists && (isVideo || isMemeaudio))) {
             Glide.with(getContext())
                     .load(attachment.getStringUri())
@@ -151,100 +141,112 @@ public class MessagesAdapter extends ArrayAdapter<Message> {
         } else if (!fileExists) {
             thumbnail.setImageResource(R.drawable.ic_file_download_black_24dp);
         } else if (isAudio) {
+            thumbnail.setImageResource(R.drawable.ic_audiotrack_black_24dp);
             setMediaPlayer(view, Uri.parse(attachment.getStringUri()));
         } else {
             thumbnail.setImageResource(R.drawable.ic_attach_file_black_24dp);
         }
 
         TextView attachmentName = (TextView) view.findViewById(R.id.label_attachment_name);
-        if ((!fileExists && !isImage) || isAudio || isNotMedia) {
-            attachmentName.setVisibility(View.VISIBLE);
-            attachmentName.setText(attachment.getName());
-        } else {
-            attachmentName.setVisibility(View.INVISIBLE);
-        }
+        attachmentName.setText(attachment.getName());
 
-        TextView attachmentSize = (TextView) view.findViewById(R.id.size);
+        TextView attachmentMimeType = (TextView) view.findViewById(R.id.label_attachment_mime_type);
+        attachmentMimeType.setText(attachment.getMimeType());
+
+        TextView attachmentSize = (TextView) view.findViewById(R.id.label_attachment_size);
         attachmentSize.setText(attachment.getHumanReadableByteCount(false));
 
-        TextView labelDownloadAvailable = (TextView) view.findViewById(R.id.label_download_available);
-        labelDownloadAvailable.setVisibility(fileExists ? View.GONE : View.VISIBLE);
+        Button openButton = (Button) view.findViewById(R.id.button_open);
+        openButton.setText(!fileExists ? "Download" : "Open");
+        openButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (!FileUtils.openFile(getContext(), attachment)) {
+                    Toast.makeText(getContext(), "Can't open this file.", Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
 
-        mCopyButton = ((ImageButton) view.findViewById(R.id.button_copy));
-        mCopyButton.setOnClickListener(new View.OnClickListener() {
+        ImageButton copyButton = ((ImageButton) view.findViewById(R.id.button_copy));
+        copyButton.setVisibility(fileExists ? View.VISIBLE : View.GONE);
+        copyButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 MessageUtils.copyMessage(getContext(), message);
                 Toast.makeText(getContext(), "Message copied", Toast.LENGTH_LONG).show();
             }
         });
+
+        LinearLayout groupAudioButtons = (LinearLayout) view.findViewById(R.id.group_audio_buttons);
+        groupAudioButtons.setVisibility((isAudio && fileExists) ? View.VISIBLE : View.GONE);
+        openButton.setVisibility((isAudio && fileExists) ? View.GONE : View.VISIBLE);
     }
 
     private void setMediaPlayer(final View view, final Uri audioUri) {
-        mPlayButton = ((ImageButton) view.findViewById(R.id.button_play));
-        mPauseButton = ((ImageButton) view.findViewById(R.id.button_pause));
-        mStopButton = ((ImageButton) view.findViewById(R.id.button_stop));
+        final ImageButton playButton = ((ImageButton) view.findViewById(R.id.button_play));
+        final ImageButton pauseButton = ((ImageButton) view.findViewById(R.id.button_pause));
+        final ImageButton stopButton = ((ImageButton) view.findViewById(R.id.button_stop));
 
-        mMediaPlayer = MediaPlayer.create(getContext(), audioUri);
-        mMediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+        final MediaPlayer mediaPlayer = MediaPlayer.create(getContext(), audioUri);
+        mediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
             @Override
             public void onCompletion(MediaPlayer mp) {
                 setMediaPlayer(view, audioUri);
             }
         });
 
-        mPlayButton.setOnClickListener(new View.OnClickListener() {
+        playButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                onPlay();
+                onPlay(mediaPlayer, playButton, pauseButton, stopButton);
             }
         });
 
-        mPauseButton.setOnClickListener(new View.OnClickListener() {
+        pauseButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                onPause();
+                onPause(mediaPlayer, playButton, pauseButton, stopButton);
             }
         });
 
-        mStopButton.setOnClickListener(new View.OnClickListener() {
+        stopButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                onStop();
+                onStop(mediaPlayer, playButton, pauseButton, stopButton);
                 setMediaPlayer(view, audioUri);
             }
         });
 
-        setEnabled(true, false, false);
-        setColors(Color.BLACK, Color.BLACK, Color.BLACK);
+        setEnabled(true, false, false, playButton, pauseButton, stopButton);
+        setColors(Color.BLACK, Color.BLACK, Color.BLACK, playButton, pauseButton, stopButton);
     }
 
-    public void onPlay() {
-        setEnabled(false, true, true);
-        setColors(Color.RED, Color.BLACK, Color.BLACK);
-        mMediaPlayer.start();
+    public void onPlay(MediaPlayer mediaPlayer, ImageButton playButton, ImageButton pauseButton, ImageButton stopButton) {
+        setEnabled(false, true, true, playButton, pauseButton, stopButton);
+        setColors(Color.RED, Color.BLACK, Color.BLACK, playButton, pauseButton, stopButton);
+        mediaPlayer.start();
     }
 
-    public void onPause() {
-        setEnabled(true, false, true);
-        setColors(Color.BLACK, Color.RED, Color.BLACK);
-        mMediaPlayer.pause();
+    public void onPause(MediaPlayer mediaPlayer, ImageButton playButton, ImageButton pauseButton, ImageButton stopButton) {
+        setEnabled(true, false, true, playButton, pauseButton, stopButton);
+        setColors(Color.BLACK, Color.RED, Color.BLACK, playButton, pauseButton, stopButton);
+        mediaPlayer.pause();
     }
 
-    public void onStop() {
-        setEnabled(true, false, false);
-        mMediaPlayer.stop();
+    public void onStop(MediaPlayer mediaPlayer, ImageButton playButton, ImageButton pauseButton, ImageButton stopButton) {
+        setEnabled(true, false, false, playButton, pauseButton, stopButton);
+        mediaPlayer.stop();
     }
 
-    private void setEnabled(boolean playButtonEnabled, boolean pauseButtonEnabled, boolean stopButtonEnabled) {
-        mPlayButton.setEnabled(playButtonEnabled);
-        mPauseButton.setEnabled(pauseButtonEnabled);
-        mStopButton.setEnabled(stopButtonEnabled);
+    private void setEnabled(boolean playButtonEnabled, boolean pauseButtonEnabled, boolean stopButtonEnabled, ImageButton playButton, ImageButton pauseButton, ImageButton stopButton) {
+        playButton.setEnabled(playButtonEnabled);
+        pauseButton.setEnabled(pauseButtonEnabled);
+        stopButton.setEnabled(stopButtonEnabled);
     }
 
-    private void setColors(int playColor, int pauseColor, int stopColor) {
-        mPlayButton.setColorFilter(playColor);
-        mPauseButton.setColorFilter(pauseColor);
-        mStopButton.setColorFilter(stopColor);
+    private void setColors(int playColor, int pauseColor, int stopColor, ImageButton playButton, ImageButton pauseButton, ImageButton stopButton) {
+        playButton.setColorFilter(playColor);
+        pauseButton.setColorFilter(pauseColor);
+        stopButton.setColorFilter(stopColor);
     }
 }

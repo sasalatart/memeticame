@@ -8,8 +8,9 @@
     <color name="colorAccent">#009688</color>
     <color name="transparent">#00000000</color>
     <color name="outMessageColor">#000000</color>
-    <color name="inMessageColor">#009688</color>
     <color name="iconBackground">#E0F2F1</color>
     <color name="colorBlack">#000000</color>
     <color name="colorYellow">#FFEB3B</color>
+    <color name="outWellColor">#B2DFDB</color>
+    <color name="inWellColor">#1DE9B6</color>
 </resources>

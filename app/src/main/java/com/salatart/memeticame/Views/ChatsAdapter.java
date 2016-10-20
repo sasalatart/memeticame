@@ -9,6 +9,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.salatart.memeticame.Models.Chat;
+import com.salatart.memeticame.Models.Message;
 import com.salatart.memeticame.Models.MessageCount;
 import com.salatart.memeticame.R;
 import com.salatart.memeticame.Utils.TimeUtils;
@@ -56,6 +57,18 @@ public class ChatsAdapter extends ArrayAdapter<Chat> {
 
         TextView createdAtView = (TextView) view.findViewById(R.id.label_created_at);
         createdAtView.setText(TimeUtils.parseISODate(chat.getCreatedAt()));
+
+        TextView lastMessageView = (TextView) view.findViewById(R.id.label_last_message);
+        String lastMessageText;
+        if (chat.getMessages().size() == 0) {
+            lastMessageText = "No messages yet";
+        } else {
+            Message lastMessage = chat.getMessages().get(chat.getMessages().size() - 1);
+            String lastUserName = chat.getParticipantsHash().get(lastMessage.getSenderPhone());
+            lastMessageText = lastUserName + ": " + lastMessage.getContent();
+            lastMessageView.setText(lastMessageText);
+        }
+        lastMessageView.setText(lastMessageText);
 
         String unreadMessages = MessageCount.findOne(chat).getUnreadMessages() + "";
         TextView unreadCountView = (TextView) view.findViewById(R.id.label_unread_count);

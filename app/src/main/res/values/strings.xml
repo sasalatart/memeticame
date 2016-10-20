@@ -36,4 +36,6 @@
     <string name="mime_type">mime type</string>
     <string name="see_gallery">See gallery</string>
     <string name="click_to_download">(click to download)</string>
+    <string name="open">open</string>
+    <string name="last_message">last message</string>
 </resources>

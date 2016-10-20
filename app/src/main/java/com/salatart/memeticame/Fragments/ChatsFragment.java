@@ -18,6 +18,7 @@ import android.widget.Toast;
 
 import com.salatart.memeticame.Models.Chat;
 import com.salatart.memeticame.Models.ChatInvitation;
+import com.salatart.memeticame.Models.Message;
 import com.salatart.memeticame.Models.MessageCount;
 import com.salatart.memeticame.Models.User;
 import com.salatart.memeticame.R;
@@ -39,9 +40,6 @@ import okhttp3.Callback;
 import okhttp3.Request;
 import okhttp3.Response;
 
-/**
- * A simple {@link Fragment} subclass.
- */
 public class ChatsFragment extends Fragment {
 
     private ArrayList<Chat> mChats;
@@ -62,7 +60,14 @@ public class ChatsFragment extends Fragment {
     private BroadcastReceiver mMessageReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            mAdapter.notifyDataSetChanged();
+            Message newMessage = intent.getParcelableExtra(Message.PARCELABLE_KEY);
+            for (Chat chat : mChats) {
+                if (chat.getId() == newMessage.getChatId()) {
+                    chat.getMessages().add(newMessage);
+                    mAdapter.notifyDataSetChanged();
+                    break;
+                }
+            }
         }
     };
 

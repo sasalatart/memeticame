@@ -181,6 +181,7 @@ public class ChatActivity extends AppCompatActivity {
 
         mAudioRecorderManager = new AudioRecorderManager();
         mCurrentlyRecording = false;
+        registerForContextMenu(mMessageInput);
 
         setAdapter();
     }
@@ -256,7 +257,7 @@ public class ChatActivity extends AppCompatActivity {
             @Override
             public void OnSuccess(Object chat) {
                 mChat = (Chat) chat;
-                mAdapter = new MessagesAdapter(getApplicationContext(), R.layout.list_item_message_in_text, mChat);
+                mAdapter = new MessagesAdapter(ChatActivity.this, R.layout.list_item_message_in, mChat);
                 ChatActivity.this.runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
@@ -418,21 +419,8 @@ public class ChatActivity extends AppCompatActivity {
     }
 
     public void setAdapter() {
-        mAdapter = new MessagesAdapter(ChatActivity.this, R.layout.list_item_message_in_text, mChat);
+        mAdapter = new MessagesAdapter(ChatActivity.this, R.layout.list_item_message_in, mChat);
         mMessagesListView.setAdapter(mAdapter);
-
-        mMessagesListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                Attachment attachment = mAdapter.getItem(position).getAttachment();
-                if (attachment != null && !FileUtils.openFile(ChatActivity.this, attachment)) {
-                    Toast.makeText(ChatActivity.this, "Can't open this file.", Toast.LENGTH_SHORT).show();
-                }
-            }
-        });
-
-        registerForContextMenu(mMessagesListView);
-        registerForContextMenu(mMessageInput);
     }
 
     @Override
@@ -440,12 +428,9 @@ public class ChatActivity extends AppCompatActivity {
         menu.setHeaderIcon(R.drawable.ic_textsms_black_24dp);
         menu.setHeaderTitle("Actions");
 
-        if (view.getId() == R.id.list_view_messages) {
-            menu.add(Menu.NONE, 1, 0, "Copy");
-            menu.add(Menu.NONE, 0, 1, "Cancel");
-        } else if (view.getId() == R.id.input_message) {
-            menu.add(Menu.NONE, 2, 0, "Paste");
-            menu.add(Menu.NONE, 0, 1, "Cancel");
+        if (view.getId() == R.id.input_message) {
+            menu.add(Menu.NONE, 0, 0, "Paste");
+            menu.add(Menu.NONE, 1, 1, "Cancel");
         }
     }
 
@@ -454,12 +439,9 @@ public class ChatActivity extends AppCompatActivity {
         AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) item.getMenuInfo();
 
         int menuItemId = item.getItemId();
-        if (menuItemId == 1) {
-            Message message = mChat.getMessages().get(info.position);
-            MessageUtils.copyMessage(ChatActivity.this, message);
-        } else if (menuItemId == 2) {
-            String[] messageData = MessageUtils.retrieveMessage(ChatActivity.this);
 
+        if (menuItemId == 0) {
+            String[] messageData = MessageUtils.retrieveMessage(ChatActivity.this);
             if (messageData == null) {
                 return false;
             }

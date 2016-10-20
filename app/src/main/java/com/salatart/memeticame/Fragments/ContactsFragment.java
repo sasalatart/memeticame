@@ -1,6 +1,7 @@
 package com.salatart.memeticame.Fragments;
 
 
+import android.app.Activity;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -41,7 +42,6 @@ public class ContactsFragment extends Fragment {
             }
         }
     };
-
 
     public ContactsFragment() {
     }
@@ -90,6 +90,7 @@ public class ContactsFragment extends Fragment {
 
         mContacts = User.findAll();
         setAdapter();
+
         ContactsUtils.retrieveContacts(getActivity(), new OnContactsReadListener() {
             @Override
             public void OnRead(ArrayList<User> intersectedContacts, ArrayList<User> localContacts) {
@@ -101,13 +102,20 @@ public class ContactsFragment extends Fragment {
     }
 
     public void setAdapter() {
-        getActivity().runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                mAdapter = new ContactsAdapter(getContext(), R.layout.list_item_contact, mContacts);
-                mContactsListView.setAdapter(mAdapter);
-            }
-        });
+        Activity activity = getActivity();
+
+        if (activity != null) {
+            activity.runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    mAdapter = new ContactsAdapter(getContext(), R.layout.list_item_contact, mContacts);
+                    mContactsListView.setAdapter(mAdapter);
+                }
+            });
+        } else {
+            mAdapter = new ContactsAdapter(getContext(), R.layout.list_item_contact, mContacts);
+            mContactsListView.setAdapter(mAdapter);
+        }
     }
 
     public interface OnContactSelected {
