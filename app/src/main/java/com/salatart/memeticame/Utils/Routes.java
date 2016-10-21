@@ -26,7 +26,7 @@ import okhttp3.RequestBody;
  */
 public class Routes {
     static String DOMAIN = "https://memeticame.salatart.com";
-    //static String DOMAIN = "http://10.0.2.2:3000";
+    // static String DOMAIN = "http://10.0.2.2:3000";
     private static MediaType JSON = MediaType.parse("application/json; charset=utf-8");
 
     public static Request login(String phoneNumber, String password) {
@@ -57,11 +57,17 @@ public class Routes {
                 .build();
     }
 
-    public static Request usersIndex(Context context) {
+    public static Request usersIndex(Context context, ArrayList<String> phoneNumbers) {
+        FormBody.Builder formBuilder = new FormBody.Builder();
+        for (int i = 0; i < phoneNumbers.size(); i++) {
+            formBuilder.add("phone_numbers[" + i + "]", phoneNumbers.get(i));
+        }
+
         return new Request.Builder()
                 .url(DOMAIN + "/users")
                 .addHeader("content-type", "application/json")
                 .addHeader("authorization", "Token token=" + SessionUtils.getToken(context))
+                .post(formBuilder.build())
                 .build();
     }
 

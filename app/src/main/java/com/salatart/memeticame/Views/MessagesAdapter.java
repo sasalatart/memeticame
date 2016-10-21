@@ -91,7 +91,11 @@ public class MessagesAdapter extends ArrayAdapter<Message> {
                 statusImageView.setImageResource(R.drawable.ic_check_black_24dp);
             }
         } else {
-            senderLabel.setText(mParentChat.getParticipantsHash().get(message.getSenderPhone()));
+            String sender = mParentChat.getParticipantsHash().get(message.getSenderPhone());
+            if (sender == null) {
+                sender = message.getSenderPhone();
+            }
+            senderLabel.setText(sender);
         }
 
         ((TextView) view.findViewById(R.id.label_timestamp)).setText(message.getCreatedAt());

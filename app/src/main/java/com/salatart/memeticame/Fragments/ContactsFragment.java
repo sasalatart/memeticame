@@ -88,9 +88,6 @@ public class ContactsFragment extends Fragment {
             }
         });
 
-        mContacts = User.findAll();
-        setAdapter();
-
         ContactsUtils.retrieveContacts(getActivity(), new OnContactsReadListener() {
             @Override
             public void OnRead(ArrayList<User> intersectedContacts, ArrayList<User> localContacts) {

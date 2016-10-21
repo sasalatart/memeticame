@@ -6,12 +6,9 @@ import android.os.Parcelable;
 import java.util.ArrayList;
 import java.util.List;
 
-import io.realm.Realm;
-import io.realm.RealmObject;
-import io.realm.RealmResults;
 import io.realm.annotations.PrimaryKey;
 
-public class User extends RealmObject implements Parcelable {
+public class User implements Parcelable {
     public static final Parcelable.Creator CREATOR = new Parcelable.Creator() {
         public User createFromParcel(Parcel in) {
             return new User(in);
@@ -42,21 +39,6 @@ public class User extends RealmObject implements Parcelable {
         this.mId = in.readInt();
         this.mName = in.readString();
         this.mPhoneNumber = in.readString();
-    }
-
-    public static ArrayList<User> intersect(ArrayList<User> localUsers, ArrayList<User> externalUsers) {
-        ArrayList<User> users = new ArrayList<>();
-
-        for (User lU : localUsers) {
-            for (User eU : externalUsers) {
-                if (User.comparePhones(lU.getPhoneNumber(), eU.getPhoneNumber())) {
-                    users.add(eU);
-                    break;
-                }
-            }
-        }
-
-        return users;
     }
 
     public static ArrayList<User> difference(ArrayList<User> originalUsers, ArrayList<User> usersToRemove) {
@@ -99,23 +81,6 @@ public class User extends RealmObject implements Parcelable {
 
     public static boolean comparePhones(String phone1, String phone2) {
         return phone1.replaceAll("[^\\d.]", "").equals(phone2.replaceAll("[^\\d.]", ""));
-    }
-
-    public static ArrayList<User> findAll() {
-        ArrayList<User> users = new ArrayList<>();
-        Realm realm = Realm.getDefaultInstance();
-        RealmResults<User> userResults = realm.where(User.class).findAll();
-        users.addAll(userResults.subList(0, userResults.size()));
-        return users;
-    }
-
-    public static void moveOrUpdateAll(ArrayList<User> users) {
-        Realm realm = Realm.getDefaultInstance();
-        realm.beginTransaction();
-        for (User user : users) {
-            realm.copyToRealmOrUpdate(user);
-        }
-        realm.commitTransaction();
     }
 
     public int getId() {

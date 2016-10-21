@@ -78,7 +78,12 @@ public class ChatsFragment extends Fragment {
             User user = intent.getParcelableExtra(User.PARCELABLE_KEY);
             for (Chat localChat : mChats) {
                 if (localChat.getId() == chat.getId() && localChat.onUserRemoved(getActivity(), user)) {
-                    mAdapter.notifyDataSetChanged();
+                    getActivity().runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            mAdapter.notifyDataSetChanged();
+                        }
+                    });
                     break;
                 }
             }

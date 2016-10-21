@@ -142,12 +142,7 @@ public class AddParticipantsActivity extends AppCompatActivity {
                     mInvitedUsers.add(chatInvitation.getUser());
                 }
 
-                AddParticipantsActivity.this.runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        mAdapter.notifyDataSetChanged();
-                    }
-                });
+                setAdapter();
             }
         });
     }
@@ -163,29 +158,11 @@ public class AddParticipantsActivity extends AppCompatActivity {
     }
 
     public void setParticipants() {
-        mUsersListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                User selectedContact = mUsers.get(position);
-                if (mSelectedUsers.contains(selectedContact)) {
-                    mSelectedUsers.remove(selectedContact);
-                } else {
-                    mSelectedUsers.add(selectedContact);
-                }
-                mAdapter.notifyDataSetChanged();
-            }
-        });
-
-        mUsers = User.difference(User.findAll(), mChat.getParticipants());
-        setAdapter();
-
-        getInvitations();
-
         ContactsUtils.retrieveContacts(AddParticipantsActivity.this, new OnContactsReadListener() {
             @Override
             public void OnRead(ArrayList<User> intersectedContacts, ArrayList<User> localContacts) {
                 mUsers = User.difference(intersectedContacts, mChat.getParticipants());
-                setAdapter();
+                getInvitations();
             }
         });
     }
@@ -195,6 +172,18 @@ public class AddParticipantsActivity extends AppCompatActivity {
         AddParticipantsActivity.this.runOnUiThread(new Runnable() {
             public void run() {
                 mUsersListView.setAdapter(mAdapter);
+                mUsersListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                    @Override
+                    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                        User selectedContact = mUsers.get(position);
+                        if (mSelectedUsers.contains(selectedContact)) {
+                            mSelectedUsers.remove(selectedContact);
+                        } else {
+                            mSelectedUsers.add(selectedContact);
+                        }
+                        mAdapter.notifyDataSetChanged();
+                    }
+                });
             }
         });
     }

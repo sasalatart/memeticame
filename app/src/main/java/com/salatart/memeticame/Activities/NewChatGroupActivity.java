@@ -71,9 +71,6 @@ public class NewChatGroupActivity extends AppCompatActivity {
     }
 
     public void setContacts() {
-        mContacts = User.findAll();
-        setAdapter();
-
         mContactsListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {

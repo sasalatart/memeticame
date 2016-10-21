@@ -47,7 +47,7 @@ public class UserUtils {
                         HttpClient.onUnsuccessfulSubmit(activity, "Error", submitButton);
                     }
                 } else {
-                    HttpClient.onUnsuccessfulSubmit(activity, "Error", submitButton);
+                    HttpClient.onUnsuccessfulSubmit(activity, HttpClient.parseErrorMessage(response), submitButton);
                 }
 
                 response.body().close();

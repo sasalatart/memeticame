@@ -39,6 +39,14 @@ public class ContactsUtils {
         new GetContactsTask(context, listener).execute();
     }
 
+    public static ArrayList<String> retrievePhoneNumbers(ArrayList<User> contacts) {
+        ArrayList<String> phoneNumbers = new ArrayList<>();
+        for (User user : contacts) {
+            phoneNumbers.add(user.getPhoneNumber());
+        }
+        return phoneNumbers;
+    }
+
     public static void retrieveContacts(final Activity activity, final OnContactsReadListener listener) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && !hasContactsPermissions(activity)) {
             activity.requestPermissions(new String[]{Manifest.permission.READ_CONTACTS}, PERMISSIONS_REQUEST_READ_CONTACTS);
@@ -46,7 +54,7 @@ public class ContactsUtils {
             ContactsUtils.getContacts(activity, new ContactsUtils.ContactsProviderListener() {
                 @Override
                 public void OnContactsReady(final ArrayList<User> contacts) {
-                    Request request = Routes.usersIndex(activity);
+                    Request request = Routes.usersIndex(activity, retrievePhoneNumbers(contacts));
                     HttpClient.getInstance().newCall(request).enqueue(new Callback() {
                         @Override
                         public void onFailure(Call call, IOException e) {
@@ -62,14 +70,12 @@ public class ContactsUtils {
 
                             if (response.isSuccessful()) {
                                 try {
-                                    ArrayList<User> intersectedContacts = User.intersect(contacts, ParserUtils.usersFromJsonArray(new JSONArray(response.body().string())));
-                                    listener.OnRead(intersectedContacts, contacts);
-                                    User.moveOrUpdateAll(intersectedContacts);
-                                } catch(JSONException e) {
-                                    HttpClient.onUnsuccessfulRequest(activity, "Error");
+                                    listener.OnRead(ParserUtils.usersFromJsonArray(new JSONArray(response.body().string())), contacts);
+                                } catch (JSONException e) {
+                                    HttpClient.onUnsuccessfulRequest(activity, e.toString());
                                 }
                             } else {
-                                HttpClient.onUnsuccessfulRequest(activity, "Error");
+                                HttpClient.onUnsuccessfulRequest(activity, HttpClient.parseErrorMessage(response));
                             }
 
                             response.body().close();
