@@ -38,4 +38,5 @@
     <string name="click_to_download">(click to download)</string>
     <string name="open">open</string>
     <string name="last_message">last message</string>
+    <string name="select_contacts_to_add">Select contacts to add</string>
 </resources>

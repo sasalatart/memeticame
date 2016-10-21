@@ -58,7 +58,8 @@ public class SignupActivity extends AppCompatActivity {
             return;
         }
 
+        com.wang.avi.AVLoadingIndicatorView loadingSignup = (com.wang.avi.AVLoadingIndicatorView) findViewById(R.id.loading_signup);
         Request request = Routes.signup(mSignupForm.getName(), mSignupForm.getPhoneNumber(), mSignupForm.getPassword(), mSignupForm.getPasswordConfirmation());
-        UserUtils.signup(SignupActivity.this, request, mSignupForm.getPhoneNumber(), mSignupForm.getPassword(), submitButton);
+        UserUtils.signup(SignupActivity.this, request, mSignupForm.getPhoneNumber(), submitButton, loadingSignup);
     }
 }

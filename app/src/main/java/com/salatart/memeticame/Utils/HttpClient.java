@@ -44,6 +44,20 @@ public class HttpClient {
         }
     }
 
+    public static void onUnsuccessfulRequestWithSpinner(final Activity activity, final String message, final com.wang.avi.AVLoadingIndicatorView loading) {
+        if (activity == null) {
+            return;
+        }
+
+        activity.runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                Toast.makeText(activity, message, Toast.LENGTH_LONG).show();
+                loading.hide();
+            }
+        });
+    }
+
     public static void onUnsuccessfulRequest(final Activity activity, final String message) {
         if (activity == null) {
             return;
@@ -66,6 +80,21 @@ public class HttpClient {
             public void run() {
                 Toast.makeText(activity, message, Toast.LENGTH_LONG).show();
                 submitButton.setEnabled(true);
+            }
+        });
+    }
+
+    public static void onUnsuccessfulSubmitWithSpinner(final Activity activity, final String message, final View submitButton, final com.wang.avi.AVLoadingIndicatorView loading) {
+        if (activity == null) {
+            return;
+        }
+
+        activity.runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                Toast.makeText(activity, message, Toast.LENGTH_LONG).show();
+                submitButton.setEnabled(true);
+                loading.hide();
             }
         });
     }

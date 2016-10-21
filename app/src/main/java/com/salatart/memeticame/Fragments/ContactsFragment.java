@@ -1,7 +1,5 @@
 package com.salatart.memeticame.Fragments;
 
-
-import android.app.Activity;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -28,9 +26,11 @@ public class ContactsFragment extends Fragment {
     private ArrayList<User> mLocalContacts = new ArrayList<>();
     private ArrayList<User> mContacts = new ArrayList<>();
     private ContactsAdapter mAdapter;
-    private ListView mContactsListView;
 
     private OnContactSelected mContactSelectedListener;
+
+    private ListView mContactsListView;
+    private com.wang.avi.AVLoadingIndicatorView mLoadingContacts;
 
     private BroadcastReceiver mUsersReceiver = new BroadcastReceiver() {
         @Override
@@ -48,19 +48,18 @@ public class ContactsFragment extends Fragment {
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-
         final View view = inflater.inflate(R.layout.fragment_contacts, container, false);
 
         mContactsListView = (ListView) view.findViewById(R.id.contacts_list_view);
-
+        mLoadingContacts = (com.wang.avi.AVLoadingIndicatorView) view.findViewById(R.id.loading_contacts);
         setContacts();
-
         return view;
     }
 
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
+
         try {
             mContactSelectedListener = (OnContactSelected) context;
         } catch (ClassCastException e) {
@@ -88,6 +87,7 @@ public class ContactsFragment extends Fragment {
             }
         });
 
+        mLoadingContacts.show();
         ContactsUtils.retrieveContacts(getActivity(), new OnContactsReadListener() {
             @Override
             public void OnRead(ArrayList<User> intersectedContacts, ArrayList<User> localContacts) {
@@ -99,20 +99,14 @@ public class ContactsFragment extends Fragment {
     }
 
     public void setAdapter() {
-        Activity activity = getActivity();
-
-        if (activity != null) {
-            activity.runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    mAdapter = new ContactsAdapter(getContext(), R.layout.list_item_contact, mContacts);
-                    mContactsListView.setAdapter(mAdapter);
-                }
-            });
-        } else {
-            mAdapter = new ContactsAdapter(getContext(), R.layout.list_item_contact, mContacts);
-            mContactsListView.setAdapter(mAdapter);
-        }
+        getActivity().runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                mAdapter = new ContactsAdapter(getContext(), R.layout.list_item_contact, mContacts);
+                mContactsListView.setAdapter(mAdapter);
+                mLoadingContacts.hide();
+            }
+        });
     }
 
     public interface OnContactSelected {

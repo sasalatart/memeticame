@@ -20,12 +20,13 @@ import okhttp3.Response;
  */
 
 public class UserUtils {
-    public static void signup(final Activity activity, Request request, final String phoneNumber, String password, final View submitButton) {
+    public static void signup(final Activity activity, Request request, final String phoneNumber, final View submitButton, final com.wang.avi.AVLoadingIndicatorView loadingSignup) {
         submitButton.setEnabled(false);
+        loadingSignup.show();
         HttpClient.getInstance().newCall(request).enqueue(new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
-                HttpClient.onUnsuccessfulRequest(activity, "Failed to signup");
+                HttpClient.onUnsuccessfulSubmitWithSpinner(activity, "Failed to signup", submitButton, loadingSignup);
             }
 
             @Override
@@ -44,12 +45,11 @@ public class UserUtils {
                         activity.startActivity(new Intent(activity, MainActivity.class));
                         activity.finish();
                     } catch (Exception e) {
-                        HttpClient.onUnsuccessfulSubmit(activity, "Error", submitButton);
+                        HttpClient.onUnsuccessfulSubmitWithSpinner(activity, "Error", submitButton, loadingSignup);
                     }
                 } else {
-                    HttpClient.onUnsuccessfulSubmit(activity, HttpClient.parseErrorMessage(response), submitButton);
+                    HttpClient.onUnsuccessfulSubmitWithSpinner(activity, HttpClient.parseErrorMessage(response), submitButton, loadingSignup);
                 }
-
                 response.body().close();
             }
         });

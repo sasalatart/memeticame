@@ -8,7 +8,6 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -16,35 +15,31 @@ import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.Toast;
 
+import com.salatart.memeticame.Listeners.OnRequestIndexListener;
+import com.salatart.memeticame.Listeners.OnRequestListener;
 import com.salatart.memeticame.Models.Chat;
 import com.salatart.memeticame.Models.ChatInvitation;
 import com.salatart.memeticame.Models.Message;
 import com.salatart.memeticame.Models.MessageCount;
 import com.salatart.memeticame.Models.User;
 import com.salatart.memeticame.R;
+import com.salatart.memeticame.Utils.ChatUtils;
 import com.salatart.memeticame.Utils.FilterUtils;
-import com.salatart.memeticame.Utils.HttpClient;
-import com.salatart.memeticame.Utils.ParserUtils;
 import com.salatart.memeticame.Utils.Routes;
 import com.salatart.memeticame.Utils.SessionUtils;
 import com.salatart.memeticame.Views.ChatsAdapter;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-
-import java.io.IOException;
 import java.util.ArrayList;
 
-import okhttp3.Call;
-import okhttp3.Callback;
 import okhttp3.Request;
-import okhttp3.Response;
 
 public class ChatsFragment extends Fragment {
 
     private ArrayList<Chat> mChats;
     private ChatsAdapter mAdapter;
+
     private ListView mChatsListView;
+    private com.wang.avi.AVLoadingIndicatorView mLoading;
 
     private OnChatSelected mChatSelectedListener;
 
@@ -60,6 +55,10 @@ public class ChatsFragment extends Fragment {
     private BroadcastReceiver mMessageReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
+            if (mChats == null) {
+                return;
+            }
+
             Message newMessage = intent.getParcelableExtra(Message.PARCELABLE_KEY);
             for (Chat chat : mChats) {
                 if (chat.getId() == newMessage.getChatId()) {
@@ -131,6 +130,8 @@ public class ChatsFragment extends Fragment {
             }
         });
 
+        mLoading = (com.wang.avi.AVLoadingIndicatorView) view.findViewById(R.id.loading_chats);
+
         return view;
     }
 
@@ -165,29 +166,19 @@ public class ChatsFragment extends Fragment {
 
     public void showChats() {
         Request request = Routes.chatsIndex(getActivity());
-        HttpClient.getInstance().newCall(request).enqueue(new Callback() {
+        ChatUtils.indexRequest(getActivity(), request, mLoading, new OnRequestIndexListener<Chat>() {
             @Override
-            public void onFailure(Call call, IOException e) {
-                Log.e("ERROR", e.toString());
-            }
-
-            @Override
-            public void onResponse(Call call, final Response response) throws IOException {
-                try {
-                    mChats = ParserUtils.chatsFromJsonArray(new JSONArray(response.body().string()));
-                    mAdapter = new ChatsAdapter(getContext(), R.layout.list_item_contact, mChats);
-                    getActivity().runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            mChatsListView.setAdapter(mAdapter);
-                        }
-                    });
-                    MessageCount.moveOrUpdateAll(mChats);
-                } catch (JSONException e) {
-                    Log.e("ERROR", e.toString());
-                } finally {
-                    response.body().close();
-                }
+            public void OnSuccess(ArrayList<Chat> chats) {
+                mChats = chats;
+                mAdapter = new ChatsAdapter(getContext(), R.layout.list_item_contact, mChats);
+                getActivity().runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        mChatsListView.setAdapter(mAdapter);
+                        mLoading.hide();
+                    }
+                });
+                MessageCount.moveOrUpdateAll(mChats);
             }
         });
     }
@@ -204,27 +195,17 @@ public class ChatsFragment extends Fragment {
                 .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int whichButton) {
                         Request request = Routes.chatLeave(getActivity(), chat.getId());
-                        HttpClient.getInstance().newCall(request).enqueue(new Callback() {
+                        ChatUtils.leaveRequest(getActivity(), request, new OnRequestListener() {
                             @Override
-                            public void onFailure(Call call, IOException e) {
-                                Log.e("ERROR", e.toString());
-                            }
-
-                            @Override
-                            public void onResponse(Call call, final Response response) throws IOException {
+                            public void OnSuccess() {
                                 getActivity().runOnUiThread(new Runnable() {
                                     @Override
                                     public void run() {
-                                        if (response.isSuccessful()) {
-                                            mChats.remove(chat);
-                                            mAdapter.notifyDataSetChanged();
-                                            Toast.makeText(getActivity(), "You have left the chat", Toast.LENGTH_SHORT).show();
-                                        } else {
-                                            Toast.makeText(getActivity(), HttpClient.parseErrorMessage(response), Toast.LENGTH_SHORT).show();
-                                        }
+                                        mChats.remove(chat);
+                                        mAdapter.notifyDataSetChanged();
+                                        Toast.makeText(getActivity(), "You have left the chat", Toast.LENGTH_SHORT).show();
                                     }
                                 });
-                                response.body().close();
                             }
                         });
                     }

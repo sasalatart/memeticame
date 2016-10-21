@@ -34,6 +34,7 @@ import okhttp3.Request;
 public class AddParticipantsActivity extends AppCompatActivity {
 
     @BindView(R.id.list_view_users_to_add) ListView mUsersListView;
+    @BindView(R.id.loading_participants) com.wang.avi.AVLoadingIndicatorView mLoading;
 
     private ArrayList<User> mUsers = new ArrayList<>();
     private ArrayList<User> mSelectedUsers = new ArrayList<>();
@@ -141,8 +142,18 @@ public class AddParticipantsActivity extends AppCompatActivity {
                 for (ChatInvitation chatInvitation : chatInvitations) {
                     mInvitedUsers.add(chatInvitation.getUser());
                 }
-
                 setAdapter();
+            }
+        });
+    }
+
+    public void setParticipants() {
+        mLoading.show();
+        ContactsUtils.retrieveContacts(AddParticipantsActivity.this, new OnContactsReadListener() {
+            @Override
+            public void OnRead(ArrayList<User> intersectedContacts, ArrayList<User> localContacts) {
+                mUsers = User.difference(intersectedContacts, mChat.getParticipants());
+                getInvitations();
             }
         });
     }
@@ -155,16 +166,6 @@ public class AddParticipantsActivity extends AppCompatActivity {
 
         Request request = Routes.inviteUsers(AddParticipantsActivity.this, mChat, mSelectedUsers);
         ChatInvitationsUtils.addParticipantsRequest(AddParticipantsActivity.this, request, mChat, submitButton);
-    }
-
-    public void setParticipants() {
-        ContactsUtils.retrieveContacts(AddParticipantsActivity.this, new OnContactsReadListener() {
-            @Override
-            public void OnRead(ArrayList<User> intersectedContacts, ArrayList<User> localContacts) {
-                mUsers = User.difference(intersectedContacts, mChat.getParticipants());
-                getInvitations();
-            }
-        });
     }
 
     public void setAdapter() {
@@ -184,6 +185,7 @@ public class AddParticipantsActivity extends AppCompatActivity {
                         mAdapter.notifyDataSetChanged();
                     }
                 });
+                mLoading.hide();
             }
         });
     }

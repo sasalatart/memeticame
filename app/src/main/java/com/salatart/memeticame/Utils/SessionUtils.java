@@ -80,13 +80,13 @@ public class SessionUtils {
         });
     }
 
-    public static void login(final Activity activity, final String phoneNumber, String password, final View submitButton) {
+    public static void login(final Activity activity, Request request, final String phoneNumber, final View submitButton, final com.wang.avi.AVLoadingIndicatorView loadingLogin) {
         submitButton.setEnabled(false);
-        Request request = Routes.login(phoneNumber, password);
+        loadingLogin.show();
         HttpClient.getInstance().newCall(request).enqueue(new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
-                Log.e("ERROR", "Failed to login");
+                HttpClient.onUnsuccessfulSubmitWithSpinner(activity, "Failed to login", submitButton, loadingLogin);
             }
 
             @Override
@@ -104,10 +104,10 @@ public class SessionUtils {
                         activity.startActivity(new Intent(activity, MainActivity.class));
                         activity.finish();
                     } catch (JSONException e) {
-                        HttpClient.onUnsuccessfulSubmit(activity, "Error", submitButton);
+                        HttpClient.onUnsuccessfulSubmitWithSpinner(activity, "Error", submitButton, loadingLogin);
                     }
                 } else {
-                    HttpClient.onUnsuccessfulSubmit(activity, "Invalid credentials", submitButton);
+                    HttpClient.onUnsuccessfulSubmitWithSpinner(activity, HttpClient.parseErrorMessage(response), submitButton, loadingLogin);
                 }
                 response.body().close();
             }

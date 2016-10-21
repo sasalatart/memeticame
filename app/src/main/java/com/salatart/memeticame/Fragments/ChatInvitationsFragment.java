@@ -6,32 +6,23 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ListView;
-import android.widget.Toast;
 
+import com.salatart.memeticame.Listeners.OnRequestIndexListener;
 import com.salatart.memeticame.Models.ChatInvitation;
 import com.salatart.memeticame.R;
+import com.salatart.memeticame.Utils.ChatInvitationsUtils;
 import com.salatart.memeticame.Utils.FilterUtils;
-import com.salatart.memeticame.Utils.HttpClient;
-import com.salatart.memeticame.Utils.ParserUtils;
 import com.salatart.memeticame.Utils.Routes;
 import com.salatart.memeticame.Utils.SessionUtils;
 import com.salatart.memeticame.Views.ChatInvitationsAdapter;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-
-import java.io.IOException;
 import java.util.ArrayList;
 
-import okhttp3.Call;
-import okhttp3.Callback;
 import okhttp3.Request;
-import okhttp3.Response;
 
 /**
  * Created by sasalatart on 10/15/16.
@@ -41,7 +32,9 @@ public class ChatInvitationsFragment extends Fragment {
 
     private ArrayList<ChatInvitation> mChatInvitations;
     private ChatInvitationsAdapter mAdapter;
+
     private ListView mChatInvitationsListView;
+    private com.wang.avi.AVLoadingIndicatorView mLoading;
 
     private BroadcastReceiver mChatInvitationsReceiver = new BroadcastReceiver() {
         @Override
@@ -76,6 +69,8 @@ public class ChatInvitationsFragment extends Fragment {
 
         mChatInvitationsListView = (ListView) view.findViewById(R.id.list_view_chat_invitations);
 
+        mLoading = (com.wang.avi.AVLoadingIndicatorView) view.findViewById(R.id.loading_chat_invitations);
+
         setChatInvitations();
 
         return view;
@@ -96,33 +91,20 @@ public class ChatInvitationsFragment extends Fragment {
     }
 
     public void setChatInvitations() {
+        mLoading.show();
         Request request = Routes.chatInvitationsIndex(getActivity());
-        HttpClient.getInstance().newCall(request).enqueue(new Callback() {
+        ChatInvitationsUtils.indexRequest(getActivity(), request, new OnRequestIndexListener<ChatInvitation>() {
             @Override
-            public void onFailure(Call call, IOException e) {
-                Log.e("ERROR", e.toString());
-            }
-
-            @Override
-            public void onResponse(Call call, Response response) throws IOException {
-                if (response.isSuccessful()) {
-                    try {
-                        mChatInvitations = ParserUtils.chatInvitationsFromJsonArray(new JSONArray(response.body().string()));
-                        mAdapter = new ChatInvitationsAdapter(getContext(), R.layout.list_item_chat_invitation, mChatInvitations);
-                        getActivity().runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                mChatInvitationsListView.setAdapter(mAdapter);
-                            }
-                        });
-                    } catch (JSONException e) {
-                        Log.e("ERROR", e.toString());
+            public void OnSuccess(ArrayList<ChatInvitation> chatInvitations) {
+                mChatInvitations = chatInvitations;
+                mAdapter = new ChatInvitationsAdapter(getContext(), R.layout.list_item_chat_invitation, mChatInvitations);
+                getActivity().runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        mChatInvitationsListView.setAdapter(mAdapter);
+                        mLoading.hide();
                     }
-                } else {
-                    Toast.makeText(getActivity(), HttpClient.parseErrorMessage(response), Toast.LENGTH_SHORT).show();
-                }
-
-                response.body().close();
+                });
             }
         });
     }

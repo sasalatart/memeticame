@@ -30,6 +30,7 @@ public class NewChatGroupActivity extends AppCompatActivity {
 
     @BindView(R.id.group_name_input) EditText mGroupNameInput;
     @BindView(R.id.contacts_list_view) ListView mContactsListView;
+    @BindView(R.id.loading_contacts) com.wang.avi.AVLoadingIndicatorView mLoading;
 
     private ArrayList<User> mContacts = new ArrayList<>();
     private ArrayList<User> mSelectedContacts = new ArrayList<>();
@@ -84,6 +85,7 @@ public class NewChatGroupActivity extends AppCompatActivity {
             }
         });
 
+        mLoading.show();
         ContactsUtils.retrieveContacts(NewChatGroupActivity.this, new OnContactsReadListener() {
             @Override
             public void OnRead(ArrayList<User> intersectedContacts, ArrayList<User> localContacts) {
@@ -98,6 +100,7 @@ public class NewChatGroupActivity extends AppCompatActivity {
         NewChatGroupActivity.this.runOnUiThread(new Runnable() {
             public void run() {
                 mContactsListView.setAdapter(mAdapter);
+                mLoading.hide();
             }
         });
     }

@@ -29,6 +29,7 @@ import okhttp3.Request;
 
 public class NewChatActivity extends AppCompatActivity {
     @BindView(R.id.input_chat_name) EditText mChatNameInput;
+    @BindView(R.id.label_existing_chats) TextView mLabelExistingChats;
 
     private User mUser;
 
@@ -48,7 +49,6 @@ public class NewChatActivity extends AppCompatActivity {
         mUser = data.getParcelable(User.PARCELABLE_KEY);
         final ArrayList<Chat> currentChats = data.getParcelableArrayList(Chat.PARCELABLE_ARRAY_KEY);
 
-        mChatNameInput.setText("Chat with " + mUser.getName(), TextView.BufferType.EDITABLE);
         setCurrentChats(currentChats);
     }
 
@@ -89,6 +89,8 @@ public class NewChatActivity extends AppCompatActivity {
                     startActivity(ChatActivity.getIntent(getApplicationContext(), currentChats.get(position)));
                 }
             });
+        } else {
+            mLabelExistingChats.setVisibility(View.GONE);
         }
     }
 }
