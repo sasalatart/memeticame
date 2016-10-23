@@ -26,7 +26,7 @@ public class UserUtils {
         HttpClient.getInstance().newCall(request).enqueue(new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
-                HttpClient.onUnsuccessfulSubmitWithSpinner(activity, "Failed to signup", submitButton, loadingSignup);
+                CallbackUtils.onUnsuccessfulSubmitWithSpinner(activity, "Failed to signup", submitButton, loadingSignup);
             }
 
             @Override
@@ -45,10 +45,10 @@ public class UserUtils {
                         activity.startActivity(new Intent(activity, MainActivity.class));
                         activity.finish();
                     } catch (Exception e) {
-                        HttpClient.onUnsuccessfulSubmitWithSpinner(activity, "Error", submitButton, loadingSignup);
+                        CallbackUtils.onUnsuccessfulSubmitWithSpinner(activity, "Error", submitButton, loadingSignup);
                     }
                 } else {
-                    HttpClient.onUnsuccessfulSubmitWithSpinner(activity, HttpClient.parseErrorMessage(response), submitButton, loadingSignup);
+                    CallbackUtils.onUnsuccessfulSubmitWithSpinner(activity, HttpClient.parseErrorMessage(response), submitButton, loadingSignup);
                 }
                 response.body().close();
             }

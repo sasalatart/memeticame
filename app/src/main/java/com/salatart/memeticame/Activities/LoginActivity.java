@@ -59,6 +59,6 @@ public class LoginActivity extends AppCompatActivity {
     public void login(final View view) {
         com.wang.avi.AVLoadingIndicatorView loadingLogin = (com.wang.avi.AVLoadingIndicatorView) findViewById(R.id.loading_login);
         Request request = Routes.login(mLoginForm.getPhoneNumber(), mLoginForm.getPassword());
-        SessionUtils.login(LoginActivity.this, request, mLoginForm.getPassword(), view, loadingLogin);
+        SessionUtils.login(LoginActivity.this, request, mLoginForm.getPhoneNumber(), view, loadingLogin);
     }
 }

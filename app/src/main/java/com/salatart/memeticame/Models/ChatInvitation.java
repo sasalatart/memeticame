@@ -25,6 +25,7 @@ public class ChatInvitation implements Parcelable {
 
     public static String PARCELABLE_KEY = "com.salatart.memeticamea.Models.ChatInvitation";
     public static String PARCELABLE_KEY_ARRAY_LIST = "com.salatart.memeticamea.Models.ChatInvitationList";
+    public static String NOTIFICATION_CLICKED = "chatInvitationNotificationClicked";
 
     private final int mId;
     private final int mChatId;

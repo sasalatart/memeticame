@@ -29,7 +29,7 @@ public class ChatUtils {
         HttpClient.getInstance().newCall(request).enqueue(new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
-                HttpClient.onUnsuccessfulRequestWithSpinner(activity, "Error", loadingIndex);
+                CallbackUtils.onUnsuccessfulRequestWithSpinner(activity, "Error", loadingIndex);
             }
 
             @Override
@@ -45,10 +45,10 @@ public class ChatUtils {
                             }
                         });
                     } catch (JSONException e) {
-                        HttpClient.onUnsuccessfulRequestWithSpinner(activity, "Error", loadingIndex);
+                        CallbackUtils.onUnsuccessfulRequestWithSpinner(activity, "Error", loadingIndex);
                     }
                 } else {
-                    HttpClient.onUnsuccessfulRequestWithSpinner(activity, HttpClient.parseErrorMessage(response), loadingIndex);
+                    CallbackUtils.onUnsuccessfulRequestWithSpinner(activity, HttpClient.parseErrorMessage(response), loadingIndex);
                 }
             }
         });
@@ -59,7 +59,7 @@ public class ChatUtils {
         HttpClient.getInstance().newCall(request).enqueue(new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
-                HttpClient.onUnsuccessfulRequest(activity, "Error");
+                CallbackUtils.onUnsuccessfulRequest(activity, "Error");
             }
 
             @Override
@@ -68,10 +68,10 @@ public class ChatUtils {
                     try {
                         listener.OnSuccess(ParserUtils.chatFromJson(new JSONObject(response.body().string())));
                     } catch (JSONException e) {
-                        HttpClient.onUnsuccessfulRequest(activity, "Error");
+                        CallbackUtils.onUnsuccessfulRequest(activity, "Error");
                     }
                 } else {
-                    HttpClient.onUnsuccessfulRequest(activity, "Could not retrieve chat");
+                    CallbackUtils.onUnsuccessfulRequest(activity, "Could not retrieve chat");
                 }
                 response.body().close();
             }
@@ -83,7 +83,7 @@ public class ChatUtils {
         HttpClient.getInstance().newCall(request).enqueue(new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
-                HttpClient.onUnsuccessfulSubmit(activity, "Error", submitButton);
+                CallbackUtils.onUnsuccessfulSubmit(activity, "Error", submitButton);
             }
 
             @Override
@@ -94,10 +94,10 @@ public class ChatUtils {
                         activity.startActivity(ChatActivity.getIntent(activity, ParserUtils.chatFromJson(jsonChat)));
                         activity.finish();
                     } catch (JSONException e) {
-                        HttpClient.onUnsuccessfulSubmit(activity, "Error", submitButton);
+                        CallbackUtils.onUnsuccessfulSubmit(activity, "Error", submitButton);
                     }
                 } else {
-                    HttpClient.onUnsuccessfulSubmit(activity, HttpClient.parseErrorMessage(response), submitButton);
+                    CallbackUtils.onUnsuccessfulSubmit(activity, HttpClient.parseErrorMessage(response), submitButton);
                 }
                 response.body().close();
             }
@@ -108,7 +108,7 @@ public class ChatUtils {
         HttpClient.getInstance().newCall(request).enqueue(new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
-                HttpClient.onUnsuccessfulRequest(activity, "Error");
+                CallbackUtils.onUnsuccessfulRequest(activity, "Error");
             }
 
             @Override
@@ -116,7 +116,7 @@ public class ChatUtils {
                 if (response.isSuccessful()) {
                     listener.OnSuccess();
                 } else {
-                    HttpClient.onUnsuccessfulRequest(activity, HttpClient.parseErrorMessage(response));
+                    CallbackUtils.onUnsuccessfulRequest(activity, HttpClient.parseErrorMessage(response));
                 }
                 response.body().close();
             }

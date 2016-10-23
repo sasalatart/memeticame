@@ -59,7 +59,11 @@
         <activity android:name=".Activities.AddParticipantsActivity" />
         <activity android:name=".Activities.NewMemeaudioActivity" />
         <activity android:name=".Activities.GalleryActivity" />
-        <activity android:name=".Activities.MemeaudioActivity"></activity>
+        <activity android:name=".Activities.MemeaudioActivity" />
+
+        <service
+            android:name=".Services.ChatInvitationService"
+            android:exported="false"></service>
     </application>
 
 </manifest>

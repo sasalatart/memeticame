@@ -14,6 +14,7 @@ import com.salatart.memeticame.Fragments.ChatInvitationsFragment;
 import com.salatart.memeticame.Fragments.ChatsFragment;
 import com.salatart.memeticame.Fragments.ContactsFragment;
 import com.salatart.memeticame.Models.Chat;
+import com.salatart.memeticame.Models.ChatInvitation;
 import com.salatart.memeticame.Models.User;
 import com.salatart.memeticame.R;
 import com.salatart.memeticame.Utils.SessionUtils;
@@ -37,7 +38,8 @@ public class MainActivity extends AppCompatActivity implements ChatsFragment.OnC
 
         Realm.init(this);
 
-        setupViewPager();
+        Bundle data = getIntent().getExtras();
+        setupViewPager(data);
     }
 
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -72,7 +74,7 @@ public class MainActivity extends AppCompatActivity implements ChatsFragment.OnC
         }
     }
 
-    private void setupViewPager() {
+    private void setupViewPager(Bundle data) {
         ViewPager viewPager = (ViewPager) findViewById(R.id.viewpager);
 
         this.mChatsFragment = new ChatsFragment();
@@ -89,6 +91,10 @@ public class MainActivity extends AppCompatActivity implements ChatsFragment.OnC
 
         TabLayout tabLayout = (TabLayout) findViewById(R.id.tabs);
         tabLayout.setupWithViewPager(viewPager);
+
+        if (data != null && data.containsKey(ChatInvitation.NOTIFICATION_CLICKED)) {
+            viewPager.setCurrentItem(2);
+        }
     }
 
     @Override

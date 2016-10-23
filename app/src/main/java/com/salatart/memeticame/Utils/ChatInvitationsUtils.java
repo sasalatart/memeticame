@@ -1,6 +1,7 @@
 package com.salatart.memeticame.Utils;
 
 import android.app.Activity;
+import android.util.Log;
 import android.view.View;
 
 import com.salatart.memeticame.Activities.ChatActivity;
@@ -27,7 +28,7 @@ public class ChatInvitationsUtils {
         HttpClient.getInstance().newCall(request).enqueue(new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
-                HttpClient.onUnsuccessfulRequest(activity, "Error");
+                CallbackUtils.onUnsuccessfulRequest(activity, "Error");
             }
 
             @Override
@@ -41,10 +42,10 @@ public class ChatInvitationsUtils {
                     try {
                         listener.OnSuccess(ParserUtils.chatInvitationsFromJsonArray(new JSONArray(response.body().string())));
                     } catch (JSONException e) {
-                        HttpClient.onUnsuccessfulRequest(activity, "Error");
+                        CallbackUtils.onUnsuccessfulRequest(activity, "Error");
                     }
                 } else {
-                    HttpClient.onUnsuccessfulRequest(activity, HttpClient.parseErrorMessage(response));
+                    CallbackUtils.onUnsuccessfulRequest(activity, HttpClient.parseErrorMessage(response));
                 }
 
                 response.body().close();
@@ -57,7 +58,7 @@ public class ChatInvitationsUtils {
         HttpClient.getInstance().newCall(request).enqueue(new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
-                HttpClient.onUnsuccessfulSubmit(activity, "Error", submitButton);
+                CallbackUtils.onUnsuccessfulSubmit(activity, "Error", submitButton);
             }
 
             @Override
@@ -71,9 +72,28 @@ public class ChatInvitationsUtils {
                     activity.startActivity(ChatActivity.getIntent(activity, chat));
                     activity.finish();
                 } else {
-                    HttpClient.onUnsuccessfulSubmit(activity, HttpClient.parseErrorMessage(response), submitButton);
+                    CallbackUtils.onUnsuccessfulSubmit(activity, HttpClient.parseErrorMessage(response), submitButton);
                 }
 
+                response.body().close();
+            }
+        });
+    }
+
+    public static void acceptOrRejectRequest(Request request) {
+        HttpClient.getInstance().newCall(request).enqueue(new Callback() {
+            @Override
+            public void onFailure(Call call, IOException e) {
+                Log.e("ERROR", e.toString());
+            }
+
+            @Override
+            public void onResponse(Call call, Response response) throws IOException {
+                if (response.isSuccessful()) {
+                    Log.i("INFO", "ChatInvitation was successfuly updated");
+                } else {
+                    Log.e("ERROR", HttpClient.parseErrorMessage(response));
+                }
                 response.body().close();
             }
         });

@@ -86,7 +86,7 @@ public class SessionUtils {
         HttpClient.getInstance().newCall(request).enqueue(new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
-                HttpClient.onUnsuccessfulSubmitWithSpinner(activity, "Failed to login", submitButton, loadingLogin);
+                CallbackUtils.onUnsuccessfulSubmitWithSpinner(activity, "Failed to login", submitButton, loadingLogin);
             }
 
             @Override
@@ -104,10 +104,10 @@ public class SessionUtils {
                         activity.startActivity(new Intent(activity, MainActivity.class));
                         activity.finish();
                     } catch (JSONException e) {
-                        HttpClient.onUnsuccessfulSubmitWithSpinner(activity, "Error", submitButton, loadingLogin);
+                        CallbackUtils.onUnsuccessfulSubmitWithSpinner(activity, "Error", submitButton, loadingLogin);
                     }
                 } else {
-                    HttpClient.onUnsuccessfulSubmitWithSpinner(activity, HttpClient.parseErrorMessage(response), submitButton, loadingLogin);
+                    CallbackUtils.onUnsuccessfulSubmitWithSpinner(activity, HttpClient.parseErrorMessage(response), submitButton, loadingLogin);
                 }
                 response.body().close();
             }

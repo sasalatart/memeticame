@@ -32,7 +32,7 @@ public class ChatsAdapter extends ArrayAdapter<Chat> {
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
         View view = convertView;
-        Chat chat = mChats.get(position);
+        Chat chat = getItem(position);
 
         if (view == null) {
             view = mLayoutInflater.inflate(R.layout.list_item_chat, parent, false);

@@ -1,14 +1,17 @@
 package com.salatart.memeticame.Services;
 
 import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.support.v4.app.NotificationCompat;
+import android.support.v4.app.TaskStackBuilder;
 import android.util.Log;
 
 import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
 import com.salatart.memeticame.Activities.ChatActivity;
+import com.salatart.memeticame.Activities.MainActivity;
 import com.salatart.memeticame.Models.Chat;
 import com.salatart.memeticame.Models.ChatInvitation;
 import com.salatart.memeticame.Models.Message;
@@ -71,8 +74,9 @@ public class MyFcmListenerService extends FirebaseMessagingService {
                 NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(this)
                         .setSmallIcon(R.drawable.ic_textsms_black_24dp)
                         .setContentTitle("Memeticame New Message")
-                        .setContentText(message.getContent());
-                notificationManager.notify(1, mBuilder.build());
+                        .setContentText(message.getContent())
+                        .setAutoCancel(true);
+                notificationManager.notify(message.getId(), mBuilder.build());
             }
         } catch (JSONException e) {
             Log.e("ERROR", e.toString());
@@ -114,6 +118,7 @@ public class MyFcmListenerService extends FirebaseMessagingService {
         Intent intent = new Intent(FilterUtils.CHAT_INVITATION_ACCEPTED_FILTER);
         try {
             intent.putExtra(ChatInvitation.PARCELABLE_KEY, ParserUtils.chatInvitationFromJson(new JSONObject(data.get("chat_invitation").toString())));
+            intent.putExtra(Chat.PARCELABLE_KEY, ParserUtils.chatFromJson(new JSONObject(data.get("chat").toString())));
             getApplicationContext().sendBroadcast(intent);
         } catch (JSONException e) {
             Log.e("ERROR", e.toString());
@@ -124,6 +129,7 @@ public class MyFcmListenerService extends FirebaseMessagingService {
         Intent intent = new Intent(FilterUtils.CHAT_INVITATION_REJECTED_FILTER);
         try {
             intent.putExtra(ChatInvitation.PARCELABLE_KEY, ParserUtils.chatInvitationFromJson(new JSONObject(data.get("chat_invitation").toString())));
+            intent.putExtra(Chat.PARCELABLE_KEY, ParserUtils.chatFromJson(new JSONObject(data.get("chat").toString())));
             getApplicationContext().sendBroadcast(intent);
         } catch (JSONException e) {
             Log.e("ERROR", e.toString());
@@ -140,12 +146,32 @@ public class MyFcmListenerService extends FirebaseMessagingService {
             String myPhoneNumber = SessionUtils.getPhoneNumber(getApplicationContext());
             for (ChatInvitation chatInvitation : chatInvitations) {
                 if (User.comparePhones(chatInvitation.getUser().getPhoneNumber(), myPhoneNumber)) {
+                    Intent acceptIntent = ChatInvitationService.getActionAcceptOrReject(getApplicationContext(), chatInvitation, true);
+                    Intent rejectIntent = ChatInvitationService.getActionAcceptOrReject(getApplicationContext(), chatInvitation, false);
+
+                    final PendingIntent acceptPendingIntent = PendingIntent.getService(this, chatInvitation.getId(), acceptIntent, PendingIntent.FLAG_ONE_SHOT);
+                    final PendingIntent rejectPendingIntent = PendingIntent.getService(this, chatInvitation.getId() * (-1), rejectIntent, PendingIntent.FLAG_ONE_SHOT);
+
                     NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
                     NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(this)
                             .setSmallIcon(R.drawable.ic_card_membership_black_24dp)
                             .setContentTitle("Memeticame New Chat Invitation")
-                            .setContentText(chatInvitations.get(0).getChatTitle());
-                    notificationManager.notify(1, mBuilder.build());
+                            .setContentText(chatInvitations.get(0).getChatTitle())
+                            .addAction(new NotificationCompat.Action(R.drawable.ic_check_black_24dp, "ACCEPT", acceptPendingIntent))
+                            .addAction(new NotificationCompat.Action(R.drawable.ic_delete_black_24dp, "REJECT", rejectPendingIntent))
+                            .setAutoCancel(true);
+
+                    Intent resultIntent = new Intent(this, MainActivity.class);
+                    resultIntent.putExtra(ChatInvitation.NOTIFICATION_CLICKED, true);
+
+                    TaskStackBuilder stackBuilder = TaskStackBuilder.create(this);
+                    stackBuilder.addParentStack(MainActivity.class);
+                    stackBuilder.addNextIntent(resultIntent);
+
+                    PendingIntent resultPendingIntent = stackBuilder.getPendingIntent(chatInvitation.getId(), PendingIntent.FLAG_UPDATE_CURRENT);
+                    mBuilder.setContentIntent(resultPendingIntent);
+
+                    notificationManager.notify(chatInvitation.getId(), mBuilder.build());
                     break;
                 }
             }

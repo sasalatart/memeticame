@@ -94,7 +94,6 @@ public class ChatsFragment extends Fragment {
         public void onReceive(Context context, Intent intent) {
             ChatInvitation chatInvitation = intent.getParcelableExtra(ChatInvitation.PARCELABLE_KEY);
             Chat chat = intent.getParcelableExtra(Chat.PARCELABLE_KEY);
-
             if (User.comparePhones(SessionUtils.getPhoneNumber(getContext()), chatInvitation.getUser().getPhoneNumber())) {
                 mChats.add(chat);
                 mAdapter.notifyDataSetChanged();
