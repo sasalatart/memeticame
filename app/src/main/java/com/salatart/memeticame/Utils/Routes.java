@@ -25,7 +25,7 @@ import okhttp3.RequestBody;
  * Created by sasalatart on 8/27/16.
  */
 public class Routes {
-    static String DOMAIN = "https://memeticame.salatart.com";
+    public static String DOMAIN = "https://memeticame.salatart.com";
     // static String DOMAIN = "http://10.0.2.2:3000";
     private static MediaType JSON = MediaType.parse("application/json; charset=utf-8");
 
@@ -207,6 +207,14 @@ public class Routes {
     public static Request logout(Context context) {
         return new Request.Builder()
                 .url(DOMAIN + "/logout")
+                .addHeader("content-type", "application/json")
+                .addHeader("authorization", "Token token=" + SessionUtils.getToken(context))
+                .build();
+    }
+
+    public static Request plainMemesIndex(Context context) {
+        return new Request.Builder()
+                .url(DOMAIN + "/plain_memes")
                 .addHeader("content-type", "application/json")
                 .addHeader("authorization", "Token token=" + SessionUtils.getToken(context))
                 .build();
