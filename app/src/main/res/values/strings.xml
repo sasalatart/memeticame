@@ -39,4 +39,7 @@
     <string name="open">open</string>
     <string name="last_message">last message</string>
     <string name="select_contacts_to_add">Select contacts to add</string>
+    <string name="send_memeaudio">Send memeaudio</string>
+    <string name="send_memetext">Send memetext</string>
+    <string name="create_memetext">Create memetext</string>
 </resources>

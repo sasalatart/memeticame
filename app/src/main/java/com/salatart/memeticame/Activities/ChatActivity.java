@@ -77,6 +77,7 @@ public class ChatActivity extends AppCompatActivity {
     @BindView(R.id.button_cancel_attachment) ImageButton mCancelButton;
     @BindView(R.id.take_audio) ImageButton mRecordButton;
     @BindView(R.id.list_view_messages) ListView mMessagesListView;
+    @BindView(R.id.meme_options) ImageButton mMemeOptionsButton;
 
     private boolean mPermissionToRecordAudio = false;
     private boolean mPermissionToUseCamera = false;
@@ -182,6 +183,7 @@ public class ChatActivity extends AppCompatActivity {
         mAudioRecorderManager = new AudioRecorderManager();
         mCurrentlyRecording = false;
         registerForContextMenu(mMessageInput);
+        registerForContextMenu(mMemeOptionsButton);
 
         setAdapter();
     }
@@ -366,7 +368,7 @@ public class ChatActivity extends AppCompatActivity {
         startActivityForResult(FileUtils.getSelectFileIntent("*/*"), FilterUtils.REQUEST_PICK_FILE);
     }
 
-    public void dispatchTakeMemeaudioIntent(View view) {
+    public void dispatchTakeMemeaudioIntent() {
         Intent takeMemeaudioIntent = new Intent(ChatActivity.this, NewMemeaudioActivity.class);
         startActivityForResult(takeMemeaudioIntent, FilterUtils.REQUEST_MEMEAUDIO_FILE);
     }
@@ -423,6 +425,10 @@ public class ChatActivity extends AppCompatActivity {
         mMessagesListView.setAdapter(mAdapter);
     }
 
+    public void showMemeOptionsMenu(View view){
+        openContextMenu(view);
+    }
+
     @Override
     public void onCreateContextMenu(ContextMenu menu, View view, ContextMenu.ContextMenuInfo menuInfo) {
         menu.setHeaderIcon(R.drawable.ic_textsms_black_24dp);
@@ -431,6 +437,11 @@ public class ChatActivity extends AppCompatActivity {
         if (view.getId() == R.id.input_message) {
             menu.add(Menu.NONE, 0, 0, "Paste");
             menu.add(Menu.NONE, 1, 1, "Cancel");
+        }
+        else if(view.getId() == R.id.meme_options){
+            menu.add(Menu.NONE, 2, 0, "Send memeaudio");
+            menu.add(Menu.NONE, 3, 1, "Send memetext");
+            menu.add(Menu.NONE, 4, 2, "Create memetext");
         }
     }
 
@@ -451,6 +462,18 @@ public class ChatActivity extends AppCompatActivity {
                 mCurrentAttachment = ParserUtils.attachmentFromUri(ChatActivity.this, Uri.parse(messageData[1]));
                 toggleAttachmentVisibilities(true);
             }
+        }
+        else if(menuItemId == 2) {
+            dispatchTakeMemeaudioIntent();
+        }
+        else if(menuItemId == 3){
+            //TODO send memetext
+        }
+        else if(menuItemId == 4){
+
+            Intent createMemetextIntent = new Intent(ChatActivity.this, NewMemetextActivity.class);
+            startActivity(createMemetextIntent);
+
         }
 
         return true;
