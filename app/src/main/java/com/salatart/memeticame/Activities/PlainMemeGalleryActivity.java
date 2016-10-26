@@ -24,7 +24,7 @@ public class PlainMemeGalleryActivity extends AppCompatActivity {
     @BindView(R.id.grid_view_plain_memes) GridView mGridView;
     @BindView(R.id.loading_memes) com.wang.avi.AVLoadingIndicatorView mLoading;
 
-    private ArrayList<String> mPlainMemes;
+    private ArrayList<String[]> mPlainMemes;
     private MemeGalleryAdapter mAdapter;
 
     @Override
@@ -50,9 +50,9 @@ public class PlainMemeGalleryActivity extends AppCompatActivity {
 
     public void setAdapter() {
         Request request = Routes.plainMemesIndex(PlainMemeGalleryActivity.this);
-        PlainMemeUtils.indexRequest(PlainMemeGalleryActivity.this, request, mLoading, new OnRequestIndexListener<String>() {
+        PlainMemeUtils.indexRequest(PlainMemeGalleryActivity.this, request, mLoading, new OnRequestIndexListener<String[]>() {
             @Override
-            public void OnSuccess(final ArrayList<String> plainMemes) {
+            public void OnSuccess(final ArrayList<String[]> plainMemes) {
                 PlainMemeGalleryActivity.this.runOnUiThread(new Runnable() {
                     @Override
                     public void run() {

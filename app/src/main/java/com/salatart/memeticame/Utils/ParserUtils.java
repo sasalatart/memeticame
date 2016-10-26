@@ -131,13 +131,16 @@ public class ParserUtils {
         return chatInvitations;
     }
 
-    public static ArrayList<String> stringsFromJsonArray(JSONArray jsonArray) throws JSONException {
-        ArrayList<String> strings = new ArrayList<>();
+    public static ArrayList<String[]> memesFromJsonArray(JSONArray jsonArray) throws JSONException {
+        ArrayList<String[]> memes = new ArrayList<>();
 
         for (int i = 0; i < jsonArray.length(); i++) {
-            strings.add(jsonArray.get(i).toString());
+            JSONObject jsonObject = jsonArray.getJSONObject(i);
+            String thumbMeme = jsonObject.getString("thumb");
+            String originalMeme = jsonObject.getString("original");
+            memes.add(new String[]{thumbMeme, originalMeme});
         }
 
-        return strings;
+        return memes;
     }
 }

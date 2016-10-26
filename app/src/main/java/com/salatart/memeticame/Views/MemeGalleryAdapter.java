@@ -22,9 +22,9 @@ import static android.content.res.Configuration.ORIENTATION_LANDSCAPE;
 public class MemeGalleryAdapter extends BaseAdapter {
     private Context mContext;
 
-    private ArrayList<String> mUrls;
+    private ArrayList<String[]> mUrls;
 
-    public MemeGalleryAdapter(Context context, ArrayList<String> urls) {
+    public MemeGalleryAdapter(Context context, ArrayList<String[]> urls) {
         mContext = context;
         mUrls = urls;
     }
@@ -60,7 +60,7 @@ public class MemeGalleryAdapter extends BaseAdapter {
             imageView = (ImageView) convertView;
         }
 
-        setImage(imageView, mUrls.get(position));
+        setImage(imageView, mUrls.get(position)[0]);
         return imageView;
     }
 

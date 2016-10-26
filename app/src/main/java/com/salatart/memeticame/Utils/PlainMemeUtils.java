@@ -21,7 +21,7 @@ import okhttp3.Response;
  */
 
 public class PlainMemeUtils {
-    public static void indexRequest(final Activity activity, Request request, final com.wang.avi.AVLoadingIndicatorView loadingSpinner, final OnRequestIndexListener<String> listener) {
+    public static void indexRequest(final Activity activity, Request request, final com.wang.avi.AVLoadingIndicatorView loadingSpinner, final OnRequestIndexListener<String[]> listener) {
         loadingSpinner.show();
         HttpClient.getInstance().newCall(request).enqueue(new Callback() {
             @Override
@@ -34,7 +34,7 @@ public class PlainMemeUtils {
                 if (response.isSuccessful()) {
                     try {
                         JSONObject jsonResponse = new JSONObject(response.body().string());
-                        listener.OnSuccess(ParserUtils.stringsFromJsonArray(new JSONArray(jsonResponse.getString("plain_memes"))));
+                        listener.OnSuccess(ParserUtils.memesFromJsonArray(new JSONArray(jsonResponse.getString("plain_memes"))));
                     } catch (JSONException e) {
                         Log.e("ERROR", e.toString());
                         CallbackUtils.onUnsuccessfulRequestWithSpinner(activity, "Error", loadingSpinner);
