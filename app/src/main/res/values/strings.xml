@@ -34,9 +34,10 @@
     <string name="message_size">message size</string>
     <string name="attachment_size">attachment size</string>
     <string name="mime_type">mime type</string>
-    <string name="see_gallery">See gallery</string>
+    <string name="see_downloads_gallery">See downloads gallery</string>
     <string name="click_to_download">(click to download)</string>
     <string name="open">open</string>
     <string name="last_message">last message</string>
     <string name="select_contacts_to_add">Select contacts to add</string>
+    <string name="see_plain_meme_gallery">See plain meme gallery</string>
 </resources>
