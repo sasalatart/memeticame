@@ -6,30 +6,31 @@ package com.salatart.memeticame.Views;
  * https://github.com/Korilakkuma/CanvasView
  */
 
-import java.io.ByteArrayOutputStream;
-import java.util.List;
-import java.util.ArrayList;
-
 import android.app.Dialog;
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.Bitmap.CompressFormat;
+import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Path;
+import android.graphics.PorterDuff;
+import android.graphics.PorterDuffXfermode;
 import android.graphics.RectF;
 import android.graphics.Typeface;
-import android.graphics.PorterDuffXfermode;
-import android.graphics.PorterDuff;
-import android.graphics.Bitmap;
-import android.graphics.Bitmap.CompressFormat;
-import android.graphics.BitmapFactory;
 import android.util.AttributeSet;
-import android.view.View;
 import android.view.MotionEvent;
+import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 
+import com.salatart.memeticame.Models.Memetext;
 import com.salatart.memeticame.R;
+
+import java.io.ByteArrayOutputStream;
+import java.util.ArrayList;
+import java.util.List;
 // import android.util.Log;
 // import android.widget.Toast;
 
@@ -62,6 +63,7 @@ public class CanvasView extends View {
 
     private List<Path>  pathLists  = new ArrayList<Path>();
     private List<Paint> paintLists = new ArrayList<Paint>();
+    private List<Memetext> memetextLists = new ArrayList<>();
 
     // for Eraser
     private int baseColor = Color.WHITE;
@@ -76,8 +78,8 @@ public class CanvasView extends View {
 
     // for Paint
     private Paint.Style paintStyle = Paint.Style.STROKE;
-    private int paintStrokeColor   = Color.BLACK;
-    private int paintFillColor     = Color.BLACK;
+    private int paintStrokeColor   = Color.WHITE;
+    private int paintFillColor     = Color.WHITE;
     private float paintStrokeWidth = 3F;
     private int opacity            = 255;
     private float blur             = 0F;
@@ -86,7 +88,7 @@ public class CanvasView extends View {
     // for Text
     private String text           = "";
     private Typeface fontFamily   = Typeface.DEFAULT;
-    private float fontSize        = 32F;
+    private float fontSize        = 128F;
     private Paint.Align textAlign = Paint.Align.RIGHT;  // fixed
     private Paint textPaint       = new Paint();
     private float textX           = 0F;
@@ -283,8 +285,20 @@ public class CanvasView extends View {
             canvas.drawText(substring, textX, y, this.textPaint);
         }
 
+    }
 
+    private void drawTextList(Canvas canvas) {
 
+        if(memetextLists.size() == 0)
+            return;
+
+        this.textPaint = this.createPaint();
+
+        for(int i = 0; i < memetextLists.size(); i++){
+
+            Memetext memetext = memetextLists.get(i);
+            canvas.drawText(memetext.getText(), memetext.getPositionX(), memetext.getPositionY(), this.textPaint);
+        }
     }
 
     /**
@@ -317,7 +331,7 @@ public class CanvasView extends View {
             case TEXT   :
                 this.startX = event.getX();
                 this.startY = event.getY();
-//                showDialog();
+                showDialog(this.startX, this.startY);
 
                 break;
             default :
@@ -325,9 +339,8 @@ public class CanvasView extends View {
         }
     }
 
-    public void showDialog(){
+    public void showDialog(final float x, final float y){
 
-        System.out.println("hola");
         final Dialog dialog = new Dialog(context);
         dialog.setContentView(R.layout.dialog_add_text_memetext);
         dialog.setTitle("Set meme text");
@@ -346,7 +359,7 @@ public class CanvasView extends View {
         okButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                setText(text.getText().toString());
+                memetextLists.add(new Memetext(text.getText().toString(), x, y ));
                 text.setText("");
                 dialog.dismiss();
             }
@@ -464,7 +477,10 @@ public class CanvasView extends View {
             canvas.drawPath(path, paint);
         }
 
-        this.drawText(canvas);
+        //this.drawText(canvas);
+
+        this.drawTextList(canvas);
+
 
         this.canvas = canvas;
     }

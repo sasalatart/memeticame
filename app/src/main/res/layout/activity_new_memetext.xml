@@ -10,11 +10,45 @@
     android:paddingTop="@dimen/activity_vertical_margin"
     tools:context="com.salatart.memeticame.Activities.NewMemetextActivity">
 
-    <com.salatart.memeticame.Views.CanvasView
-        android:id="@+id/canvas"
+    <LinearLayout
+        android:id="@+id/memetext_layout"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:onClick="showDialog"
-        android:layout_gravity="center_horizontal" />
+        android:layout_height="wrap_content"
+        android:weightSum="6"
+        android:orientation="vertical">
+
+        <com.salatart.memeticame.Views.CanvasView
+            android:id="@+id/canvas"
+            android:layout_weight="5"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+        <LinearLayout
+            android:id="@+id/options_memetext_image"
+            android:layout_weight="1"
+            android:weightSum="2"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <Button
+                android:id="@+id/get_from_gallery"
+                android:layout_weight="1"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/select_image" />
+
+            <Button
+                android:id="@+id/get_from_camera"
+                android:layout_weight="1"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:onClick="dispatchTakePictureForMemetextIntent"
+                android:text="@string/camera" />
+
+
+        </LinearLayout>
+
+    </LinearLayout>
 
 </RelativeLayout>

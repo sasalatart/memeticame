@@ -42,4 +42,6 @@
     <string name="send_memeaudio">Send memeaudio</string>
     <string name="send_memetext">Send memetext</string>
     <string name="create_memetext">Create memetext</string>
+    <string name="select_image">Select image</string>
+    <string name="camera">Camera</string>
 </resources>
