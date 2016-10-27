@@ -44,4 +44,5 @@
     <string name="create_memetext">Create memetext</string>
     <string name="select_image">Select image</string>
     <string name="camera">Camera</string>
+    <string name="create_meme">Create Meme</string>
 </resources>

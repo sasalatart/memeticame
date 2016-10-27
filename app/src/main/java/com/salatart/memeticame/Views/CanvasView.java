@@ -293,6 +293,7 @@ public class CanvasView extends View {
             return;
 
         this.textPaint = this.createPaint();
+        this.textPaint.setTextAlign(Paint.Align.LEFT);
 
         for(int i = 0; i < memetextLists.size(); i++){
 
@@ -563,6 +564,14 @@ public class CanvasView extends View {
         } else {
             return false;
         }
+    }
+
+    public void undoText() {
+        if(this.memetextLists.size() == 0)
+            return;
+
+        this.memetextLists.remove(this.memetextLists.size() - 1);
+        this.invalidate();
     }
 
     /**

@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/activity_new_memetext"
     android:layout_width="match_parent"
@@ -14,14 +15,33 @@
         android:id="@+id/memetext_layout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:weightSum="6"
+        android:weightSum="8"
         android:orientation="vertical">
 
         <com.salatart.memeticame.Views.CanvasView
             android:id="@+id/canvas"
-            android:layout_weight="5"
+            android:layout_weight="6"
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />
+
+        <LinearLayout
+            android:id="@+id/memetext_draw_menu"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:weightSum="6"
+            android:layout_weight="1"
+            android:orientation="horizontal">
+
+
+        <ImageButton
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:srcCompat="@android:drawable/ic_menu_slideshow"
+            android:id="@+id/undo_text"
+            android:onClick="undoText"
+            android:layout_weight="1" />
+
+        </LinearLayout>
 
         <LinearLayout
             android:id="@+id/options_memetext_image"
