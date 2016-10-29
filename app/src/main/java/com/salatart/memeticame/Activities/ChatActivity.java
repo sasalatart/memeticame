@@ -12,13 +12,13 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.Handler;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.FileProvider;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 import android.view.ContextMenu;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -33,6 +33,7 @@ import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.salatart.memeticame.Listeners.OnRequestShowListener;
+import com.salatart.memeticame.Listeners.OnSendMessageListener;
 import com.salatart.memeticame.Models.Attachment;
 import com.salatart.memeticame.Models.Chat;
 import com.salatart.memeticame.Models.ChatInvitation;
@@ -44,7 +45,6 @@ import com.salatart.memeticame.Utils.AudioRecorderManager;
 import com.salatart.memeticame.Utils.ChatUtils;
 import com.salatart.memeticame.Utils.FileUtils;
 import com.salatart.memeticame.Utils.FilterUtils;
-import com.salatart.memeticame.Utils.HttpClient;
 import com.salatart.memeticame.Utils.MessageUtils;
 import com.salatart.memeticame.Utils.ParserUtils;
 import com.salatart.memeticame.Utils.Routes;
@@ -52,18 +52,11 @@ import com.salatart.memeticame.Utils.SessionUtils;
 import com.salatart.memeticame.Utils.ZipManager;
 import com.salatart.memeticame.Views.MessagesAdapter;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import java.io.File;
-import java.io.IOException;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
-import okhttp3.Call;
-import okhttp3.Callback;
 import okhttp3.Request;
-import okhttp3.Response;
 
 public class ChatActivity extends AppCompatActivity {
     public static final int PERMISSIONS_CODE = 200;
@@ -268,7 +261,7 @@ public class ChatActivity extends AppCompatActivity {
         });
     }
 
-    public void sendMessage(View view) {
+    public void onClickSendMessage(View view) {
         final String content = mMessageInput.getText().toString();
         if (content.isEmpty()) {
             Toast.makeText(getApplicationContext(), "Can't send empty messages.", Toast.LENGTH_SHORT).show();
@@ -283,44 +276,40 @@ public class ChatActivity extends AppCompatActivity {
             }
         });
 
-        Request request = Routes.messagesCreate(getApplicationContext(), message);
-        HttpClient.getInstance().newCall(request).enqueue(new Callback() {
-            @Override
-            public void onFailure(Call call, IOException e) {
-                onSendFailure(message);
-            }
-
-            @Override
-            public void onResponse(Call call, final Response response) throws IOException {
-                if (response.isSuccessful()) {
-                    try {
-                        mChat.getMessages().remove(message);
-                        mChat.getMessages().add(ParserUtils.messageFromJson(new JSONObject(response.body().string())));
-                        ChatActivity.this.runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                mAdapter.notifyDataSetChanged();
-                            }
-                        });
-                    } catch (IOException | JSONException e) {
-                        Log.e("ERROR", e.toString());
-                    }
-                } else {
-                    onSendFailure(message);
-                }
-                response.body().close();
-            }
-        });
+        sendMessage(message);
     }
 
-    public void onSendFailure(final Message message) {
-        ChatActivity.this.runOnUiThread(new Runnable() {
+    public void sendMessage(final Message message) {
+        Request request = Routes.messagesCreate(getApplicationContext(), message);
+        MessageUtils.sendMessage(request, new OnSendMessageListener() {
             @Override
-            public void run() {
-                mChat.getMessages().remove(message);
-                mAdapter.notifyDataSetChanged();
-                mMessageInput.setText(message.getContent());
-                Toast.makeText(getApplicationContext(), "Could not send message", Toast.LENGTH_LONG).show();
+            public void OnSuccess(final Message responseMessage) {
+                ChatActivity.this.runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        mChat.getMessages().remove(message);
+                        mChat.getMessages().add(responseMessage);
+                        mAdapter.notifyDataSetChanged();
+                    }
+                });
+            }
+
+            @Override
+            public void OnFailure() {
+                ChatActivity.this.runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        Toast.makeText(getApplicationContext(), "Could not send message. Attempting again in 10 seconds.", Toast.LENGTH_LONG).show();
+
+                        Handler handler = new Handler();
+                        handler.postDelayed(new Runnable() {
+                            @Override
+                            public void run() {
+                                sendMessage(message);
+                            }
+                        }, 10000);
+                    }
+                });
             }
         });
     }
