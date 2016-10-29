@@ -53,6 +53,7 @@ import com.salatart.memeticame.Utils.ZipManager;
 import com.salatart.memeticame.Views.MessagesAdapter;
 
 import java.io.File;
+import java.util.HashMap;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -71,6 +72,8 @@ public class ChatActivity extends AppCompatActivity {
     @BindView(R.id.take_audio) ImageButton mRecordButton;
     @BindView(R.id.list_view_messages) ListView mMessagesListView;
 
+    private int mRetryMultiplier = 5;
+    private int mMaximumTries = 5;
     private boolean mPermissionToRecordAudio = false;
     private boolean mPermissionToUseCamera = false;
     private boolean mPermissionToWrite = false;
@@ -86,6 +89,8 @@ public class ChatActivity extends AppCompatActivity {
     private Attachment mCurrentAttachment;
     private Uri mCurrentImageUri;
     private Uri mCurrentVideoUri;
+
+    private HashMap<String, Integer> pendingUploads = new HashMap<>();
 
     private BroadcastReceiver mMessageReceiver = new BroadcastReceiver() {
         @Override
@@ -299,7 +304,22 @@ public class ChatActivity extends AppCompatActivity {
                 ChatActivity.this.runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        Toast.makeText(getApplicationContext(), "Could not send message. Attempting again in 10 seconds.", Toast.LENGTH_LONG).show();
+                        if (pendingUploads.containsKey(message.getCreatedAt())) {
+                            pendingUploads.put(message.getCreatedAt(), pendingUploads.get(message.getCreatedAt()) + 1);
+                        } else {
+                            pendingUploads.put(message.getCreatedAt(), 1);
+                        }
+
+                        int timesTried = pendingUploads.get(message.getCreatedAt());
+                        if (timesTried > mMaximumTries) {
+                            Toast.makeText(getApplicationContext(), "Failed " + timesTried + " times. Canceling upload.", Toast.LENGTH_LONG).show();
+                            mChat.getMessages().remove(message);
+                            mAdapter.notifyDataSetChanged();
+                            return;
+                        }
+
+                        int seconds = mRetryMultiplier * timesTried;
+                        Toast.makeText(getApplicationContext(), "Could not send message (Attempt: " + timesTried + "). Trying again in " + seconds + " seconds.", Toast.LENGTH_LONG).show();
 
                         Handler handler = new Handler();
                         handler.postDelayed(new Runnable() {
@@ -307,7 +327,7 @@ public class ChatActivity extends AppCompatActivity {
                             public void run() {
                                 sendMessage(message);
                             }
-                        }, 10000);
+                        }, seconds * 1000);
                     }
                 });
             }
