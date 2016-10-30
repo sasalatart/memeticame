@@ -23,39 +23,39 @@ import java.util.ArrayList;
  */
 
 public class ParserUtils {
-    public static Chat chatFromJson(JSONObject jsonResponse) throws JSONException {
-        ArrayList<User> users = usersFromJsonArray(new JSONArray(jsonResponse.getString("users")));
-        User admin = userFromJson(new JSONObject(jsonResponse.getString("admin")));
-        ArrayList<Message> messages = messagesFromJsonArray(new JSONArray(jsonResponse.getString("messages")));
+    public static Chat chatFromJson(JSONObject jsonObject) throws JSONException {
+        ArrayList<User> users = usersFromJsonArray(new JSONArray(jsonObject.getString("users")));
+        User admin = userFromJson(new JSONObject(jsonObject.getString("admin")));
+        ArrayList<Message> messages = messagesFromJsonArray(new JSONArray(jsonObject.getString("messages")));
 
-        return new Chat(Integer.parseInt(jsonResponse.getString("id")),
-                jsonResponse.getString("title"),
-                Boolean.parseBoolean(jsonResponse.getString("group")),
-                jsonResponse.getString("created_at"),
+        return new Chat(Integer.parseInt(jsonObject.getString("id")),
+                jsonObject.getString("title"),
+                Boolean.parseBoolean(jsonObject.getString("group")),
+                jsonObject.getString("created_at"),
                 admin.getPhoneNumber(),
                 users,
                 messages);
     }
 
-    public static ArrayList<Chat> chatsFromJsonArray(JSONArray jsonResponse) throws JSONException {
+    public static ArrayList<Chat> chatsFromJsonArray(JSONArray jsonArray) throws JSONException {
         ArrayList<Chat> chats = new ArrayList<>();
 
-        for (int i = 0; i < jsonResponse.length(); i++) {
-            JSONObject jsonChat = jsonResponse.getJSONObject(i);
+        for (int i = 0; i < jsonArray.length(); i++) {
+            JSONObject jsonChat = jsonArray.getJSONObject(i);
             chats.add(chatFromJson(jsonChat));
         }
 
         return chats;
     }
 
-    public static Message messageFromJson(JSONObject jsonMessage) throws JSONException {
-        Message message = new Message(jsonMessage.getInt("id"),
-                jsonMessage.getString("sender_phone"),
-                jsonMessage.getString("content"),
-                jsonMessage.getInt("chat_id"),
-                jsonMessage.getString("created_at"));
+    public static Message messageFromJson(JSONObject jsonObject) throws JSONException {
+        Message message = new Message(jsonObject.getInt("id"),
+                jsonObject.getString("sender_phone"),
+                jsonObject.getString("content"),
+                jsonObject.getInt("chat_id"),
+                jsonObject.getString("created_at"));
 
-        JSONObject jsonAttachment = jsonMessage.getJSONObject("attachment_link");
+        JSONObject jsonAttachment = jsonObject.getJSONObject("attachment_link");
         if (!jsonAttachment.getString("name").equals("null")) {
             message.setAttachment(new Attachment(jsonAttachment.getString("name"),
                     jsonAttachment.getString("mime_type"),
@@ -67,24 +67,24 @@ public class ParserUtils {
         return message;
     }
 
-    public static ArrayList<Message> messagesFromJsonArray(JSONArray jsonResponse) throws JSONException {
+    public static ArrayList<Message> messagesFromJsonArray(JSONArray jsonArray) throws JSONException {
         ArrayList<Message> messages = new ArrayList<>();
-        for (int i = 0; i < jsonResponse.length(); i++) {
-            messages.add(messageFromJson(jsonResponse.getJSONObject(i)));
+        for (int i = 0; i < jsonArray.length(); i++) {
+            messages.add(messageFromJson(jsonArray.getJSONObject(i)));
         }
 
         return messages;
     }
 
-    public static User userFromJson(JSONObject jsonUser) throws JSONException {
-        return new User(jsonUser.getInt("id"), jsonUser.getString("name"), jsonUser.getString("phone_number"));
+    public static User userFromJson(JSONObject jsonObject) throws JSONException {
+        return new User(jsonObject.getInt("id"), jsonObject.getString("name"), jsonObject.getString("phone_number"));
     }
 
-    public static ArrayList<User> usersFromJsonArray(JSONArray jsonResponse) throws JSONException {
+    public static ArrayList<User> usersFromJsonArray(JSONArray jsonArray) throws JSONException {
         ArrayList<User> users = new ArrayList<>();
 
-        for (int i = 0; i < jsonResponse.length(); i++) {
-            users.add(userFromJson(jsonResponse.getJSONObject(i)));
+        for (int i = 0; i < jsonArray.length(); i++) {
+            users.add(userFromJson(jsonArray.getJSONObject(i)));
         }
 
         return users;
@@ -113,21 +113,34 @@ public class ParserUtils {
         }
     }
 
-    public static ChatInvitation chatInvitationFromJson(JSONObject jsonChatInvitation) throws JSONException {
-        return new ChatInvitation(jsonChatInvitation.getInt("id"),
-                ParserUtils.userFromJson(new JSONObject(jsonChatInvitation.getString("user"))),
-                jsonChatInvitation.getInt("chat_id"),
-                jsonChatInvitation.getString("chat_title"),
-                jsonChatInvitation.getString("created_at"));
+    public static ChatInvitation chatInvitationFromJson(JSONObject jsonObject) throws JSONException {
+        return new ChatInvitation(jsonObject.getInt("id"),
+                ParserUtils.userFromJson(new JSONObject(jsonObject.getString("user"))),
+                jsonObject.getInt("chat_id"),
+                jsonObject.getString("chat_title"),
+                jsonObject.getString("created_at"));
     }
 
-    public static ArrayList<ChatInvitation> chatInvitationsFromJsonArray(JSONArray jsonResponse) throws JSONException {
+    public static ArrayList<ChatInvitation> chatInvitationsFromJsonArray(JSONArray jsonArray) throws JSONException {
         ArrayList<ChatInvitation> chatInvitations = new ArrayList<>();
 
-        for (int i = 0; i < jsonResponse.length(); i++) {
-            chatInvitations.add(chatInvitationFromJson(jsonResponse.getJSONObject(i)));
+        for (int i = 0; i < jsonArray.length(); i++) {
+            chatInvitations.add(chatInvitationFromJson(jsonArray.getJSONObject(i)));
         }
 
         return chatInvitations;
+    }
+
+    public static ArrayList<String[]> memesFromJsonArray(JSONArray jsonArray) throws JSONException {
+        ArrayList<String[]> memes = new ArrayList<>();
+
+        for (int i = 0; i < jsonArray.length(); i++) {
+            JSONObject jsonObject = jsonArray.getJSONObject(i);
+            String thumbMeme = jsonObject.getString("thumb");
+            String originalMeme = jsonObject.getString("original");
+            memes.add(new String[]{thumbMeme, originalMeme});
+        }
+
+        return memes;
     }
 }

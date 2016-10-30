@@ -65,6 +65,7 @@
             android:name=".Services.ChatInvitationService"
             android:exported="false" />
 
+        <activity android:name=".Activities.PlainMemeGalleryActivity"></activity>
         <activity android:name=".Activities.NewMemetextActivity"></activity>
     </application>
 

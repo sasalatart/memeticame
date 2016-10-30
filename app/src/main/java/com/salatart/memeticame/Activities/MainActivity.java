@@ -57,8 +57,10 @@ public class MainActivity extends AppCompatActivity implements ChatsFragment.OnC
             startActivityForResult(new Intent(Intent.ACTION_INSERT, ContactsContract.Contacts.CONTENT_URI), REQUEST_NEW_CONTACT);
         } else if (id == R.id.action_create_group_chat) {
             startActivity(NewChatGroupActivity.getIntent(getApplicationContext()));
-        } else if (id == R.id.action_see_gallery) {
+        } else if (id == R.id.action_see_downloads_gallery) {
             startActivity(new Intent(MainActivity.this, GalleryActivity.class));
+        } else if (id == R.id.action_see_plain_meme_gallery) {
+            startActivity(new Intent(MainActivity.this, PlainMemeGalleryActivity.class));
         }
 
         return super.onOptionsItemSelected(item);
