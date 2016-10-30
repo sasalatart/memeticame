@@ -46,4 +46,9 @@
     <string name="select_image">Select image</string>
     <string name="camera">Camera</string>
     <string name="create_meme">Create Meme</string>
+    <string name="meme_dialog_font_size_title">Font Size</string>
+    <string name="meme_dialog_font_family_title">Font Family</string>
+    <string name="meme_dialog_text_placeholder">Enter a content</string>
+    <string name="ok">OK</string>
+    <string name="color">Color</string>
 </resources>

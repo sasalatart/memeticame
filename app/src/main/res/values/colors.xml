@@ -13,4 +13,19 @@
     <color name="colorYellow">#FFEB3B</color>
     <color name="outWellColor">#B2DFDB</color>
     <color name="inWellColor">#1DE9B6</color>
+
+    <array name="material_colors">
+        <item>#FFFFFF</item>
+        <item>#F44336</item>
+        <item>#9C27B0</item>
+        <item>#3F51B5</item>
+        <item>#03A9F4</item>
+        <item>#009688</item>
+        <item>#8BC34A</item>
+        <item>#FFEB3B</item>
+        <item>#FF9800</item>
+        <item>#795548</item>
+        <item>#607D8B</item>
+        <item>#000000</item>
+    </array>
 </resources>

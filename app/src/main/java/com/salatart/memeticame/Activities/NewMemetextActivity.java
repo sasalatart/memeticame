@@ -96,7 +96,8 @@ public class NewMemetextActivity extends AppCompatActivity {
                  e.printStackTrace();
              }
 
-             mCanvas.drawBitmap((Bitmap.createScaledBitmap(RotateBitmap(picture,90), mCanvas.getWidth(), mCanvas.getHeight(), false)));
+//             mCanvas.drawBitmap((Bitmap.createScaledBitmap(RotateBitmap(picture,90), mCanvas.getWidth(), mCanvas.getHeight(), false)));
+             mCanvas.drawBitmap((Bitmap.createScaledBitmap(picture, mCanvas.getWidth(), mCanvas.getHeight(), false)));
          }
     }
 

@@ -6,7 +6,6 @@ package com.salatart.memeticame.Views;
  * https://github.com/Korilakkuma/CanvasView
  */
 
-import android.app.Dialog;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.CompressFormat;
@@ -78,8 +77,8 @@ public class CanvasView extends View {
 
     // for Paint
     private Paint.Style paintStyle = Paint.Style.FILL;
-    private int paintStrokeColor   = Color.WHITE;
-    private int paintFillColor     = Color.WHITE;
+    private int paintStrokeColor   = Color.BLACK;
+    private int paintFillColor     = Color.BLACK;
     private float paintStrokeWidth = 3F;
     private int opacity            = 255;
     private float blur             = 0F;
@@ -295,9 +294,10 @@ public class CanvasView extends View {
         this.textPaint = this.createPaint();
         this.textPaint.setTextAlign(Paint.Align.LEFT);
 
-        for(int i = 0; i < memetextLists.size(); i++){
-
-            Memetext memetext = memetextLists.get(i);
+        for(Memetext memetext : memetextLists){
+            this.textPaint.setTextSize(memetext.getFontSize());
+            this.textPaint.setTypeface(memetext.getFontFamily());
+            this.textPaint.setColor(memetext.getPaintColor());
             canvas.drawText(memetext.getText(), memetext.getPositionX(), memetext.getPositionY(), this.textPaint);
         }
     }
@@ -342,27 +342,13 @@ public class CanvasView extends View {
 
     public void showDialog(final float x, final float y){
 
-        final Dialog dialog = new Dialog(context);
-        dialog.setContentView(R.layout.dialog_add_text_memetext);
-        dialog.setTitle("Set meme text");
+        final MemeDialog dialog = new MemeDialog(context,x,y);
 
-        final EditText text = (EditText) dialog.findViewById(R.id.memetext);
-        Button okButton = (Button) dialog.findViewById(R.id.ok);
-        Button cancelButton = (Button) dialog.findViewById(R.id.cancel);
 
-        cancelButton.setOnClickListener(new View.OnClickListener() {
+        dialog.setConfirmMemetextListener(new OnConfirmMemetextListener() {
             @Override
-            public void onClick(View v) {
-                text.setText("");
-                dialog.dismiss();
-            }
-        });
-        okButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                memetextLists.add(new Memetext(text.getText().toString(), x, y ));
-                text.setText("");
-                dialog.dismiss();
+            public void onConfirm(Memetext memetext) {
+                memetextLists.add(memetext);
             }
         });
 
