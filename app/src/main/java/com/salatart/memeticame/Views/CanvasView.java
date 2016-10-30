@@ -24,6 +24,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 
+import com.salatart.memeticame.Listeners.OnConfirmMemetextListener;
 import com.salatart.memeticame.Models.Memetext;
 import com.salatart.memeticame.R;
 
