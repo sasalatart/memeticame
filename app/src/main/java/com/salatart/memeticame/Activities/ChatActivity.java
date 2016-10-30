@@ -7,8 +7,10 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
+import android.database.Cursor;
 import android.graphics.Color;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
@@ -19,11 +21,13 @@ import android.support.v4.content.ContextCompat;
 import android.support.v4.content.FileProvider;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.ContextMenu;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.EditText;
 import android.widget.ImageButton;
@@ -54,6 +58,8 @@ import com.salatart.memeticame.Views.MessagesAdapter;
 
 import java.io.File;
 import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -82,6 +88,8 @@ public class ChatActivity extends AppCompatActivity {
     private Chat mChat;
     private MessageCount mMessageCount;
     private MessagesAdapter mAdapter;
+    private UpdaterAsyncTask mUpdater;
+    private int mScrollState = AbsListView.OnScrollListener.SCROLL_STATE_IDLE;
 
     private boolean mCurrentlyRecording;
     private AudioRecorderManager mAudioRecorderManager;
@@ -100,26 +108,6 @@ public class ChatActivity extends AppCompatActivity {
                 mChat.getMessages().add(newMessage);
                 mAdapter.notifyDataSetChanged();
             }
-        }
-    };
-
-    private BroadcastReceiver mDownloadReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            ChatActivity.this.runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    mAdapter.notifyDataSetChanged();
-                }
-            });
-        }
-    };
-
-    private BroadcastReceiver mZipReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            finish();
-            startActivity(getIntent());
         }
     };
 
@@ -180,8 +168,6 @@ public class ChatActivity extends AppCompatActivity {
         mAudioRecorderManager = new AudioRecorderManager();
         mCurrentlyRecording = false;
         registerForContextMenu(mMessageInput);
-
-        setAdapter();
     }
 
     @Override
@@ -195,8 +181,6 @@ public class ChatActivity extends AppCompatActivity {
 
         getChat();
 
-        registerReceiver(mDownloadReceiver, new IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE));
-        registerReceiver(mZipReceiver, new IntentFilter(FilterUtils.UNZIP_FILTER));
         registerReceiver(mMessageReceiver, new IntentFilter(FilterUtils.NEW_MESSAGE_FILTER));
         registerReceiver(mUsersKickedReceiver, new IntentFilter(FilterUtils.USER_KICKED_FILTER));
         registerReceiver(mUserAcceptedInvitationReceiver, new IntentFilter(FilterUtils.CHAT_INVITATION_ACCEPTED_FILTER));
@@ -206,13 +190,16 @@ public class ChatActivity extends AppCompatActivity {
     @Override
     public void onPause() {
         super.onPause();
-        unregisterReceiver(mDownloadReceiver);
-        unregisterReceiver(mZipReceiver);
+
         unregisterReceiver(mMessageReceiver);
         unregisterReceiver(mUsersKickedReceiver);
         unregisterReceiver(mUserAcceptedInvitationReceiver);
         mMessageCount.update(mChat, mChat.getMessages().size(), 0);
         sIsActive = false;
+
+        if (mUpdater != null) {
+            mUpdater.stop();
+        }
     }
 
     @Override
@@ -255,13 +242,7 @@ public class ChatActivity extends AppCompatActivity {
             @Override
             public void OnSuccess(Object chat) {
                 mChat = (Chat) chat;
-                mAdapter = new MessagesAdapter(ChatActivity.this, R.layout.list_item_message_in, mChat);
-                ChatActivity.this.runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        mMessagesListView.setAdapter(mAdapter);
-                    }
-                });
+                setAdapter();
             }
         });
     }
@@ -428,8 +409,26 @@ public class ChatActivity extends AppCompatActivity {
     }
 
     public void setAdapter() {
-        mAdapter = new MessagesAdapter(ChatActivity.this, R.layout.list_item_message_in, mChat);
-        mMessagesListView.setAdapter(mAdapter);
+        ChatActivity.this.runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                mAdapter = new MessagesAdapter(ChatActivity.this, R.layout.list_item_message_in, mChat);
+                mMessagesListView.setAdapter(mAdapter);
+                mMessagesListView.setOnScrollListener(new AbsListView.OnScrollListener() {
+                    @Override
+                    public void onScrollStateChanged(AbsListView view, int scrollState) {
+                        mScrollState = scrollState;
+                    }
+
+                    @Override
+                    public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
+                    }
+                });
+
+                mUpdater = new UpdaterAsyncTask();
+                mUpdater.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, (Void) null);
+            }
+        });
     }
 
     @Override
@@ -503,5 +502,99 @@ public class ChatActivity extends AppCompatActivity {
         boolean canUseCamera = ContextCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED;
         boolean canWriteToStorage = ContextCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED;
         return canRecordAudio && canUseCamera && canWriteToStorage;
+    }
+
+    private class UpdaterAsyncTask extends AsyncTask {
+
+        boolean isRunning = true;
+
+        public void stop() {
+            isRunning = false;
+        }
+
+        protected void onProgressUpdate() {
+            super.onProgressUpdate();
+
+            // Update only when we're not scrolling, and only for visible views
+            if (mScrollState == AbsListView.OnScrollListener.SCROLL_STATE_IDLE) {
+                int start = mMessagesListView.getFirstVisiblePosition();
+                for (int i = start, j = mMessagesListView.getLastVisiblePosition(); i <= j; i++) {
+                    final View view = mMessagesListView.getChildAt(i - start);
+                    try {
+                        Attachment attachment = ((Message) mMessagesListView.getItemAtPosition(i)).getAttachment();
+                        if (attachment != null && attachment.isDirty()) {
+                            final int finalI = i;
+                            ChatActivity.this.runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    mMessagesListView.getAdapter().getView(finalI, view, mMessagesListView); // Tell the adapter to update this view
+                                }
+                            });
+                        }
+                    } catch (IndexOutOfBoundsException e) {
+                        Log.e("ERROR", e.toString());
+                    }
+                }
+            }
+        }
+
+        @Override
+        protected Object doInBackground(Object[] params) {
+            while (isRunning) {
+                updateCurrentAdapterContent();
+                onProgressUpdate();
+
+                try {
+                    Thread.sleep(200);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+
+            return null;
+        }
+
+        private void updateCurrentAdapterContent() {
+            List<Message> messages = mChat.getMessages();
+            Map<Long, Float> map = new HashMap<>();
+
+            DownloadManager.Query q = new DownloadManager.Query();
+            q.setFilterByStatus(DownloadManager.STATUS_FAILED | DownloadManager.STATUS_PAUSED | DownloadManager.STATUS_SUCCESSFUL | DownloadManager.STATUS_RUNNING | DownloadManager.STATUS_PENDING);
+            try {
+                DownloadManager downloadManager = (DownloadManager) ChatActivity.this.getSystemService(Context.DOWNLOAD_SERVICE);
+                Cursor cursor = downloadManager.query(q);
+
+                while (cursor.moveToNext()) {
+                    long id = cursor.getLong(cursor.getColumnIndex(DownloadManager.COLUMN_ID));
+                    String uri = cursor.getString(cursor.getColumnIndex(DownloadManager.COLUMN_URI));
+                    int status = cursor.getInt(cursor.getColumnIndex(DownloadManager.COLUMN_STATUS));
+                    int downloaded = cursor.getInt(cursor.getColumnIndex(DownloadManager.COLUMN_BYTES_DOWNLOADED_SO_FAR));
+                    int total = cursor.getInt(cursor.getColumnIndex(DownloadManager.COLUMN_TOTAL_SIZE_BYTES));
+                    float progress = (status == DownloadManager.STATUS_SUCCESSFUL ? 1 : (float) downloaded / (float) total);
+
+                    map.put(id, progress);
+                }
+
+                cursor.close();
+
+                if (map.size() == 0) {
+                    return;
+                }
+
+                for (Message message : messages) {
+                    Attachment attachment = message.getAttachment();
+                    if (attachment == null || !map.containsKey(attachment.getDownloadId())) {
+                        continue;
+                    }
+
+                    float progress = map.get(attachment.getDownloadId());
+                    if (attachment.getProgress() != progress * 100) {
+                        attachment.setProgress(progress);
+                    }
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
     }
 }

@@ -67,7 +67,7 @@ public class FileUtils {
     }
 
     public static boolean openFile(Context context, Attachment attachment) {
-        boolean fileExists = checkFileExistence(context, attachment.getName());
+        boolean fileExists = attachment.exists(context);
 
         if (!fileExists) {
             downloadAttachment(context, attachment);
@@ -218,7 +218,8 @@ public class FileUtils {
                 .setDescription("Downloaded with Memeticame")
                 .setDestinationInExternalPublicDir("/Memeticame/Downloads", attachment.getName());
 
-        downloadManager.enqueue(request);
+        attachment.setProgress(0);
+        attachment.setDownloadId(downloadManager.enqueue(request));
     }
 
     public static void downloadAttachment(final Context context, final Attachment attachment) {

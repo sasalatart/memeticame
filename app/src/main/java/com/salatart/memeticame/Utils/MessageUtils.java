@@ -55,7 +55,7 @@ public class MessageUtils {
         editor.putString(MESSAGE_CONTENT, message.getContent());
 
         Attachment attachment = message.getAttachment();
-        if (attachment != null && FileUtils.checkFileExistence(context, attachment.getName())) {
+        if (attachment != null && attachment.exists(context)) {
             String uriString = FileUtils.getUriFromFileName(context, attachment.getName()).toString();
             editor.putString(MESSAGE_ATTACHMENT_URI, uriString);
         } else {

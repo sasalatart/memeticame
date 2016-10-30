@@ -12,6 +12,7 @@ import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -109,7 +110,7 @@ public class MessagesAdapter extends ArrayAdapter<Message> {
             return;
         }
 
-        boolean fileExists = FileUtils.checkFileExistence(getContext(), attachment.getName());
+        boolean fileExists = attachment.exists(getContext());
         boolean isImage = attachment.isImage();
         boolean isVideo = attachment.isVideo();
         boolean isAudio = attachment.isAudio();
@@ -118,7 +119,10 @@ public class MessagesAdapter extends ArrayAdapter<Message> {
         if (fileExists && !isMemeaudio) {
             attachment.setUri(FileUtils.getUriFromFileName(getContext(), attachment.getName()).toString());
         } else if (fileExists) {
-            attachment.setUri(attachment.getMemeaudioPartUri(getContext(), true).toString());
+            Uri imageUri = attachment.getMemeaudioPartUri(getContext(), true);
+            if (imageUri != null) {
+                attachment.setUri(imageUri.toString());
+            }
         }
 
         ImageView attachmentType = (ImageView) view.findViewById(R.id.label_attachment_type);
@@ -184,6 +188,24 @@ public class MessagesAdapter extends ArrayAdapter<Message> {
         LinearLayout groupAudioButtons = (LinearLayout) view.findViewById(R.id.group_audio_buttons);
         groupAudioButtons.setVisibility((isAudio && fileExists) ? View.VISIBLE : View.GONE);
         openButton.setVisibility((isAudio && fileExists) ? View.GONE : View.VISIBLE);
+
+        LinearLayout groupProgress = (LinearLayout) view.findViewById(R.id.group_progress);
+        ProgressBar progressBar = (ProgressBar) view.findViewById(R.id.progress_bar);
+        TextView progressLabel = (TextView) view.findViewById(R.id.label_progress);
+        if (attachment.getProgress() >= 0 && attachment.getProgress() <= 100) {
+            groupProgress.setVisibility(View.VISIBLE);
+            progressBar.setProgress(attachment.getProgress());
+            String progress = attachment.getProgress() + "%";
+            progressLabel.setText(progress);
+        } else {
+            groupProgress.setVisibility(View.GONE);
+        }
+
+        if (attachment.getProgress() >= 0 && attachment.getProgress() < 100) {
+            openButton.setEnabled(false);
+        } else {
+            openButton.setEnabled(true);
+        }
     }
 
     private void setMediaPlayer(final View view, final Uri audioUri) {
