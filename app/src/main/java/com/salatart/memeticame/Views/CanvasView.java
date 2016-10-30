@@ -77,7 +77,7 @@ public class CanvasView extends View {
     private boolean isDown = false;
 
     // for Paint
-    private Paint.Style paintStyle = Paint.Style.STROKE;
+    private Paint.Style paintStyle = Paint.Style.FILL;
     private int paintStrokeColor   = Color.WHITE;
     private int paintFillColor     = Color.WHITE;
     private float paintStrokeWidth = 3F;

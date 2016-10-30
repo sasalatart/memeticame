@@ -373,6 +373,11 @@ public class ChatActivity extends AppCompatActivity {
         startActivityForResult(takeMemeaudioIntent, FilterUtils.REQUEST_MEMEAUDIO_FILE);
     }
 
+    public void dispatchTakeMemetextIntent() {
+        Intent takeMemetextIntent = new Intent(ChatActivity.this, NewMemetextActivity.class);
+        startActivityForResult(takeMemetextIntent, FilterUtils.REQUEST_CREATE_MEMETEXT_FILE);
+    }
+
     public void dispatchTakePictureIntent(View view) {
         Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
         if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
@@ -470,10 +475,7 @@ public class ChatActivity extends AppCompatActivity {
             //TODO send memetext
         }
         else if(menuItemId == 4){
-
-            Intent createMemetextIntent = new Intent(ChatActivity.this, NewMemetextActivity.class);
-            startActivity(createMemetextIntent);
-
+            dispatchTakeMemetextIntent();
         }
 
         return true;
@@ -492,6 +494,8 @@ public class ChatActivity extends AppCompatActivity {
         } else if (requestCode == FilterUtils.REQUEST_MEMEAUDIO_FILE && resultCode == RESULT_OK && data != null) {
             Uri memeaudioZipUri = (Uri) data.getExtras().get(ZipManager.PARCELABLE_KEY);
             setCurrentAttachmentFromUri(memeaudioZipUri);
+        } else if (requestCode == FilterUtils.REQUEST_CREATE_MEMETEXT_FILE && resultCode == RESULT_OK && data != null) {
+            //TODO if is necessary to pass the URI from the memetext or memeaudio
         }
     }
 

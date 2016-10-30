@@ -1,5 +1,6 @@
 package com.salatart.memeticame.Activities;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Color;
@@ -16,6 +17,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.Toast;
 
@@ -23,10 +25,14 @@ import com.salatart.memeticame.R;
 import com.salatart.memeticame.Utils.AudioRecorderManager;
 import com.salatart.memeticame.Utils.FileUtils;
 import com.salatart.memeticame.Utils.FilterUtils;
+import com.salatart.memeticame.Utils.ZipManager;
 import com.salatart.memeticame.Views.CanvasView;
 
+import java.io.BufferedOutputStream;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -37,6 +43,7 @@ public class NewMemetextActivity extends AppCompatActivity {
     @BindView(R.id.get_from_gallery) Button mGetFromGalleryButton;
     @BindView(R.id.get_from_camera) Button mGetFromCameraButton;
     @BindView(R.id.undo_text) ImageButton mUndoText;
+    @BindView(R.id.meme_name) EditText mMemeName;
     @BindView(R.id.take_audio) ImageButton mRecordButton;
     @BindView(R.id.button_play) ImageButton mPlayButton;
     @BindView(R.id.button_pause) ImageButton mPauseButton;
@@ -49,6 +56,7 @@ public class NewMemetextActivity extends AppCompatActivity {
 
     private MediaPlayer mMediaPlayer;
     private Uri mAudioUri;
+    private File audioFile;
 
 
     @Override
@@ -106,17 +114,42 @@ public class NewMemetextActivity extends AppCompatActivity {
 
     private void createMeme(){
 
+        if(mMemeName.getText().length() == 0){
+            Toast.makeText(NewMemetextActivity.this, "Insert a name", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
         Bitmap meme = mCanvas.getBitmap();
+        String imagePath = FileUtils.getMemeticameDirectory() + "/" + mMemeName.getText() + ".jpg";
+        File memeFile = new File(imagePath);
+        try {
+            memeFile.createNewFile();
+            OutputStream os =  new BufferedOutputStream(new FileOutputStream(memeFile));
+            meme.compress(Bitmap.CompressFormat.JPEG, 100 , os);
+            os.close();
 
-        //mCanvas.drawBitmap((Bitmap.createScaledBitmap(meme, mCanvas.getWidth(), mCanvas.getHeight(), false)));
+            if(mAudioUri != null) {
+                Uri mImageUri = Uri.fromFile(memeFile);
+                String zipFileName = FileUtils.getName(NewMemetextActivity.this, mImageUri) + ZipManager.SEPARATOR + FileUtils.getName(NewMemetextActivity.this, mAudioUri) + ".zip";
+                String audioPath = audioFile.getAbsolutePath();
+                Uri memeaudioZipUri = ZipManager.zip(new String[]{audioPath, imagePath}, zipFileName);
+            }
 
+            Intent returnIntent = new Intent();
+            setResult(Activity.RESULT_OK, returnIntent);
+            finish();
+
+        }
+        catch (IOException e) {
+            e.printStackTrace();
+        }
 
     }
 
 
     public void toggleRecording(View view) {
         if (mCurrentlyRecording) {
-            File audioFile = mAudioRecorderManager.stopAudioRecording();
+            audioFile = mAudioRecorderManager.stopAudioRecording();
             mAudioUri = mAudioRecorderManager.addRecordingToMediaLibrary(NewMemetextActivity.this, audioFile);
             mRecordButton.setColorFilter(Color.BLACK);
             setMediaPlayer();
