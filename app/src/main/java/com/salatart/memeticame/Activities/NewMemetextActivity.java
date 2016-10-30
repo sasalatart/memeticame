@@ -2,7 +2,9 @@ package com.salatart.memeticame.Activities;
 
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.Color;
 import android.graphics.Matrix;
+import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
@@ -15,8 +17,10 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageButton;
+import android.widget.Toast;
 
 import com.salatart.memeticame.R;
+import com.salatart.memeticame.Utils.AudioRecorderManager;
 import com.salatart.memeticame.Utils.FileUtils;
 import com.salatart.memeticame.Utils.FilterUtils;
 import com.salatart.memeticame.Views.CanvasView;
@@ -33,8 +37,19 @@ public class NewMemetextActivity extends AppCompatActivity {
     @BindView(R.id.get_from_gallery) Button mGetFromGalleryButton;
     @BindView(R.id.get_from_camera) Button mGetFromCameraButton;
     @BindView(R.id.undo_text) ImageButton mUndoText;
+    @BindView(R.id.take_audio) ImageButton mRecordButton;
+    @BindView(R.id.button_play) ImageButton mPlayButton;
+    @BindView(R.id.button_pause) ImageButton mPauseButton;
+    @BindView(R.id.button_stop) ImageButton mStopButton;
 
     private Uri mCurrentImageUri;
+
+    private boolean mCurrentlyRecording;
+    private AudioRecorderManager mAudioRecorderManager;
+
+    private MediaPlayer mMediaPlayer;
+    private Uri mAudioUri;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -44,6 +59,7 @@ public class NewMemetextActivity extends AppCompatActivity {
         ButterKnife.bind(this);
 
         mCanvas.setMode(CanvasView.Mode.TEXT);
+        mAudioRecorderManager = new AudioRecorderManager();
 
 
     }
@@ -97,6 +113,20 @@ public class NewMemetextActivity extends AppCompatActivity {
 
     }
 
+
+    public void toggleRecording(View view) {
+        if (mCurrentlyRecording) {
+            File audioFile = mAudioRecorderManager.stopAudioRecording();
+            mAudioUri = mAudioRecorderManager.addRecordingToMediaLibrary(NewMemetextActivity.this, audioFile);
+            mRecordButton.setColorFilter(Color.BLACK);
+            setMediaPlayer();
+        } else {
+            mAudioRecorderManager.startAudioRecording(NewMemetextActivity.this);
+            mRecordButton.setColorFilter(Color.RED);
+        }
+        mCurrentlyRecording = !mCurrentlyRecording;
+    }
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
@@ -116,6 +146,60 @@ public class NewMemetextActivity extends AppCompatActivity {
         }
     }
 
+    public void setMediaPlayer() {
+        mMediaPlayer = MediaPlayer.create(NewMemetextActivity.this, mAudioUri);
+        mMediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+            @Override
+            public void onCompletion(MediaPlayer mp) {
+                setMediaPlayer();
+            }
+        });
+
+        setEnabled(true, false, false);
+        setColors(Color.BLACK, Color.BLACK, Color.BLACK);
+    }
+
+    public void onPlay(View view) {
+        if(mAudioUri == null){
+            Toast.makeText(this, "Please, add an audio", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        setEnabled(false, true, true);
+        setColors(Color.RED, Color.BLACK, Color.BLACK);
+        mMediaPlayer.start();
+    }
+
+    public void onPause(View view) {
+        if(mAudioUri == null){
+            Toast.makeText(this, "Please, add an audio", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        setEnabled(true, false, true);
+        setColors(Color.BLACK, Color.RED, Color.BLACK);
+        mMediaPlayer.pause();
+    }
+
+    public void onStop(View view) {
+        if(mAudioUri == null){
+            Toast.makeText(this, "Please, add an audio", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        setEnabled(true, false, false);
+        mMediaPlayer.stop();
+        setMediaPlayer();
+    }
+
+    public void setEnabled(boolean playButtonEnabled, boolean pauseButtonEnabled, boolean stopButtonEnabled) {
+        mPlayButton.setEnabled(playButtonEnabled);
+        mPauseButton.setEnabled(pauseButtonEnabled);
+        mStopButton.setEnabled(stopButtonEnabled);
+    }
+
+    public void setColors(int playColor, int pauseColor, int stopColor) {
+        mPlayButton.setColorFilter(playColor);
+        mPauseButton.setColorFilter(pauseColor);
+        mStopButton.setColorFilter(stopColor);
+    }
 
 
 

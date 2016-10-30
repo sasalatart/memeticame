@@ -41,6 +41,41 @@
             android:onClick="undoText"
             android:layout_weight="1" />
 
+        <ImageButton
+            android:id="@+id/take_audio"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:onClick="toggleRecording"
+            android:src="@drawable/ic_settings_voice_black_24dp" />
+
+
+        <ImageButton
+           android:id="@+id/button_pause"
+           android:layout_width="wrap_content"
+           android:layout_height="wrap_content"
+           android:layout_centerHorizontal="true"
+           android:onClick="onPause"
+           android:src="@drawable/ic_pause_circle_outline_black_24dp" />
+
+        <ImageButton
+          android:id="@+id/button_play"
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:layout_toLeftOf="@id/button_pause"
+          android:layout_toStartOf="@id/button_pause"
+          android:onClick="onPlay"
+          android:src="@drawable/ic_play_circle_outline_black_24dp" />
+
+        <ImageButton
+          android:id="@+id/button_stop"
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:layout_toEndOf="@id/button_pause"
+          android:layout_toRightOf="@id/button_pause"
+          android:onClick="onStop"
+          android:src="@drawable/ic_stop_black_24dp" />
+
+
         </LinearLayout>
 
         <LinearLayout
