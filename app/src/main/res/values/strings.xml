@@ -40,4 +40,5 @@
     <string name="last_message">last message</string>
     <string name="select_contacts_to_add">Select contacts to add</string>
     <string name="see_plain_meme_gallery">See plain meme gallery</string>
+    <string name="percentage">percentage</string>
 </resources>
