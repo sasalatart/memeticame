@@ -119,10 +119,7 @@ public class MessagesAdapter extends ArrayAdapter<Message> {
         if (fileExists && !isMemeaudio) {
             attachment.setUri(FileUtils.getUriFromFileName(getContext(), attachment.getName()).toString());
         } else if (fileExists) {
-            Uri imageUri = attachment.getMemeaudioPartUri(getContext(), true);
-            if (imageUri != null) {
-                attachment.setUri(imageUri.toString());
-            }
+            attachment.setUri(attachment.getMemeaudioImagetUrl().toString());
         }
 
         ImageView attachmentType = (ImageView) view.findViewById(R.id.label_attachment_type);
@@ -139,9 +136,15 @@ public class MessagesAdapter extends ArrayAdapter<Message> {
         }
 
         ImageView thumbnail = (ImageView) view.findViewById(R.id.thumbnail);
-        if (isImage || (fileExists && (isVideo || isMemeaudio))) {
+        if (isImage || (fileExists && isVideo) || isMemeaudio) {
+
+            String uri = attachment.getStringUri();
+            if (!fileExists && isMemeaudio) {
+                uri = attachment.getMemeaudioImagetUrl().toString();
+            }
+
             Glide.with(getContext())
-                    .load(attachment.getStringUri())
+                    .load(uri)
                     .placeholder(R.drawable.ic_access_time_black_24dp)
                     .crossFade()
                     .override(Attachment.IMAGE_SIZE, Attachment.IMAGE_SIZE)

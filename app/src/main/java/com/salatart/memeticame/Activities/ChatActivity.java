@@ -556,7 +556,7 @@ public class ChatActivity extends AppCompatActivity {
 
         private void updateCurrentAdapterContent() {
             List<Message> messages = mChat.getMessages();
-            Map<Long, Float> map = new HashMap<>();
+            Map<Long, Holder> map = new HashMap<>();
 
             DownloadManager.Query q = new DownloadManager.Query();
             q.setFilterByStatus(DownloadManager.STATUS_FAILED | DownloadManager.STATUS_PAUSED | DownloadManager.STATUS_SUCCESSFUL | DownloadManager.STATUS_RUNNING | DownloadManager.STATUS_PENDING);
@@ -572,7 +572,7 @@ public class ChatActivity extends AppCompatActivity {
                     int total = cursor.getInt(cursor.getColumnIndex(DownloadManager.COLUMN_TOTAL_SIZE_BYTES));
                     float progress = (status == DownloadManager.STATUS_SUCCESSFUL ? 1 : (float) downloaded / (float) total);
 
-                    map.put(id, progress);
+                    map.put(id, new Holder(progress, status));
                 }
 
                 cursor.close();
@@ -582,18 +582,45 @@ public class ChatActivity extends AppCompatActivity {
                 }
 
                 for (Message message : messages) {
-                    Attachment attachment = message.getAttachment();
+                    final Attachment attachment = message.getAttachment();
                     if (attachment == null || !map.containsKey(attachment.getDownloadId())) {
                         continue;
                     }
 
-                    float progress = map.get(attachment.getDownloadId());
-                    if (attachment.getProgress() != progress * 100) {
-                        attachment.setProgress(progress);
+                    Holder currentHolder = map.get(attachment.getDownloadId());
+
+                    if (attachment.getProgress() != currentHolder.progress * 100) {
+                        attachment.setProgress(currentHolder.progress);
+                    }
+
+                    if (currentHolder.status == DownloadManager.STATUS_SUCCESSFUL) {
+                        // downloadManager.remove(attachment.getDownloadId());
+                    } else if (currentHolder.status == DownloadManager.STATUS_FAILED || currentHolder.status == DownloadManager.STATUS_PAUSED) {
+                        downloadManager.remove(attachment.getDownloadId());
+                        attachment.setDownloadId(0);
+                        attachment.setProgress(-1);
+
+                        ChatActivity.this.runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                String toastText = "Error trying to download " + attachment.getName() + ". Try again...";
+                                Toast.makeText(getApplicationContext(), toastText, Toast.LENGTH_SHORT).show();
+                            }
+                        });
                     }
                 }
             } catch (Exception e) {
                 e.printStackTrace();
+            }
+        }
+
+        public class Holder {
+            public float progress;
+            public int status;
+
+            public Holder(float progress, int status) {
+                this.progress = progress;
+                this.status = status;
             }
         }
     }
