@@ -13,7 +13,6 @@ public class FilterUtils {
     public static final String CHAT_INVITATIONS_ADAPTER_FILTER = "chatsAdapterFilter";
     public static final String CHAT_INVITATION_ACCEPTED_FILTER = "chatInvitationAcceptedFilter";
     public static final String CHAT_INVITATION_REJECTED_FILTER = "chatInvitationRejectedFilter";
-    public static final String UNZIP_FILTER = "unzipFilter";
 
     public static final int REQUEST_NEW_CONTACT = 1;
     public static final int REQUEST_PICK_FILE = 2;
@@ -21,4 +20,5 @@ public class FilterUtils {
     public static final int REQUEST_VIDEO_CAPTURE = 4;
     public static final int REQUEST_MEMEAUDIO_FILE = 5;
     public static final int REQUEST_CREATE_MEMETEXT_FILE = 6;
+    public static final int REQUEST_PICK_PLAIN_MEME = 7;
 }

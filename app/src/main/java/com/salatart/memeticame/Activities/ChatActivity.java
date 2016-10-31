@@ -7,11 +7,14 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
+import android.database.Cursor;
 import android.graphics.Color;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.Handler;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.v4.content.ContextCompat;
@@ -24,7 +27,7 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.AdapterView;
+import android.widget.AbsListView;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
@@ -33,9 +36,11 @@ import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.salatart.memeticame.Listeners.OnRequestShowListener;
+import com.salatart.memeticame.Listeners.OnSendMessageListener;
 import com.salatart.memeticame.Models.Attachment;
 import com.salatart.memeticame.Models.Chat;
 import com.salatart.memeticame.Models.ChatInvitation;
+import com.salatart.memeticame.Models.Memetext;
 import com.salatart.memeticame.Models.Message;
 import com.salatart.memeticame.Models.MessageCount;
 import com.salatart.memeticame.Models.User;
@@ -44,7 +49,6 @@ import com.salatart.memeticame.Utils.AudioRecorderManager;
 import com.salatart.memeticame.Utils.ChatUtils;
 import com.salatart.memeticame.Utils.FileUtils;
 import com.salatart.memeticame.Utils.FilterUtils;
-import com.salatart.memeticame.Utils.HttpClient;
 import com.salatart.memeticame.Utils.MessageUtils;
 import com.salatart.memeticame.Utils.ParserUtils;
 import com.salatart.memeticame.Utils.Routes;
@@ -52,18 +56,14 @@ import com.salatart.memeticame.Utils.SessionUtils;
 import com.salatart.memeticame.Utils.ZipManager;
 import com.salatart.memeticame.Views.MessagesAdapter;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import java.io.File;
-import java.io.IOException;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
-import okhttp3.Call;
-import okhttp3.Callback;
 import okhttp3.Request;
-import okhttp3.Response;
 
 public class ChatActivity extends AppCompatActivity {
     public static final int PERMISSIONS_CODE = 200;
@@ -79,6 +79,8 @@ public class ChatActivity extends AppCompatActivity {
     @BindView(R.id.list_view_messages) ListView mMessagesListView;
     @BindView(R.id.meme_options) ImageButton mMemeOptionsButton;
 
+    private int mRetryMultiplier = 5;
+    private int mMaximumTries = 5;
     private boolean mPermissionToRecordAudio = false;
     private boolean mPermissionToUseCamera = false;
     private boolean mPermissionToWrite = false;
@@ -87,6 +89,8 @@ public class ChatActivity extends AppCompatActivity {
     private Chat mChat;
     private MessageCount mMessageCount;
     private MessagesAdapter mAdapter;
+    private UpdaterAsyncTask mUpdater;
+    private int mScrollState = AbsListView.OnScrollListener.SCROLL_STATE_IDLE;
 
     private boolean mCurrentlyRecording;
     private AudioRecorderManager mAudioRecorderManager;
@@ -94,6 +98,8 @@ public class ChatActivity extends AppCompatActivity {
     private Attachment mCurrentAttachment;
     private Uri mCurrentImageUri;
     private Uri mCurrentVideoUri;
+
+    private HashMap<String, Integer> pendingUploads = new HashMap<>();
 
     private BroadcastReceiver mMessageReceiver = new BroadcastReceiver() {
         @Override
@@ -103,26 +109,6 @@ public class ChatActivity extends AppCompatActivity {
                 mChat.getMessages().add(newMessage);
                 mAdapter.notifyDataSetChanged();
             }
-        }
-    };
-
-    private BroadcastReceiver mDownloadReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            ChatActivity.this.runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    mAdapter.notifyDataSetChanged();
-                }
-            });
-        }
-    };
-
-    private BroadcastReceiver mZipReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            finish();
-            startActivity(getIntent());
         }
     };
 
@@ -184,8 +170,6 @@ public class ChatActivity extends AppCompatActivity {
         mCurrentlyRecording = false;
         registerForContextMenu(mMessageInput);
         registerForContextMenu(mMemeOptionsButton);
-
-        setAdapter();
     }
 
     @Override
@@ -199,8 +183,6 @@ public class ChatActivity extends AppCompatActivity {
 
         getChat();
 
-        registerReceiver(mDownloadReceiver, new IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE));
-        registerReceiver(mZipReceiver, new IntentFilter(FilterUtils.UNZIP_FILTER));
         registerReceiver(mMessageReceiver, new IntentFilter(FilterUtils.NEW_MESSAGE_FILTER));
         registerReceiver(mUsersKickedReceiver, new IntentFilter(FilterUtils.USER_KICKED_FILTER));
         registerReceiver(mUserAcceptedInvitationReceiver, new IntentFilter(FilterUtils.CHAT_INVITATION_ACCEPTED_FILTER));
@@ -210,13 +192,16 @@ public class ChatActivity extends AppCompatActivity {
     @Override
     public void onPause() {
         super.onPause();
-        unregisterReceiver(mDownloadReceiver);
-        unregisterReceiver(mZipReceiver);
+
         unregisterReceiver(mMessageReceiver);
         unregisterReceiver(mUsersKickedReceiver);
         unregisterReceiver(mUserAcceptedInvitationReceiver);
         mMessageCount.update(mChat, mChat.getMessages().size(), 0);
         sIsActive = false;
+
+        if (mUpdater != null) {
+            mUpdater.stop();
+        }
     }
 
     @Override
@@ -259,18 +244,12 @@ public class ChatActivity extends AppCompatActivity {
             @Override
             public void OnSuccess(Object chat) {
                 mChat = (Chat) chat;
-                mAdapter = new MessagesAdapter(ChatActivity.this, R.layout.list_item_message_in, mChat);
-                ChatActivity.this.runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        mMessagesListView.setAdapter(mAdapter);
-                    }
-                });
+                setAdapter();
             }
         });
     }
 
-    public void sendMessage(View view) {
+    public void onClickSendMessage(View view) {
         final String content = mMessageInput.getText().toString();
         if (content.isEmpty()) {
             Toast.makeText(getApplicationContext(), "Can't send empty messages.", Toast.LENGTH_SHORT).show();
@@ -285,44 +264,55 @@ public class ChatActivity extends AppCompatActivity {
             }
         });
 
-        Request request = Routes.messagesCreate(getApplicationContext(), message);
-        HttpClient.getInstance().newCall(request).enqueue(new Callback() {
-            @Override
-            public void onFailure(Call call, IOException e) {
-                onSendFailure(message);
-            }
-
-            @Override
-            public void onResponse(Call call, final Response response) throws IOException {
-                if (response.isSuccessful()) {
-                    try {
-                        mChat.getMessages().remove(message);
-                        mChat.getMessages().add(ParserUtils.messageFromJson(new JSONObject(response.body().string())));
-                        ChatActivity.this.runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                mAdapter.notifyDataSetChanged();
-                            }
-                        });
-                    } catch (IOException | JSONException e) {
-                        Log.e("ERROR", e.toString());
-                    }
-                } else {
-                    onSendFailure(message);
-                }
-                response.body().close();
-            }
-        });
+        sendMessage(message);
     }
 
-    public void onSendFailure(final Message message) {
-        ChatActivity.this.runOnUiThread(new Runnable() {
+    public void sendMessage(final Message message) {
+        Request request = Routes.messagesCreate(getApplicationContext(), message);
+        MessageUtils.sendMessage(request, new OnSendMessageListener() {
             @Override
-            public void run() {
-                mChat.getMessages().remove(message);
-                mAdapter.notifyDataSetChanged();
-                mMessageInput.setText(message.getContent());
-                Toast.makeText(getApplicationContext(), "Could not send message", Toast.LENGTH_LONG).show();
+            public void OnSuccess(final Message responseMessage) {
+                ChatActivity.this.runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        mChat.getMessages().remove(message);
+                        mChat.getMessages().add(responseMessage);
+                        mAdapter.notifyDataSetChanged();
+                    }
+                });
+            }
+
+            @Override
+            public void OnFailure() {
+                ChatActivity.this.runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        if (pendingUploads.containsKey(message.getCreatedAt())) {
+                            pendingUploads.put(message.getCreatedAt(), pendingUploads.get(message.getCreatedAt()) + 1);
+                        } else {
+                            pendingUploads.put(message.getCreatedAt(), 1);
+                        }
+
+                        int timesTried = pendingUploads.get(message.getCreatedAt());
+                        if (timesTried > mMaximumTries) {
+                            Toast.makeText(getApplicationContext(), "Failed " + timesTried + " times. Canceling upload.", Toast.LENGTH_LONG).show();
+                            mChat.getMessages().remove(message);
+                            mAdapter.notifyDataSetChanged();
+                            return;
+                        }
+
+                        int seconds = mRetryMultiplier * timesTried;
+                        Toast.makeText(getApplicationContext(), "Could not send message (Attempt: " + timesTried + "). Trying again in " + seconds + " seconds.", Toast.LENGTH_LONG).show();
+
+                        Handler handler = new Handler();
+                        handler.postDelayed(new Runnable() {
+                            @Override
+                            public void run() {
+                                sendMessage(message);
+                            }
+                        }, seconds * 1000);
+                    }
+                });
             }
         });
     }
@@ -426,11 +416,29 @@ public class ChatActivity extends AppCompatActivity {
     }
 
     public void setAdapter() {
-        mAdapter = new MessagesAdapter(ChatActivity.this, R.layout.list_item_message_in, mChat);
-        mMessagesListView.setAdapter(mAdapter);
+        ChatActivity.this.runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                mAdapter = new MessagesAdapter(ChatActivity.this, R.layout.list_item_message_in, mChat);
+                mMessagesListView.setAdapter(mAdapter);
+                mMessagesListView.setOnScrollListener(new AbsListView.OnScrollListener() {
+                    @Override
+                    public void onScrollStateChanged(AbsListView view, int scrollState) {
+                        mScrollState = scrollState;
+                    }
+
+                    @Override
+                    public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
+                    }
+                });
+
+                mUpdater = new UpdaterAsyncTask();
+                mUpdater.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, (Void) null);
+            }
+        });
     }
 
-    public void showMemeOptionsMenu(View view){
+    public void showMemeOptionsMenu(View view) {
         openContextMenu(view);
     }
 
@@ -442,8 +450,7 @@ public class ChatActivity extends AppCompatActivity {
         if (view.getId() == R.id.input_message) {
             menu.add(Menu.NONE, 0, 0, "Paste");
             menu.add(Menu.NONE, 1, 1, "Cancel");
-        }
-        else if(view.getId() == R.id.meme_options){
+        } else if (view.getId() == R.id.meme_options) {
             menu.add(Menu.NONE, 2, 0, "Send memeaudio");
             menu.add(Menu.NONE, 3, 1, "Send memetext");
             menu.add(Menu.NONE, 4, 2, "Create memetext");
@@ -452,10 +459,7 @@ public class ChatActivity extends AppCompatActivity {
 
     @Override
     public boolean onContextItemSelected(MenuItem item) {
-        AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) item.getMenuInfo();
-
         int menuItemId = item.getItemId();
-
         if (menuItemId == 0) {
             String[] messageData = MessageUtils.retrieveMessage(ChatActivity.this);
             if (messageData == null) {
@@ -467,14 +471,11 @@ public class ChatActivity extends AppCompatActivity {
                 mCurrentAttachment = ParserUtils.attachmentFromUri(ChatActivity.this, Uri.parse(messageData[1]));
                 toggleAttachmentVisibilities(true);
             }
-        }
-        else if(menuItemId == 2) {
+        } else if (menuItemId == 2) {
             dispatchTakeMemeaudioIntent();
-        }
-        else if(menuItemId == 3){
+        } else if (menuItemId == 3) {
             //TODO send memetext
-        }
-        else if(menuItemId == 4){
+        } else if (menuItemId == 4) {
             dispatchTakeMemetextIntent();
         }
 
@@ -495,7 +496,8 @@ public class ChatActivity extends AppCompatActivity {
             Uri memeaudioZipUri = (Uri) data.getExtras().get(ZipManager.PARCELABLE_KEY);
             setCurrentAttachmentFromUri(memeaudioZipUri);
         } else if (requestCode == FilterUtils.REQUEST_CREATE_MEMETEXT_FILE && resultCode == RESULT_OK && data != null) {
-            //TODO if is necessary to pass the URI from the memetext or memeaudio
+            Uri memetextUri = (Uri) data.getExtras().get(Memetext.PARCELABLE_KEY);
+            setCurrentAttachmentFromUri(memetextUri);
         }
     }
 
@@ -521,5 +523,99 @@ public class ChatActivity extends AppCompatActivity {
         boolean canUseCamera = ContextCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED;
         boolean canWriteToStorage = ContextCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED;
         return canRecordAudio && canUseCamera && canWriteToStorage;
+    }
+
+    private class UpdaterAsyncTask extends AsyncTask {
+
+        boolean isRunning = true;
+
+        public void stop() {
+            isRunning = false;
+        }
+
+        protected void onProgressUpdate() {
+            super.onProgressUpdate();
+
+            // Update only when we're not scrolling, and only for visible views
+            if (mScrollState == AbsListView.OnScrollListener.SCROLL_STATE_IDLE) {
+                int start = mMessagesListView.getFirstVisiblePosition();
+                for (int i = start, j = mMessagesListView.getLastVisiblePosition(); i <= j; i++) {
+                    final View view = mMessagesListView.getChildAt(i - start);
+                    try {
+                        Attachment attachment = ((Message) mMessagesListView.getItemAtPosition(i)).getAttachment();
+                        if (attachment != null && attachment.isDirty()) {
+                            final int finalI = i;
+                            ChatActivity.this.runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    mMessagesListView.getAdapter().getView(finalI, view, mMessagesListView); // Tell the adapter to update this view
+                                }
+                            });
+                        }
+                    } catch (IndexOutOfBoundsException e) {
+                        Log.e("ERROR", e.toString());
+                    }
+                }
+            }
+        }
+
+        @Override
+        protected Object doInBackground(Object[] params) {
+            while (isRunning) {
+                updateCurrentAdapterContent();
+                onProgressUpdate();
+
+                try {
+                    Thread.sleep(200);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+
+            return null;
+        }
+
+        private void updateCurrentAdapterContent() {
+            List<Message> messages = mChat.getMessages();
+            Map<Long, Float> map = new HashMap<>();
+
+            DownloadManager.Query q = new DownloadManager.Query();
+            q.setFilterByStatus(DownloadManager.STATUS_FAILED | DownloadManager.STATUS_PAUSED | DownloadManager.STATUS_SUCCESSFUL | DownloadManager.STATUS_RUNNING | DownloadManager.STATUS_PENDING);
+            try {
+                DownloadManager downloadManager = (DownloadManager) ChatActivity.this.getSystemService(Context.DOWNLOAD_SERVICE);
+                Cursor cursor = downloadManager.query(q);
+
+                while (cursor.moveToNext()) {
+                    long id = cursor.getLong(cursor.getColumnIndex(DownloadManager.COLUMN_ID));
+                    String uri = cursor.getString(cursor.getColumnIndex(DownloadManager.COLUMN_URI));
+                    int status = cursor.getInt(cursor.getColumnIndex(DownloadManager.COLUMN_STATUS));
+                    int downloaded = cursor.getInt(cursor.getColumnIndex(DownloadManager.COLUMN_BYTES_DOWNLOADED_SO_FAR));
+                    int total = cursor.getInt(cursor.getColumnIndex(DownloadManager.COLUMN_TOTAL_SIZE_BYTES));
+                    float progress = (status == DownloadManager.STATUS_SUCCESSFUL ? 1 : (float) downloaded / (float) total);
+
+                    map.put(id, progress);
+                }
+
+                cursor.close();
+
+                if (map.size() == 0) {
+                    return;
+                }
+
+                for (Message message : messages) {
+                    Attachment attachment = message.getAttachment();
+                    if (attachment == null || !map.containsKey(attachment.getDownloadId())) {
+                        continue;
+                    }
+
+                    float progress = map.get(attachment.getDownloadId());
+                    if (attachment.getProgress() != progress * 100) {
+                        attachment.setProgress(progress);
+                    }
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
     }
 }

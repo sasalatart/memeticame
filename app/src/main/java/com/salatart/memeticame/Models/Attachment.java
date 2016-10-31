@@ -1,13 +1,11 @@
 package com.salatart.memeticame.Models;
 
 import android.content.Context;
-import android.content.Intent;
 import android.net.Uri;
 import android.os.Parcel;
 import android.os.Parcelable;
 
 import com.salatart.memeticame.Utils.FileUtils;
-import com.salatart.memeticame.Utils.FilterUtils;
 import com.salatart.memeticame.Utils.ZipManager;
 
 /**
@@ -37,13 +35,19 @@ public class Attachment implements Parcelable {
     private String mBase64Content;
     private String mUri;
     private long mSize;
+    private long mDownloadId;
+    private float mProgress;
+    private boolean mDirty;
 
-    public Attachment(String name, String mimeType, String base64Content, String uri, long size) {
+    public Attachment(String name, String mimeType, String base64Content, String uri, long size, float progress, boolean dirty) {
         this.mName = name;
         this.mMimeType = mimeType;
         this.mBase64Content = base64Content;
         this.mUri = uri;
         this.mSize = size;
+        this.mProgress = progress;
+        this.mDownloadId = 0;
+        this.mDirty = dirty;
     }
 
     public Attachment(Parcel in) {
@@ -52,10 +56,13 @@ public class Attachment implements Parcelable {
         this.mBase64Content = in.readString();
         this.mUri = in.readString();
         this.mSize = in.readLong();
+        this.mProgress = in.readFloat();
+        this.mDownloadId = 0;
+        this.mDirty = in.readByte() != 0;
     }
 
     public Attachment clone() {
-        return new Attachment(mName, mMimeType, mBase64Content, mUri, mSize);
+        return new Attachment(mName, mMimeType, mBase64Content, mUri, mSize, mProgress, mDirty);
     }
 
     public String getName() {
@@ -76,6 +83,27 @@ public class Attachment implements Parcelable {
 
     public long getSize() {
         return mSize;
+    }
+
+    public int getProgress() {
+        return (int) (mProgress * 100);
+    }
+
+    public void setProgress(float progress) {
+        mDirty = true;
+        mProgress = progress;
+    }
+
+    public long getDownloadId() {
+        return mDownloadId;
+    }
+
+    public void setDownloadId(long downloadId) {
+        mDownloadId = downloadId;
+    }
+
+    public boolean isDirty() {
+        return mDirty;
     }
 
     // Code from: http://stackoverflow.com/questions/3758606/how-to-convert-byte-size-into-human-readable-format-in-java
@@ -105,7 +133,6 @@ public class Attachment implements Parcelable {
         if (FileUtils.checkFileExistence(context, mName.split(ZipManager.SEPARATOR)[index].replace(".zip", ""))) {
             return FileUtils.getUriFromFileName(context, mName.split(ZipManager.SEPARATOR)[index].replace(".zip", ""));
         } else if (ZipManager.fastUnzip(FileUtils.getUriFromFileName(context, mName).getPath())) {
-            context.sendBroadcast(new Intent(FilterUtils.UNZIP_FILTER));
             return FileUtils.getUriFromFileName(context, mName.split(ZipManager.SEPARATOR)[index].replace(".zip", ""));
         } else {
             return null;
@@ -128,8 +155,8 @@ public class Attachment implements Parcelable {
         return mMimeType.contains("image");
     }
 
-    public boolean isNotMedia() {
-        return !mMimeType.contains("image") && !mMimeType.contains("video") && !mMimeType.contains("audio");
+    public boolean exists(Context context) {
+        return FileUtils.checkFileExistence(context, mName) && (mProgress == -1 || mProgress == 1);
     }
 
     @Override
@@ -144,5 +171,7 @@ public class Attachment implements Parcelable {
         dest.writeString(mBase64Content);
         dest.writeString(mUri);
         dest.writeLong(mSize);
+        dest.writeFloat(mProgress);
+        dest.writeByte((byte) (mDirty ? 1 : 0));
     }
 }

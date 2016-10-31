@@ -43,7 +43,10 @@
     <string name="send_memeaudio">Send memeaudio</string>
     <string name="send_memetext">Send memetext</string>
     <string name="create_memetext">Create memetext</string>
-    <string name="select_image">Select image</string>
-    <string name="camera">Camera</string>
-    <string name="create_meme">Create Meme</string>
+    <string name="from_device">From device</string>
+    <string name="from_camera">From camera</string>
+    <string name="from_gallery">From gallery</string>
+    <string name="create_meme">Create meme</string>
+    <string name="percentage">percentage</string>
+    <string name="meme_name">Meme name</string>
 </resources>

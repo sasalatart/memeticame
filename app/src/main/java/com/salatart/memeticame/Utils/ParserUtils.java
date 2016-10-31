@@ -61,7 +61,9 @@ public class ParserUtils {
                     jsonAttachment.getString("mime_type"),
                     null,
                     Routes.DOMAIN + jsonAttachment.getString("url"),
-                    jsonAttachment.getLong("size")));
+                    jsonAttachment.getLong("size"),
+                    -1,
+                    false));
         }
 
         return message;
@@ -102,11 +104,7 @@ public class ParserUtils {
         }
 
         try {
-            return new Attachment(name,
-                    mimeType,
-                    FileUtils.encodeToBase64FromUri(context, uri),
-                    uri.toString(),
-                    new File(uri.getPath()).length());
+            return new Attachment(name, mimeType, FileUtils.encodeToBase64FromUri(context, uri), uri.toString(), new File(uri.getPath()).length(), -1, false);
         } catch (IOException e) {
             Log.e("ERROR", e.toString());
             return null;

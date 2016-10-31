@@ -5,12 +5,13 @@ package com.salatart.memeticame.Models;
  */
 
 public class Memetext {
+    public static String PARCELABLE_KEY = "memetext";
 
     private String mText;
     private float mPositionX;
     private float mPositionY;
 
-    public Memetext(String text, float posX, float posY){
+    public Memetext(String text, float posX, float posY) {
         mText = text;
         mPositionX = posX;
         mPositionY = posY;
