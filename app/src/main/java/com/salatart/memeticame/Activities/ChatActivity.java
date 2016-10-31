@@ -28,7 +28,6 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AbsListView;
-import android.widget.AdapterView;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
@@ -41,6 +40,7 @@ import com.salatart.memeticame.Listeners.OnSendMessageListener;
 import com.salatart.memeticame.Models.Attachment;
 import com.salatart.memeticame.Models.Chat;
 import com.salatart.memeticame.Models.ChatInvitation;
+import com.salatart.memeticame.Models.Memetext;
 import com.salatart.memeticame.Models.Message;
 import com.salatart.memeticame.Models.MessageCount;
 import com.salatart.memeticame.Models.User;
@@ -77,6 +77,7 @@ public class ChatActivity extends AppCompatActivity {
     @BindView(R.id.button_cancel_attachment) ImageButton mCancelButton;
     @BindView(R.id.take_audio) ImageButton mRecordButton;
     @BindView(R.id.list_view_messages) ListView mMessagesListView;
+    @BindView(R.id.meme_options) ImageButton mMemeOptionsButton;
 
     private int mRetryMultiplier = 5;
     private int mMaximumTries = 5;
@@ -168,6 +169,7 @@ public class ChatActivity extends AppCompatActivity {
         mAudioRecorderManager = new AudioRecorderManager();
         mCurrentlyRecording = false;
         registerForContextMenu(mMessageInput);
+        registerForContextMenu(mMemeOptionsButton);
     }
 
     @Override
@@ -356,9 +358,14 @@ public class ChatActivity extends AppCompatActivity {
         startActivityForResult(FileUtils.getSelectFileIntent("*/*"), FilterUtils.REQUEST_PICK_FILE);
     }
 
-    public void dispatchTakeMemeaudioIntent(View view) {
+    public void dispatchTakeMemeaudioIntent() {
         Intent takeMemeaudioIntent = new Intent(ChatActivity.this, NewMemeaudioActivity.class);
         startActivityForResult(takeMemeaudioIntent, FilterUtils.REQUEST_MEMEAUDIO_FILE);
+    }
+
+    public void dispatchTakeMemetextIntent() {
+        Intent takeMemetextIntent = new Intent(ChatActivity.this, NewMemetextActivity.class);
+        startActivityForResult(takeMemetextIntent, FilterUtils.REQUEST_CREATE_MEMETEXT_FILE);
     }
 
     public void dispatchTakePictureIntent(View view) {
@@ -431,6 +438,10 @@ public class ChatActivity extends AppCompatActivity {
         });
     }
 
+    public void showMemeOptionsMenu(View view) {
+        openContextMenu(view);
+    }
+
     @Override
     public void onCreateContextMenu(ContextMenu menu, View view, ContextMenu.ContextMenuInfo menuInfo) {
         menu.setHeaderIcon(R.drawable.ic_textsms_black_24dp);
@@ -439,15 +450,16 @@ public class ChatActivity extends AppCompatActivity {
         if (view.getId() == R.id.input_message) {
             menu.add(Menu.NONE, 0, 0, "Paste");
             menu.add(Menu.NONE, 1, 1, "Cancel");
+        } else if (view.getId() == R.id.meme_options) {
+            menu.add(Menu.NONE, 2, 0, "Send memeaudio");
+            menu.add(Menu.NONE, 3, 1, "Send memetext");
+            menu.add(Menu.NONE, 4, 2, "Create memetext");
         }
     }
 
     @Override
     public boolean onContextItemSelected(MenuItem item) {
-        AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) item.getMenuInfo();
-
         int menuItemId = item.getItemId();
-
         if (menuItemId == 0) {
             String[] messageData = MessageUtils.retrieveMessage(ChatActivity.this);
             if (messageData == null) {
@@ -459,6 +471,12 @@ public class ChatActivity extends AppCompatActivity {
                 mCurrentAttachment = ParserUtils.attachmentFromUri(ChatActivity.this, Uri.parse(messageData[1]));
                 toggleAttachmentVisibilities(true);
             }
+        } else if (menuItemId == 2) {
+            dispatchTakeMemeaudioIntent();
+        } else if (menuItemId == 3) {
+            //TODO send memetext
+        } else if (menuItemId == 4) {
+            dispatchTakeMemetextIntent();
         }
 
         return true;
@@ -477,6 +495,9 @@ public class ChatActivity extends AppCompatActivity {
         } else if (requestCode == FilterUtils.REQUEST_MEMEAUDIO_FILE && resultCode == RESULT_OK && data != null) {
             Uri memeaudioZipUri = (Uri) data.getExtras().get(ZipManager.PARCELABLE_KEY);
             setCurrentAttachmentFromUri(memeaudioZipUri);
+        } else if (requestCode == FilterUtils.REQUEST_CREATE_MEMETEXT_FILE && resultCode == RESULT_OK && data != null) {
+            Uri memetextUri = (Uri) data.getExtras().get(Memetext.PARCELABLE_KEY);
+            setCurrentAttachmentFromUri(memetextUri);
         }
     }
 

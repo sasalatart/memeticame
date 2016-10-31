@@ -1,13 +1,17 @@
 package com.salatart.memeticame.Activities;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.AdapterView;
 import android.widget.GridView;
 
 import com.salatart.memeticame.Listeners.OnRequestIndexListener;
+import com.salatart.memeticame.Models.Memetext;
 import com.salatart.memeticame.R;
 import com.salatart.memeticame.Utils.PlainMemeUtils;
 import com.salatart.memeticame.Utils.Routes;
@@ -59,6 +63,15 @@ public class PlainMemeGalleryActivity extends AppCompatActivity {
                         mPlainMemes = plainMemes;
                         mAdapter = new MemeGalleryAdapter(PlainMemeGalleryActivity.this, mPlainMemes);
                         mGridView.setAdapter(mAdapter);
+                        mGridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                            @Override
+                            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                                Intent returnIntent = new Intent();
+                                returnIntent.putExtra(Memetext.PARCELABLE_KEY, Routes.DOMAIN + mPlainMemes.get(position)[1]);
+                                setResult(Activity.RESULT_OK, returnIntent);
+                                finish();
+                            }
+                        });
                         mLoading.hide();
                     }
                 });

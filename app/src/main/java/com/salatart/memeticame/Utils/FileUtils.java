@@ -8,6 +8,8 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.media.MediaMetadataRetriever;
 import android.net.Uri;
 import android.os.Environment;
@@ -27,6 +29,8 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -172,6 +176,8 @@ public class FileUtils {
     public static boolean checkFileExistence(Context context, String name) {
         File file1 = new File(getMemeticameDirectory() + "/" + name);
         File file2 = new File(getMemeticameDownloadsDirectory() + "/" + name);
+
+
         File file3 = new File(context.getExternalFilesDir(Environment.DIRECTORY_PICTURES) + "/" + name);
         File file4 = new File(context.getExternalFilesDir(Environment.DIRECTORY_MUSIC) + "/" + name);
 
@@ -197,11 +203,7 @@ public class FileUtils {
         }
     }
 
-    public static void downloadFile(Context context, Attachment attachment) {
-        if (!URLUtil.isValidUrl(attachment.getStringUri())) {
-            return;
-        }
-
+    public static long downloadFile(Context context, Uri downloadUri, String name) {
         File dir = new File(getMemeticameDownloadsDirectory());
         if (!dir.exists()) {
             dir.mkdirs();
@@ -209,17 +211,15 @@ public class FileUtils {
 
         DownloadManager downloadManager = (DownloadManager) context.getSystemService(Context.DOWNLOAD_SERVICE);
 
-        Uri downloadUri = Uri.parse(attachment.getStringUri());
         DownloadManager.Request request = new DownloadManager.Request(downloadUri);
         request.setAllowedNetworkTypes(
                 DownloadManager.Request.NETWORK_WIFI | DownloadManager.Request.NETWORK_MOBILE)
                 .setAllowedOverRoaming(false)
-                .setTitle(attachment.getName())
+                .setTitle(name)
                 .setDescription("Downloaded with Memeticame")
-                .setDestinationInExternalPublicDir("/Memeticame/Downloads", attachment.getName());
+                .setDestinationInExternalPublicDir("/Memeticame/Downloads", name);
 
-        attachment.setProgress(0);
-        attachment.setDownloadId(downloadManager.enqueue(request));
+        return downloadManager.enqueue(request);
     }
 
     public static void downloadAttachment(final Context context, final Attachment attachment) {
@@ -233,7 +233,8 @@ public class FileUtils {
                 .setIcon(android.R.drawable.ic_dialog_alert)
                 .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int whichButton) {
-                        downloadFile(context, attachment);
+                        attachment.setDownloadId(downloadFile(context, Uri.parse(attachment.getStringUri()), attachment.getName()));
+                        attachment.setProgress(0);
                     }
                 })
                 .setNegativeButton(android.R.string.no, null).show();
@@ -277,5 +278,20 @@ public class FileUtils {
         }
         cursor.close();
         return filePath;
+    }
+
+    public static Bitmap getBitmapFromURL(String src) {
+        try {
+            URL url = new URL(src);
+            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+            connection.setDoInput(true);
+            connection.connect();
+            InputStream input = connection.getInputStream();
+            Bitmap myBitmap = BitmapFactory.decodeStream(input);
+            return myBitmap;
+        } catch (IOException e) {
+            e.printStackTrace();
+            return null;
+        }
     }
 }

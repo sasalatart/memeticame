@@ -16,9 +16,9 @@
         android:title="@string/see_downloads_gallery" />
 
     <item
-        android:id="@+id/action_see_plain_meme_gallery"
+        android:id="@+id/action_create_meme"
         android:orderInCategory="100"
-        android:title="@string/see_plain_meme_gallery" />
+        android:title="@string/create_meme" />
 
     <item
         android:id="@+id/action_logout"

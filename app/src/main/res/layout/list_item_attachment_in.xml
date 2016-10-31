@@ -167,7 +167,7 @@
             android:layout_height="wrap_content"
             android:layout_below="@id/third_row"
             android:orientation="horizontal"
-            android:visibility="gone" >
+            android:visibility="gone">
 
             <ProgressBar
                 android:id="@+id/progress_bar"

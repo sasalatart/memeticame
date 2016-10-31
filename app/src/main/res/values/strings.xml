@@ -40,5 +40,20 @@
     <string name="last_message">last message</string>
     <string name="select_contacts_to_add">Select contacts to add</string>
     <string name="see_plain_meme_gallery">See plain meme gallery</string>
+    <string name="send_memeaudio">Send memeaudio</string>
+    <string name="send_memetext">Send memetext</string>
+    <string name="create_memetext">Create memetext</string>
+    <string name="from_device">From device</string>
+    <string name="from_camera">From camera</string>
+    <string name="from_gallery">From gallery</string>
+    <string name="create_meme">Create meme</string>
     <string name="percentage">percentage</string>
+    <string name="meme_name">Meme name</string>
+    <string name="select_image">Select image</string>
+    <string name="camera">Camera</string>
+    <string name="meme_dialog_font_size_title">Font size</string>
+    <string name="meme_dialog_font_family_title">Font family</string>
+    <string name="meme_dialog_text_placeholder">Enter a text</string>
+    <string name="ok">OK</string>
+    <string name="color">Color</string>
 </resources>
