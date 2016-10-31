@@ -13,7 +13,6 @@ public class FilterUtils {
     public static final String CHAT_INVITATIONS_ADAPTER_FILTER = "chatsAdapterFilter";
     public static final String CHAT_INVITATION_ACCEPTED_FILTER = "chatInvitationAcceptedFilter";
     public static final String CHAT_INVITATION_REJECTED_FILTER = "chatInvitationRejectedFilter";
-    public static final String UNZIP_FILTER = "unzipFilter";
 
     public static final int REQUEST_NEW_CONTACT = 1;
     public static final int REQUEST_PICK_FILE = 2;

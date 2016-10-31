@@ -1,13 +1,12 @@
 package com.salatart.memeticame.Models;
 
 import android.content.Context;
-import android.content.Intent;
 import android.net.Uri;
 import android.os.Parcel;
 import android.os.Parcelable;
 
 import com.salatart.memeticame.Utils.FileUtils;
-import com.salatart.memeticame.Utils.FilterUtils;
+import com.salatart.memeticame.Utils.Routes;
 import com.salatart.memeticame.Utils.ZipManager;
 
 /**
@@ -91,6 +90,11 @@ public class Attachment implements Parcelable {
         return (int) (mProgress * 100);
     }
 
+    public void setProgress(float progress) {
+        mDirty = true;
+        mProgress = progress;
+    }
+
     public long getDownloadId() {
         return mDownloadId;
     }
@@ -116,11 +120,6 @@ public class Attachment implements Parcelable {
         mUri = uri;
     }
 
-    public void setProgress(float progress) {
-        mDirty = true;
-        mProgress = progress;
-    }
-
     public String getShowableStringUri(Context context) {
         if (isMemeaudio()) {
             return getMemeaudioPartUri(context, true).toString();
@@ -132,14 +131,15 @@ public class Attachment implements Parcelable {
     public Uri getMemeaudioPartUri(Context context, boolean image) {
         int index = image ? 0 : 1;
 
-        if (FileUtils.checkFileExistence(context, mName.split(ZipManager.SEPARATOR)[index].replace(".zip", ""))) {
-            return FileUtils.getUriFromFileName(context, mName.split(ZipManager.SEPARATOR)[index].replace(".zip", ""));
-        } else if (ZipManager.fastUnzip(FileUtils.getUriFromFileName(context, mName).getPath())) {
-            context.sendBroadcast(new Intent(FilterUtils.UNZIP_FILTER));
-            return FileUtils.getUriFromFileName(context, mName.split(ZipManager.SEPARATOR)[index].replace(".zip", ""));
-        } else {
-            return null;
+        if (!FileUtils.checkFileExistence(context, mName.split(ZipManager.SEPARATOR)[index].replace(".zip", ""))) {
+            ZipManager.fastUnzip(FileUtils.getUriFromFileName(context, mName).getPath());
         }
+
+        return FileUtils.getUriFromFileName(context, mName.split(ZipManager.SEPARATOR)[index].replace(".zip", ""));
+    }
+
+    public Uri getMemeaudioImagetUrl() {
+        return Uri.parse(Routes.UNZIP_ROUTE + "/" + mName + "/" + mName.split(ZipManager.SEPARATOR)[0].replace(".zip", ""));
     }
 
     public boolean isMemeaudio() {
