@@ -26,7 +26,9 @@ import okhttp3.RequestBody;
  */
 public class Routes {
     public static String DOMAIN = "https://memeticame.salatart.com";
-    // static String DOMAIN = "http://10.0.2.2:3000";
+    // public static String DOMAIN = "http://10.0.2.2:3000";
+    public static String UNZIP_ROUTE = DOMAIN + "/system/unzipped";
+
     private static MediaType JSON = MediaType.parse("application/json; charset=utf-8");
 
     public static Request login(String phoneNumber, String password) {
