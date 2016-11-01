@@ -146,6 +146,10 @@ public class Attachment implements Parcelable {
         return mMimeType.contains("memeaudio");
     }
 
+    public boolean isMeme() {
+        return isMemeaudio() || (isImage() && mName.contains(Meme.SEPARATOR));
+    }
+
     public boolean isAudio() {
         return mMimeType.contains("audio") && !mMimeType.contains("meme");
     }

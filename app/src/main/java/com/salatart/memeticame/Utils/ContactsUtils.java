@@ -29,8 +29,6 @@ import okhttp3.Response;
  * Created by Andres Matte on 8/10/2016.
  */
 public class ContactsUtils {
-    public static final int PERMISSIONS_REQUEST_READ_CONTACTS = 101;
-
     public static boolean hasContactsPermissions(Context context) {
         return ContextCompat.checkSelfPermission(context, Manifest.permission.READ_CONTACTS) == PackageManager.PERMISSION_GRANTED;
     }
@@ -49,41 +47,41 @@ public class ContactsUtils {
 
     public static void retrieveContacts(final Activity activity, final OnContactsReadListener listener) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && !hasContactsPermissions(activity)) {
-            activity.requestPermissions(new String[]{Manifest.permission.READ_CONTACTS}, PERMISSIONS_REQUEST_READ_CONTACTS);
-        } else {
-            ContactsUtils.getContacts(activity, new ContactsUtils.ContactsProviderListener() {
-                @Override
-                public void OnContactsReady(final ArrayList<User> contacts) {
-                    Request request = Routes.usersIndex(activity, retrievePhoneNumbers(contacts));
-                    HttpClient.getInstance().newCall(request).enqueue(new Callback() {
-                        @Override
-                        public void onFailure(Call call, IOException e) {
-                            CallbackUtils.onUnsuccessfulRequest(activity, "Error");
-                        }
-
-                        @Override
-                        public void onResponse(Call call, final Response response) throws IOException {
-                            if (activity == null) {
-                                response.body().close();
-                                return;
-                            }
-
-                            if (response.isSuccessful()) {
-                                try {
-                                    listener.OnRead(ParserUtils.usersFromJsonArray(new JSONArray(response.body().string())), contacts);
-                                } catch (JSONException e) {
-                                    CallbackUtils.onUnsuccessfulRequest(activity, e.toString());
-                                }
-                            } else {
-                                CallbackUtils.onUnsuccessfulRequest(activity, HttpClient.parseErrorMessage(response));
-                            }
-
-                            response.body().close();
-                        }
-                    });
-                }
-            });
+            return;
         }
+
+        ContactsUtils.getContacts(activity, new ContactsUtils.ContactsProviderListener() {
+            @Override
+            public void OnContactsReady(final ArrayList<User> contacts) {
+                Request request = Routes.usersIndex(activity, retrievePhoneNumbers(contacts));
+                HttpClient.getInstance().newCall(request).enqueue(new Callback() {
+                    @Override
+                    public void onFailure(Call call, IOException e) {
+                        listener.OnFailure("error");
+                    }
+
+                    @Override
+                    public void onResponse(Call call, final Response response) throws IOException {
+                        if (activity == null) {
+                            response.body().close();
+                            return;
+                        }
+
+                        if (response.isSuccessful()) {
+                            try {
+                                listener.OnRead(ParserUtils.usersFromJsonArray(new JSONArray(response.body().string())), contacts);
+                            } catch (JSONException e) {
+                                listener.OnFailure("error");
+                            }
+                        } else {
+                            listener.OnFailure("error");
+                        }
+
+                        response.body().close();
+                    }
+                });
+            }
+        });
     }
 
     public interface ContactsProviderListener {

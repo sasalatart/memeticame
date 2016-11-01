@@ -13,6 +13,7 @@ import android.widget.GridView;
 import com.salatart.memeticame.Listeners.OnRequestIndexListener;
 import com.salatart.memeticame.Models.Meme;
 import com.salatart.memeticame.R;
+import com.salatart.memeticame.Utils.CallbackUtils;
 import com.salatart.memeticame.Utils.PlainMemeUtils;
 import com.salatart.memeticame.Utils.Routes;
 import com.salatart.memeticame.Views.PlainMemeGalleryAdapter;
@@ -53,8 +54,9 @@ public class PlainMemeGalleryActivity extends AppCompatActivity {
     }
 
     public void setAdapter() {
+        mLoading.show();
         Request request = Routes.plainMemesIndex(PlainMemeGalleryActivity.this);
-        PlainMemeUtils.indexRequest(PlainMemeGalleryActivity.this, request, mLoading, new OnRequestIndexListener<String[]>() {
+        PlainMemeUtils.indexRequest(request, new OnRequestIndexListener<String[]>() {
             @Override
             public void OnSuccess(final ArrayList<String[]> plainMemes) {
                 PlainMemeGalleryActivity.this.runOnUiThread(new Runnable() {
@@ -75,6 +77,11 @@ public class PlainMemeGalleryActivity extends AppCompatActivity {
                         mLoading.hide();
                     }
                 });
+            }
+
+            @Override
+            public void OnFailure(String message) {
+                CallbackUtils.onUnsuccessfulRequestWithSpinner(PlainMemeGalleryActivity.this, message, mLoading);
             }
         });
     }

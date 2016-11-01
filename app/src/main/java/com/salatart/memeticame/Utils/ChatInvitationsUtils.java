@@ -24,28 +24,23 @@ import okhttp3.Response;
  */
 
 public class ChatInvitationsUtils {
-    public static void indexRequest(final Activity activity, Request request, final OnRequestIndexListener<ChatInvitation> listener) {
+    public static void indexRequest(Request request, final OnRequestIndexListener<ChatInvitation> listener) {
         HttpClient.getInstance().newCall(request).enqueue(new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
-                CallbackUtils.onUnsuccessfulRequest(activity, "Error");
+                listener.OnFailure("Error");
             }
 
             @Override
             public void onResponse(Call call, Response response) throws IOException {
-                if (activity == null) {
-                    response.body().close();
-                    return;
-                }
-
                 if (response.isSuccessful()) {
                     try {
                         listener.OnSuccess(ParserUtils.chatInvitationsFromJsonArray(new JSONArray(response.body().string())));
                     } catch (JSONException e) {
-                        CallbackUtils.onUnsuccessfulRequest(activity, "Error");
+                        listener.OnFailure("Error");
                     }
                 } else {
-                    CallbackUtils.onUnsuccessfulRequest(activity, HttpClient.parseErrorMessage(response));
+                    listener.OnFailure(HttpClient.parseErrorMessage(response));
                 }
 
                 response.body().close();

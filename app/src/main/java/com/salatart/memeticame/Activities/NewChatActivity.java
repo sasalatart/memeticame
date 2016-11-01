@@ -12,9 +12,11 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.salatart.memeticame.Listeners.OnRequestShowListener;
 import com.salatart.memeticame.Models.Chat;
 import com.salatart.memeticame.Models.User;
 import com.salatart.memeticame.R;
+import com.salatart.memeticame.Utils.CallbackUtils;
 import com.salatart.memeticame.Utils.ChatUtils;
 import com.salatart.memeticame.Utils.Routes;
 import com.salatart.memeticame.Utils.SessionUtils;
@@ -67,15 +69,27 @@ public class NewChatActivity extends AppCompatActivity {
         return true;
     }
 
-    public void createChat(View view) {
+    public void createChat(final View submitButton) {
         String title = this.mChatNameInput.getText().toString();
         if (title.isEmpty()) {
             Toast.makeText(getApplicationContext(), "Title can't be blank", Toast.LENGTH_SHORT).show();
             return;
         }
 
+        submitButton.setEnabled(false);
         Request request = Routes.chatsCreate(getApplicationContext(), title, new ArrayList<>(Arrays.asList(mUser)), false);
-        ChatUtils.createRequest(NewChatActivity.this, request, view);
+        ChatUtils.createRequest(request, new OnRequestShowListener<Chat>() {
+            @Override
+            public void OnSuccess(Chat chat) {
+                startActivity(ChatActivity.getIntent(NewChatActivity.this, chat));
+                finish();
+            }
+
+            @Override
+            public void OnFailure(String message) {
+                CallbackUtils.onUnsuccessfulSubmit(NewChatActivity.this, message, submitButton);
+            }
+        });
     }
 
     public void setCurrentChats(final ArrayList<Chat> currentChats) {

@@ -1,23 +1,18 @@
 package com.salatart.memeticame.Activities;
 
-import android.Manifest;
 import android.app.DownloadManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.graphics.Color;
 import android.net.Uri;
 import android.os.AsyncTask;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
 import android.provider.MediaStore;
-import android.support.annotation.NonNull;
-import android.support.v4.content.ContextCompat;
 import android.support.v4.content.FileProvider;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
@@ -46,6 +41,7 @@ import com.salatart.memeticame.Models.MessageCount;
 import com.salatart.memeticame.Models.User;
 import com.salatart.memeticame.R;
 import com.salatart.memeticame.Utils.AudioRecorderManager;
+import com.salatart.memeticame.Utils.CallbackUtils;
 import com.salatart.memeticame.Utils.ChatUtils;
 import com.salatart.memeticame.Utils.FileUtils;
 import com.salatart.memeticame.Utils.FilterUtils;
@@ -65,7 +61,6 @@ import butterknife.ButterKnife;
 import okhttp3.Request;
 
 public class ChatActivity extends AppCompatActivity {
-    public static final int PERMISSIONS_CODE = 200;
     public static final String PICTURE_STATE = "pictureState";
     public static final String VIDEO_STATE = "videoState";
 
@@ -80,10 +75,6 @@ public class ChatActivity extends AppCompatActivity {
 
     private int mRetryMultiplier = 5;
     private int mMaximumTries = 5;
-    private boolean mPermissionToRecordAudio = false;
-    private boolean mPermissionToUseCamera = false;
-    private boolean mPermissionToWrite = false;
-    private String[] mPermissions = {"android.permission.RECORD_AUDIO", "android.permission.CAMERA", "android.permission.WRITE_EXTERNAL_STORAGE"};
 
     private Chat mChat;
     private MessageCount mMessageCount;
@@ -148,10 +139,6 @@ public class ChatActivity extends AppCompatActivity {
         if (savedInstanceState != null) {
             mCurrentImageUri = savedInstanceState.getParcelable(PICTURE_STATE);
             mCurrentVideoUri = savedInstanceState.getParcelable(VIDEO_STATE);
-        }
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && !hasMediaPermissions()) {
-            requestPermissions(mPermissions, PERMISSIONS_CODE);
         }
 
         ActionBar actionBar = getSupportActionBar();
@@ -239,11 +226,17 @@ public class ChatActivity extends AppCompatActivity {
     }
 
     public void getChat() {
-        ChatUtils.showRequest(ChatActivity.this, mChat, new OnRequestShowListener() {
+        Request request = Routes.chatShow(ChatActivity.this, mChat);
+        ChatUtils.showRequest(request, new OnRequestShowListener() {
             @Override
             public void OnSuccess(Object chat) {
                 mChat = (Chat) chat;
                 setAdapter();
+            }
+
+            @Override
+            public void OnFailure(String message) {
+                CallbackUtils.onUnsuccessfulRequest(ChatActivity.this, message);
             }
         });
     }
@@ -494,30 +487,6 @@ public class ChatActivity extends AppCompatActivity {
             Uri memeUri = (Uri) data.getExtras().get(Attachment.PARCELABLE_KEY);
             setCurrentAttachmentFromUri(memeUri);
         }
-    }
-
-    @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-
-        switch (requestCode) {
-            case PERMISSIONS_CODE:
-                mPermissionToRecordAudio = grantResults[0] == PackageManager.PERMISSION_GRANTED;
-                mPermissionToUseCamera = grantResults[1] == PackageManager.PERMISSION_GRANTED;
-                mPermissionToWrite = (grantResults[2] == PackageManager.PERMISSION_GRANTED);
-                break;
-        }
-
-        if (!mPermissionToRecordAudio || !mPermissionToUseCamera || !mPermissionToWrite) {
-            ChatActivity.super.finish();
-        }
-    }
-
-    private boolean hasMediaPermissions() {
-        boolean canRecordAudio = ContextCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED;
-        boolean canUseCamera = ContextCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED;
-        boolean canWriteToStorage = ContextCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED;
-        return canRecordAudio && canUseCamera && canWriteToStorage;
     }
 
     private class UpdaterAsyncTask extends AsyncTask {

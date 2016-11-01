@@ -13,8 +13,11 @@ import android.widget.ListView;
 import android.widget.Toast;
 
 import com.salatart.memeticame.Listeners.OnContactsReadListener;
+import com.salatart.memeticame.Listeners.OnRequestShowListener;
+import com.salatart.memeticame.Models.Chat;
 import com.salatart.memeticame.Models.User;
 import com.salatart.memeticame.R;
+import com.salatart.memeticame.Utils.CallbackUtils;
 import com.salatart.memeticame.Utils.ChatUtils;
 import com.salatart.memeticame.Utils.ContactsUtils;
 import com.salatart.memeticame.Utils.Routes;
@@ -60,15 +63,27 @@ public class NewChatGroupActivity extends AppCompatActivity {
         return true;
     }
 
-    public void createGroup(View view) {
+    public void createGroup(final View submitButton) {
         String title = mGroupNameInput.getText().toString();
         if (title.isEmpty()) {
             Toast.makeText(NewChatGroupActivity.this, "You must choose a name before creating a group.", Toast.LENGTH_LONG).show();
             return;
         }
 
+        submitButton.setEnabled(false);
         Request request = Routes.chatsCreate(getApplicationContext(), title, mSelectedContacts, true);
-        ChatUtils.createRequest(NewChatGroupActivity.this, request, view);
+        ChatUtils.createRequest(request, new OnRequestShowListener<Chat>() {
+            @Override
+            public void OnSuccess(Chat chat) {
+                startActivity(ChatActivity.getIntent(NewChatGroupActivity.this, chat));
+                finish();
+            }
+
+            @Override
+            public void OnFailure(String message) {
+                CallbackUtils.onUnsuccessfulSubmit(NewChatGroupActivity.this, message, submitButton);
+            }
+        });
     }
 
     public void setContacts() {
@@ -91,6 +106,11 @@ public class NewChatGroupActivity extends AppCompatActivity {
             public void OnRead(ArrayList<User> intersectedContacts, ArrayList<User> localContacts) {
                 mContacts = intersectedContacts;
                 setAdapter();
+            }
+
+            @Override
+            public void OnFailure(String message) {
+                CallbackUtils.onUnsuccessfulRequestWithSpinner(NewChatGroupActivity.this, message, mLoading);
             }
         });
     }

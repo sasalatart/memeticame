@@ -23,6 +23,7 @@ import com.salatart.memeticame.Models.Message;
 import com.salatart.memeticame.Models.MessageCount;
 import com.salatart.memeticame.Models.User;
 import com.salatart.memeticame.R;
+import com.salatart.memeticame.Utils.CallbackUtils;
 import com.salatart.memeticame.Utils.ChatUtils;
 import com.salatart.memeticame.Utils.FilterUtils;
 import com.salatart.memeticame.Utils.Routes;
@@ -165,7 +166,7 @@ public class ChatsFragment extends Fragment {
 
     public void showChats() {
         Request request = Routes.chatsIndex(getActivity());
-        ChatUtils.indexRequest(getActivity(), request, mLoading, new OnRequestIndexListener<Chat>() {
+        ChatUtils.indexRequest(request, new OnRequestIndexListener<Chat>() {
             @Override
             public void OnSuccess(ArrayList<Chat> chats) {
                 mChats = chats;
@@ -178,6 +179,11 @@ public class ChatsFragment extends Fragment {
                     }
                 });
                 MessageCount.moveOrUpdateAll(mChats);
+            }
+
+            @Override
+            public void OnFailure(String message) {
+                CallbackUtils.onUnsuccessfulRequestWithSpinner(getActivity(), message, mLoading);
             }
         });
     }
@@ -194,7 +200,7 @@ public class ChatsFragment extends Fragment {
                 .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int whichButton) {
                         Request request = Routes.chatLeave(getActivity(), chat.getId());
-                        ChatUtils.leaveRequest(getActivity(), request, new OnRequestListener() {
+                        ChatUtils.leaveRequest(request, new OnRequestListener() {
                             @Override
                             public void OnSuccess() {
                                 getActivity().runOnUiThread(new Runnable() {
@@ -205,6 +211,11 @@ public class ChatsFragment extends Fragment {
                                         Toast.makeText(getActivity(), "You have left the chat", Toast.LENGTH_SHORT).show();
                                     }
                                 });
+                            }
+
+                            @Override
+                            public void OnFailure(String message) {
+                                CallbackUtils.onUnsuccessfulRequest(getActivity(), message);
                             }
                         });
                     }

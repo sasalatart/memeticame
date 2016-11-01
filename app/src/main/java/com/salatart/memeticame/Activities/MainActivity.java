@@ -1,7 +1,9 @@
 package com.salatart.memeticame.Activities;
 
+import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.provider.ContactsContract;
 import android.support.design.widget.TabLayout;
@@ -9,6 +11,7 @@ import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.Toast;
 
 import com.salatart.memeticame.Fragments.ChatInvitationsFragment;
 import com.salatart.memeticame.Fragments.ChatsFragment;
@@ -17,19 +20,25 @@ import com.salatart.memeticame.Models.Chat;
 import com.salatart.memeticame.Models.ChatInvitation;
 import com.salatart.memeticame.Models.User;
 import com.salatart.memeticame.R;
+import com.salatart.memeticame.Utils.ContactsUtils;
+import com.salatart.memeticame.Utils.FileUtils;
 import com.salatart.memeticame.Utils.SessionUtils;
 import com.salatart.memeticame.Views.ViewPagerAdapter;
 
 import io.realm.Realm;
 
-import static com.salatart.memeticame.Utils.ContactsUtils.PERMISSIONS_REQUEST_READ_CONTACTS;
 import static com.salatart.memeticame.Utils.FilterUtils.REQUEST_NEW_CONTACT;
 
 public class MainActivity extends AppCompatActivity implements ChatsFragment.OnChatSelected, ContactsFragment.OnContactSelected {
+    public static final int PERMISSIONS_REQUEST_READ_CONTACTS = 101;
+    public static final int PERMISSIONS_REQUEST_MEDIA = 200;
 
     private ChatsFragment mChatsFragment;
     private ContactsFragment mContactsFragment;
     private ChatInvitationsFragment mChatInvitationsFragment;
+
+    private String[] mMediaPermissions = {"android.permission.RECORD_AUDIO", "android.permission.CAMERA", "android.permission.WRITE_EXTERNAL_STORAGE"};
+    private String[] mContactsPermissions = {Manifest.permission.READ_CONTACTS};
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -37,6 +46,14 @@ public class MainActivity extends AppCompatActivity implements ChatsFragment.OnC
         setContentView(R.layout.activity_main);
 
         Realm.init(this);
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && !FileUtils.hasMediaPermissions(MainActivity.this)) {
+            requestPermissions(mMediaPermissions, PERMISSIONS_REQUEST_MEDIA);
+        }
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && !ContactsUtils.hasContactsPermissions(MainActivity.this)) {
+            requestPermissions(mContactsPermissions, PERMISSIONS_REQUEST_READ_CONTACTS);
+        }
 
         Bundle data = getIntent().getExtras();
         setupViewPager(data);
@@ -111,7 +128,11 @@ public class MainActivity extends AppCompatActivity implements ChatsFragment.OnC
 
     @Override
     public void OnChatSelected(Chat chat) {
-        startActivity(ChatActivity.getIntent(getApplicationContext(), chat));
+        if (FileUtils.hasMediaPermissions(MainActivity.this)) {
+            startActivity(ChatActivity.getIntent(getApplicationContext(), chat));
+        } else {
+            Toast.makeText(MainActivity.this, "You do not have media permissions.", Toast.LENGTH_LONG).show();
+        }
     }
 
     @Override

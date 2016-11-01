@@ -1,9 +1,5 @@
 package com.salatart.memeticame.Utils;
 
-import android.app.Activity;
-import android.view.View;
-
-import com.salatart.memeticame.Activities.ChatActivity;
 import com.salatart.memeticame.Listeners.OnRequestIndexListener;
 import com.salatart.memeticame.Listeners.OnRequestListener;
 import com.salatart.memeticame.Listeners.OnRequestShowListener;
@@ -25,11 +21,11 @@ import okhttp3.Response;
  */
 
 public class ChatUtils {
-    public static void indexRequest(final Activity activity, Request request, final com.wang.avi.AVLoadingIndicatorView loadingIndex, final OnRequestIndexListener<Chat> listener) {
+    public static void indexRequest(Request request, final OnRequestIndexListener<Chat> listener) {
         HttpClient.getInstance().newCall(request).enqueue(new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
-                CallbackUtils.onUnsuccessfulRequestWithSpinner(activity, "Error", loadingIndex);
+                listener.OnFailure("Error");
             }
 
             @Override
@@ -37,29 +33,21 @@ public class ChatUtils {
                 if (response.isSuccessful()) {
                     try {
                         listener.OnSuccess(ParserUtils.chatsFromJsonArray(new JSONArray(response.body().string())));
-
-                        activity.runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                loadingIndex.hide();
-                            }
-                        });
                     } catch (JSONException e) {
-                        CallbackUtils.onUnsuccessfulRequestWithSpinner(activity, "Error", loadingIndex);
+                        listener.OnFailure("Error");
                     }
                 } else {
-                    CallbackUtils.onUnsuccessfulRequestWithSpinner(activity, HttpClient.parseErrorMessage(response), loadingIndex);
+                    listener.OnFailure(HttpClient.parseErrorMessage(response));
                 }
             }
         });
     }
 
-    public static void showRequest(final Activity activity, final Chat chat, final OnRequestShowListener listener) {
-        Request request = Routes.chatShow(activity, chat);
+    public static void showRequest(Request request, final OnRequestShowListener listener) {
         HttpClient.getInstance().newCall(request).enqueue(new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
-                CallbackUtils.onUnsuccessfulRequest(activity, "Error");
+                listener.OnFailure("Error");
             }
 
             @Override
@@ -68,47 +56,44 @@ public class ChatUtils {
                     try {
                         listener.OnSuccess(ParserUtils.chatFromJson(new JSONObject(response.body().string())));
                     } catch (JSONException e) {
-                        CallbackUtils.onUnsuccessfulRequest(activity, "Error");
+                        listener.OnFailure("Error");
                     }
                 } else {
-                    CallbackUtils.onUnsuccessfulRequest(activity, "Could not retrieve chat");
+                    listener.OnFailure("Could not retrieve chat");
                 }
                 response.body().close();
             }
         });
     }
 
-    public static void createRequest(final Activity activity, Request request, final View submitButton) {
-        submitButton.setEnabled(false);
+    public static void createRequest(Request request, final OnRequestShowListener listener) {
         HttpClient.getInstance().newCall(request).enqueue(new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
-                CallbackUtils.onUnsuccessfulSubmit(activity, "Error", submitButton);
+                listener.OnFailure("Error");
             }
 
             @Override
             public void onResponse(Call call, Response response) throws IOException {
                 if (response.isSuccessful()) {
                     try {
-                        JSONObject jsonChat = new JSONObject(response.body().string());
-                        activity.startActivity(ChatActivity.getIntent(activity, ParserUtils.chatFromJson(jsonChat)));
-                        activity.finish();
+                        listener.OnSuccess(ParserUtils.chatFromJson(new JSONObject(response.body().string())));
                     } catch (JSONException e) {
-                        CallbackUtils.onUnsuccessfulSubmit(activity, "Error", submitButton);
+                        listener.OnFailure("Error");
                     }
                 } else {
-                    CallbackUtils.onUnsuccessfulSubmit(activity, HttpClient.parseErrorMessage(response), submitButton);
+                    listener.OnFailure(HttpClient.parseErrorMessage(response));
                 }
                 response.body().close();
             }
         });
     }
 
-    public static void leaveRequest(final Activity activity, Request request, final OnRequestListener listener) {
+    public static void leaveRequest(Request request, final OnRequestListener listener) {
         HttpClient.getInstance().newCall(request).enqueue(new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
-                CallbackUtils.onUnsuccessfulRequest(activity, "Error");
+                listener.OnFailure("Error");
             }
 
             @Override
@@ -116,7 +101,7 @@ public class ChatUtils {
                 if (response.isSuccessful()) {
                     listener.OnSuccess();
                 } else {
-                    CallbackUtils.onUnsuccessfulRequest(activity, HttpClient.parseErrorMessage(response));
+                    listener.OnFailure(HttpClient.parseErrorMessage(response));
                 }
                 response.body().close();
             }

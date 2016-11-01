@@ -114,6 +114,7 @@ public class MessagesAdapter extends ArrayAdapter<Message> {
         boolean isImage = attachment.isImage();
         boolean isVideo = attachment.isVideo();
         boolean isAudio = attachment.isAudio();
+        boolean isMeme = attachment.isMeme();
         boolean isMemeaudio = attachment.isMemeaudio();
 
         if (fileExists && !isMemeaudio) {
@@ -124,6 +125,8 @@ public class MessagesAdapter extends ArrayAdapter<Message> {
                 uri = attachment.getMemeaudioImagetUrl();
             }
             attachment.setUri(uri.toString());
+        } else if (isMeme && (attachment.getSize() / 1024 < 250)) {
+            FileUtils.downloadFile(getContext(), Uri.parse(attachment.getStringUri()), attachment.getName());
         }
 
         ImageView attachmentType = (ImageView) view.findViewById(R.id.label_attachment_type);

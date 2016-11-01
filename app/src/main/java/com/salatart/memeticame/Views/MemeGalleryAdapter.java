@@ -12,6 +12,7 @@ import android.widget.TextView;
 import com.bumptech.glide.Glide;
 import com.salatart.memeticame.Models.Attachment;
 import com.salatart.memeticame.R;
+import com.salatart.memeticame.Utils.MemeUtils;
 
 import java.util.ArrayList;
 
@@ -50,7 +51,7 @@ public class MemeGalleryAdapter extends ArrayAdapter {
 
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
-        Attachment meme = mMemes.get(position);
+        Attachment memeAttachment = mMemes.get(position);
 
         if (convertView == null) {
             LayoutInflater inflater = ((Activity) mContext).getLayoutInflater();
@@ -58,13 +59,13 @@ public class MemeGalleryAdapter extends ArrayAdapter {
         }
 
         ImageView imageMeme = (ImageView) convertView.findViewById(R.id.image_meme);
-        setImage(imageMeme, meme.getShowableStringUri(mContext));
+        setImage(imageMeme, memeAttachment.getShowableStringUri(mContext));
 
         ImageView imageAudioLabel = (ImageView) convertView.findViewById(R.id.label_contains_audio);
-        imageAudioLabel.setVisibility(meme.isMemeaudio() ? View.VISIBLE : View.GONE);
+        imageAudioLabel.setVisibility(memeAttachment.isMemeaudio() ? View.VISIBLE : View.GONE);
 
         TextView textMemeName = (TextView) convertView.findViewById(R.id.label_meme_name);
-        textMemeName.setText(meme.getName());
+        textMemeName.setText(MemeUtils.cleanName(memeAttachment.getName()));
 
         return convertView;
     }

@@ -7,7 +7,7 @@ import com.salatart.memeticame.Models.Message;
  */
 
 public interface OnSendMessageListener {
-    public void OnSuccess(Message message);
+    void OnSuccess(Message message);
 
-    public void OnFailure();
+    void OnFailure();
 }
