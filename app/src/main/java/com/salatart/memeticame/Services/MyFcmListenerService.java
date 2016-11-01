@@ -19,6 +19,7 @@ import com.salatart.memeticame.Models.MessageCount;
 import com.salatart.memeticame.Models.User;
 import com.salatart.memeticame.R;
 import com.salatart.memeticame.Utils.FilterUtils;
+import com.salatart.memeticame.Utils.NotificationUtils;
 import com.salatart.memeticame.Utils.ParserUtils;
 import com.salatart.memeticame.Utils.SessionUtils;
 
@@ -59,6 +60,9 @@ public class MyFcmListenerService extends FirebaseMessagingService {
         } else if (collapseKey.equals("users_invited")) {
             broadcastUsersInvited(data);
         }
+
+        NotificationUtils.playNotificationSound(getApplicationContext());
+
     }
 
     public void broadcastNewMessage(Map data) {
@@ -179,4 +183,5 @@ public class MyFcmListenerService extends FirebaseMessagingService {
             Log.e("ERROR", e.toString());
         }
     }
+
 }

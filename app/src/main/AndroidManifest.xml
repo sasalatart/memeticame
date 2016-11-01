@@ -65,8 +65,10 @@
             android:exported="false" />
 
         <activity android:name=".Activities.PlainMemeGalleryActivity" />
-        <activity android:name=".Activities.NewMemeActivity" />
+        <activity android:name=".Activities.NewMemeActivity"
+            android:screenOrientation="portrait"/>
         <activity android:name=".Activities.MemeGalleryActivity"></activity>
+>
     </application>
 
 </manifest>
