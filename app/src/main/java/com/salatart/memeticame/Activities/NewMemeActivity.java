@@ -26,6 +26,7 @@ import com.salatart.memeticame.R;
 import com.salatart.memeticame.Utils.AudioRecorderManager;
 import com.salatart.memeticame.Utils.FileUtils;
 import com.salatart.memeticame.Utils.FilterUtils;
+import com.salatart.memeticame.Utils.MemeUtils;
 import com.salatart.memeticame.Utils.ZipManager;
 import com.salatart.memeticame.Views.CanvasView;
 
@@ -118,7 +119,7 @@ public class NewMemeActivity extends AppCompatActivity {
         }
 
         Bitmap meme = mCanvas.getBitmap();
-        String imagePath = FileUtils.getMemeticameMemesDirectory() + "/" + Meme.createName(mMemeName.getText().toString());
+        String imagePath = FileUtils.getMemeticameMemesDirectory() + "/" + MemeUtils.createName(mMemeName.getText().toString());
         File memeFile = new File(imagePath);
         try {
             memeFile.createNewFile();
