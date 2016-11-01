@@ -21,12 +21,9 @@ import android.graphics.Typeface;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
-import android.widget.Button;
-import android.widget.EditText;
 
-import com.salatart.memeticame.Listeners.OnConfirmMemetextListener;
-import com.salatart.memeticame.Models.Memetext;
-import com.salatart.memeticame.R;
+import com.salatart.memeticame.Listeners.OnConfirmMemeListener;
+import com.salatart.memeticame.Models.Meme;
 
 import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
@@ -63,7 +60,7 @@ public class CanvasView extends View {
 
     private List<Path>  pathLists  = new ArrayList<Path>();
     private List<Paint> paintLists = new ArrayList<Paint>();
-    private List<Memetext> memetextLists = new ArrayList<>();
+    private List<Meme> memeLists = new ArrayList<>();
 
     // for Eraser
     private int baseColor = Color.WHITE;
@@ -289,17 +286,17 @@ public class CanvasView extends View {
 
     private void drawTextList(Canvas canvas) {
 
-        if(memetextLists.size() == 0)
+        if(memeLists.size() == 0)
             return;
 
         this.textPaint = this.createPaint();
         this.textPaint.setTextAlign(Paint.Align.LEFT);
 
-        for(Memetext memetext : memetextLists){
-            this.textPaint.setTextSize(memetext.getFontSize());
-            this.textPaint.setTypeface(memetext.getFontFamily());
-            this.textPaint.setColor(memetext.getPaintColor());
-            canvas.drawText(memetext.getText(), memetext.getPositionX(), memetext.getPositionY(), this.textPaint);
+        for(Meme meme : memeLists){
+            this.textPaint.setTextSize(meme.getFontSize());
+            this.textPaint.setTypeface(meme.getFontFamily());
+            this.textPaint.setColor(meme.getPaintColor());
+            canvas.drawText(meme.getText(), meme.getPositionX(), meme.getPositionY(), this.textPaint);
         }
     }
 
@@ -346,10 +343,10 @@ public class CanvasView extends View {
         final MemeDialog dialog = new MemeDialog(context,x,y);
 
 
-        dialog.setConfirmMemetextListener(new OnConfirmMemetextListener() {
+        dialog.setConfirmMemeListener(new OnConfirmMemeListener() {
             @Override
-            public void onConfirm(Memetext memetext) {
-                memetextLists.add(memetext);
+            public void onConfirm(Meme meme) {
+                memeLists.add(meme);
             }
         });
 
@@ -554,10 +551,10 @@ public class CanvasView extends View {
     }
 
     public void undoText() {
-        if(this.memetextLists.size() == 0)
+        if(this.memeLists.size() == 0)
             return;
 
-        this.memetextLists.remove(this.memetextLists.size() - 1);
+        this.memeLists.remove(this.memeLists.size() - 1);
         this.invalidate();
     }
 

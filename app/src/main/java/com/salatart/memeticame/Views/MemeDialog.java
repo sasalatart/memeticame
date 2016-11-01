@@ -2,8 +2,6 @@ package com.salatart.memeticame.Views;
 
 import android.app.Dialog;
 import android.content.Context;
-import android.graphics.Color;
-import android.graphics.Typeface;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
@@ -13,8 +11,8 @@ import android.widget.Spinner;
 
 import com.rtugeek.android.colorseekbar.ColorSeekBar;
 import com.salatart.memeticame.Enums.TypefaceConverter;
-import com.salatart.memeticame.Listeners.OnConfirmMemetextListener;
-import com.salatart.memeticame.Models.Memetext;
+import com.salatart.memeticame.Listeners.OnConfirmMemeListener;
+import com.salatart.memeticame.Models.Meme;
 import com.salatart.memeticame.R;
 
 /**
@@ -23,21 +21,19 @@ import com.salatart.memeticame.R;
 
 public class MemeDialog extends Dialog {
 
-    OnConfirmMemetextListener mListener;
+    OnConfirmMemeListener mListener;
     private int mColorInt;
 
-    public MemeDialog (final Context context, final float x, final float y) {
+    public MemeDialog(final Context context, final float x, final float y) {
         super(context);
 
-        this.setContentView(R.layout.dialog_add_text_memetext);
+        this.setContentView(R.layout.dialog_add_text_meme);
         this.setTitle("Set meme text");
-        final EditText text = (EditText) MemeDialog.this.findViewById(R.id.memetext);
+        final EditText text = (EditText) MemeDialog.this.findViewById(R.id.input_meme_name);
 
-        final Spinner fontFamilySpinner =
-                (Spinner) MemeDialog.this.findViewById(R.id.font_family_spinner);
+        final Spinner fontFamilySpinner = (Spinner) MemeDialog.this.findViewById(R.id.font_family_spinner);
 
-        ArrayAdapter<TypefaceConverter> adapter = new ArrayAdapter<>(context,
-                android.R.layout.simple_spinner_item, TypefaceConverter.values());
+        ArrayAdapter<TypefaceConverter> adapter = new ArrayAdapter<>(context, android.R.layout.simple_spinner_item, TypefaceConverter.values());
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         fontFamilySpinner.setAdapter(adapter);
 
@@ -48,8 +44,6 @@ public class MemeDialog extends Dialog {
         colorSeekBar.setBarHeight(7);
         mColorInt = colorSeekBar.getColor();
         text.setTextColor(mColorInt);
-
-
 
         colorSeekBar.setOnColorChangeListener(new ColorSeekBar.OnColorChangeListener() {
             @Override
@@ -63,20 +57,17 @@ public class MemeDialog extends Dialog {
         okButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                final EditText text = (EditText) MemeDialog.this.findViewById(R.id.input_meme_name);
+                if (mListener != null && !text.getText().toString().isEmpty()) {
+                    final SeekBar fontSizeBar = (SeekBar) MemeDialog.this.findViewById(R.id.font_size_bar);
 
-                final EditText text = (EditText) MemeDialog.this.findViewById(R.id.memetext);
-                if(mListener != null && !text.getText().toString().isEmpty()) {
-                    final SeekBar fontSizeBar =
-                            (SeekBar) MemeDialog.this.findViewById(R.id.font_size_bar);
+                    Meme meme = new Meme(text.getText().toString(), x, y);
+                    meme.setFontSize(fontSizeBar.getProgress() + 24F);
+                    meme.setPaintColor(mColorInt);
 
-                    Memetext memetext = new Memetext(text.getText().toString(), x, y );
-                    memetext.setFontSize(fontSizeBar.getProgress() + 24F);
-                    memetext.setPaintColor(mColorInt);
-
-                    TypefaceConverter typefaceConverter =
-                            (TypefaceConverter) fontFamilySpinner.getSelectedItem();
-                    memetext.setFontFamily(typefaceConverter.getTypeface());
-                    mListener.onConfirm(memetext);
+                    TypefaceConverter typefaceConverter = (TypefaceConverter) fontFamilySpinner.getSelectedItem();
+                    meme.setFontFamily(typefaceConverter.getTypeface());
+                    mListener.onConfirm(meme);
                 }
 
                 MemeDialog.this.dismiss();
@@ -94,12 +85,12 @@ public class MemeDialog extends Dialog {
 
     @Override
     public void show() {
-        final EditText text = (EditText) this.findViewById(R.id.memetext);
+        final EditText text = (EditText) this.findViewById(R.id.input_meme_name);
         text.setText("");
         super.show();
     }
 
-    public void setConfirmMemetextListener(OnConfirmMemetextListener listener){
+    public void setConfirmMemeListener(OnConfirmMemeListener listener) {
         mListener = listener;
     }
 }

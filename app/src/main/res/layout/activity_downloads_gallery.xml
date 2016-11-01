@@ -8,11 +8,10 @@
     android:paddingLeft="@dimen/activity_horizontal_margin"
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
-    tools:context="com.salatart.memeticame.Activities.GalleryActivity">
+    tools:context="com.salatart.memeticame.Activities.DownloadsGalleryActivity">
 
     <ListView
         android:id="@+id/list_view_gallery"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
-
 </LinearLayout>
