@@ -1,42 +1,46 @@
 package com.salatart.memeticame.Views;
 
+import android.app.Activity;
 import android.content.Context;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.BaseAdapter;
-import android.widget.GridView;
+import android.widget.ArrayAdapter;
 import android.widget.ImageView;
+import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
+import com.salatart.memeticame.Models.Attachment;
 import com.salatart.memeticame.R;
-import com.salatart.memeticame.Utils.Routes;
 
 import java.util.ArrayList;
 
-import static android.content.res.Configuration.ORIENTATION_LANDSCAPE;
-
 /**
- * Created by sasalatart on 10/26/16.
+ * Created by sasalatart on 10/31/16.
  */
 
-public class MemeGalleryAdapter extends BaseAdapter {
+public class MemeGalleryAdapter extends ArrayAdapter {
+
     private Context mContext;
+    private int mLayoutResourceId;
+    private ArrayList<Attachment> mMemes;
 
-    private ArrayList<String[]> mUrls;
+    public MemeGalleryAdapter(Context context, int layoutResourceId, ArrayList<Attachment> memes) {
+        super(context, layoutResourceId, memes);
 
-    public MemeGalleryAdapter(Context context, ArrayList<String[]> urls) {
         mContext = context;
-        mUrls = urls;
+        mLayoutResourceId = layoutResourceId;
+        mMemes = memes;
     }
 
     @Override
     public int getCount() {
-        return mUrls.size();
+        return mMemes.size();
     }
 
     @Override
     public Object getItem(int position) {
-        return mUrls.get(position);
+        return mMemes.get(position);
     }
 
     @Override
@@ -46,27 +50,28 @@ public class MemeGalleryAdapter extends BaseAdapter {
 
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
-        ImageView imageView;
-        if (convertView == null) {
-            int size = parent.getWidth() / 2;
-            if (mContext.getResources().getConfiguration().orientation == ORIENTATION_LANDSCAPE) {
-                size = (int) (parent.getWidth() / 2.5);
-            }
+        Attachment meme = mMemes.get(position);
 
-            imageView = new ImageView(mContext);
-            imageView.setLayoutParams(new GridView.LayoutParams(size, size));
-            imageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
-        } else {
-            imageView = (ImageView) convertView;
+        if (convertView == null) {
+            LayoutInflater inflater = ((Activity) mContext).getLayoutInflater();
+            convertView = inflater.inflate(mLayoutResourceId, parent, false);
         }
 
-        setImage(imageView, mUrls.get(position)[0]);
-        return imageView;
+        ImageView imageMeme = (ImageView) convertView.findViewById(R.id.image_meme);
+        setImage(imageMeme, meme.getShowableStringUri(mContext));
+
+        ImageView imageAudioLabel = (ImageView) convertView.findViewById(R.id.label_contains_audio);
+        imageAudioLabel.setVisibility(meme.isMemeaudio() ? View.VISIBLE : View.GONE);
+
+        TextView textMemeName = (TextView) convertView.findViewById(R.id.label_meme_name);
+        textMemeName.setText(meme.getName());
+
+        return convertView;
     }
 
-    private void setImage(ImageView view, String url) {
+    private void setImage(ImageView view, String uri) {
         Glide.with(mContext)
-                .load(Routes.DOMAIN + url)
+                .load(uri)
                 .placeholder(R.drawable.ic_access_time_black_24dp)
                 .crossFade()
                 .into(view);

@@ -11,11 +11,11 @@ import android.widget.AdapterView;
 import android.widget.GridView;
 
 import com.salatart.memeticame.Listeners.OnRequestIndexListener;
-import com.salatart.memeticame.Models.Memetext;
+import com.salatart.memeticame.Models.Meme;
 import com.salatart.memeticame.R;
 import com.salatart.memeticame.Utils.PlainMemeUtils;
 import com.salatart.memeticame.Utils.Routes;
-import com.salatart.memeticame.Views.MemeGalleryAdapter;
+import com.salatart.memeticame.Views.PlainMemeGalleryAdapter;
 
 import java.util.ArrayList;
 
@@ -29,7 +29,7 @@ public class PlainMemeGalleryActivity extends AppCompatActivity {
     @BindView(R.id.loading_memes) com.wang.avi.AVLoadingIndicatorView mLoading;
 
     private ArrayList<String[]> mPlainMemes;
-    private MemeGalleryAdapter mAdapter;
+    private PlainMemeGalleryAdapter mAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -61,13 +61,13 @@ public class PlainMemeGalleryActivity extends AppCompatActivity {
                     @Override
                     public void run() {
                         mPlainMemes = plainMemes;
-                        mAdapter = new MemeGalleryAdapter(PlainMemeGalleryActivity.this, mPlainMemes);
+                        mAdapter = new PlainMemeGalleryAdapter(PlainMemeGalleryActivity.this, mPlainMemes);
                         mGridView.setAdapter(mAdapter);
                         mGridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                             @Override
                             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                                 Intent returnIntent = new Intent();
-                                returnIntent.putExtra(Memetext.PARCELABLE_KEY, Routes.DOMAIN + mPlainMemes.get(position)[1]);
+                                returnIntent.putExtra(Meme.URI_KEY, Routes.DOMAIN + mPlainMemes.get(position)[1]);
                                 setResult(Activity.RESULT_OK, returnIntent);
                                 finish();
                             }

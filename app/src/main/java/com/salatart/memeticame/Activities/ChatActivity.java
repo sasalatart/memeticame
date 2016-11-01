@@ -40,7 +40,7 @@ import com.salatart.memeticame.Listeners.OnSendMessageListener;
 import com.salatart.memeticame.Models.Attachment;
 import com.salatart.memeticame.Models.Chat;
 import com.salatart.memeticame.Models.ChatInvitation;
-import com.salatart.memeticame.Models.Memetext;
+import com.salatart.memeticame.Models.Meme;
 import com.salatart.memeticame.Models.Message;
 import com.salatart.memeticame.Models.MessageCount;
 import com.salatart.memeticame.Models.User;
@@ -53,7 +53,6 @@ import com.salatart.memeticame.Utils.MessageUtils;
 import com.salatart.memeticame.Utils.ParserUtils;
 import com.salatart.memeticame.Utils.Routes;
 import com.salatart.memeticame.Utils.SessionUtils;
-import com.salatart.memeticame.Utils.ZipManager;
 import com.salatart.memeticame.Views.MessagesAdapter;
 
 import java.io.File;
@@ -358,14 +357,9 @@ public class ChatActivity extends AppCompatActivity {
         startActivityForResult(FileUtils.getSelectFileIntent("*/*"), FilterUtils.REQUEST_PICK_FILE);
     }
 
-    public void dispatchTakeMemeaudioIntent() {
-        Intent takeMemeaudioIntent = new Intent(ChatActivity.this, NewMemeaudioActivity.class);
-        startActivityForResult(takeMemeaudioIntent, FilterUtils.REQUEST_MEMEAUDIO_FILE);
-    }
-
-    public void dispatchTakeMemetextIntent() {
-        Intent takeMemetextIntent = new Intent(ChatActivity.this, NewMemetextActivity.class);
-        startActivityForResult(takeMemetextIntent, FilterUtils.REQUEST_CREATE_MEMETEXT_FILE);
+    public void dispatchTakeMemeIntent() {
+        Intent takeMemeIntent = new Intent(ChatActivity.this, NewMemeActivity.class);
+        startActivityForResult(takeMemeIntent, FilterUtils.REQUEST_CREATE_MEME);
     }
 
     public void dispatchTakePictureIntent(View view) {
@@ -390,6 +384,10 @@ public class ChatActivity extends AppCompatActivity {
                 startActivityForResult(takeVideoIntent, FilterUtils.REQUEST_VIDEO_CAPTURE);
             }
         }
+    }
+
+    public void dispatchSelectMemeIntent() {
+        startActivityForResult(MemeGalleryActivity.getIntent(ChatActivity.this, 1), FilterUtils.REQUEST_PICK_MEME);
     }
 
     public void toggleRecording(View view) {
@@ -451,9 +449,8 @@ public class ChatActivity extends AppCompatActivity {
             menu.add(Menu.NONE, 0, 0, "Paste");
             menu.add(Menu.NONE, 1, 1, "Cancel");
         } else if (view.getId() == R.id.meme_options) {
-            menu.add(Menu.NONE, 2, 0, "Send memeaudio");
-            menu.add(Menu.NONE, 3, 1, "Send memetext");
-            menu.add(Menu.NONE, 4, 2, "Create memetext");
+            menu.add(Menu.NONE, 2, 1, "Create a meme");
+            menu.add(Menu.NONE, 3, 2, "Pick a meme from gallery");
         }
     }
 
@@ -472,11 +469,9 @@ public class ChatActivity extends AppCompatActivity {
                 toggleAttachmentVisibilities(true);
             }
         } else if (menuItemId == 2) {
-            dispatchTakeMemeaudioIntent();
+            dispatchTakeMemeIntent();
         } else if (menuItemId == 3) {
-            //TODO send memetext
-        } else if (menuItemId == 4) {
-            dispatchTakeMemetextIntent();
+            dispatchSelectMemeIntent();
         }
 
         return true;
@@ -492,12 +487,12 @@ public class ChatActivity extends AppCompatActivity {
             setCurrentAttachmentFromUri(mCurrentImageUri);
         } else if (requestCode == FilterUtils.REQUEST_VIDEO_CAPTURE && resultCode == RESULT_OK) {
             setCurrentAttachmentFromUri(mCurrentVideoUri);
-        } else if (requestCode == FilterUtils.REQUEST_MEMEAUDIO_FILE && resultCode == RESULT_OK && data != null) {
-            Uri memeaudioZipUri = (Uri) data.getExtras().get(ZipManager.PARCELABLE_KEY);
-            setCurrentAttachmentFromUri(memeaudioZipUri);
-        } else if (requestCode == FilterUtils.REQUEST_CREATE_MEMETEXT_FILE && resultCode == RESULT_OK && data != null) {
-            Uri memetextUri = (Uri) data.getExtras().get(Memetext.PARCELABLE_KEY);
-            setCurrentAttachmentFromUri(memetextUri);
+        } else if (requestCode == FilterUtils.REQUEST_CREATE_MEME && resultCode == RESULT_OK && data != null) {
+            Uri memeUri = (Uri) data.getExtras().get(Meme.URI_KEY);
+            setCurrentAttachmentFromUri(memeUri);
+        } else if (requestCode == FilterUtils.REQUEST_PICK_MEME && resultCode == RESULT_OK && data != null) {
+            Uri memeUri = (Uri) data.getExtras().get(Attachment.PARCELABLE_KEY);
+            setCurrentAttachmentFromUri(memeUri);
         }
     }
 

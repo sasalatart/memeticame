@@ -12,15 +12,17 @@ import android.widget.Toast;
 
 import com.salatart.memeticame.Models.Attachment;
 import com.salatart.memeticame.R;
+import com.salatart.memeticame.Utils.AttachmentUtils;
 import com.salatart.memeticame.Utils.FileUtils;
 import com.salatart.memeticame.Views.GalleryAdapter;
 
+import java.io.File;
 import java.util.ArrayList;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-public class GalleryActivity extends AppCompatActivity {
+public class DownloadsGalleryActivity extends AppCompatActivity {
 
     @BindView(R.id.list_view_gallery) ListView mGalleryListView;
 
@@ -30,14 +32,14 @@ public class GalleryActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_gallery);
+        setContentView(R.layout.activity_downloads_gallery);
 
         ButterKnife.bind(this);
 
         ActionBar actionBar = getSupportActionBar();
         actionBar.setDisplayHomeAsUpEnabled(true);
 
-        setTitle("Gallery");
+        setTitle("Downloads Gallery");
 
         setGallery();
     }
@@ -49,15 +51,15 @@ public class GalleryActivity extends AppCompatActivity {
     }
 
     public void setGallery() {
-        mAttachments = FileUtils.getAllDownloadedAttachments(GalleryActivity.this);
-        mAdapter = new GalleryAdapter(GalleryActivity.this, R.layout.list_item_attachment, mAttachments);
+        mAttachments = AttachmentUtils.attachmentsFromDir(DownloadsGalleryActivity.this, new File(FileUtils.getMemeticameDownloadsDirectory()));
+        mAdapter = new GalleryAdapter(DownloadsGalleryActivity.this, R.layout.list_item_attachment, mAttachments);
         mGalleryListView.setAdapter(mAdapter);
         mGalleryListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 Attachment attachment = mAdapter.getItem(position);
-                if (attachment != null && !FileUtils.openFile(GalleryActivity.this, attachment)) {
-                    Toast.makeText(GalleryActivity.this, "Can't open this file.", Toast.LENGTH_SHORT).show();
+                if (attachment != null && !FileUtils.openFile(DownloadsGalleryActivity.this, attachment)) {
+                    Toast.makeText(DownloadsGalleryActivity.this, "Can't open this file.", Toast.LENGTH_SHORT).show();
                 }
             }
         });

@@ -18,7 +18,7 @@ public class FilterUtils {
     public static final int REQUEST_PICK_FILE = 2;
     public static final int REQUEST_IMAGE_CAPTURE = 3;
     public static final int REQUEST_VIDEO_CAPTURE = 4;
-    public static final int REQUEST_MEMEAUDIO_FILE = 5;
-    public static final int REQUEST_CREATE_MEMETEXT_FILE = 6;
-    public static final int REQUEST_PICK_PLAIN_MEME = 7;
+    public static final int REQUEST_CREATE_MEME = 5;
+    public static final int REQUEST_PICK_PLAIN_MEME = 6;
+    public static final int REQUEST_PICK_MEME = 7;
 }

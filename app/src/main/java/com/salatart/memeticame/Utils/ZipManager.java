@@ -27,7 +27,7 @@ public class ZipManager {
 
     public static Uri zip(String[] files, String zipFileName) throws IOException {
         BufferedInputStream origin = null;
-        String zipPath = FileUtils.getMemeticameDirectory() + "/" + zipFileName;
+        String zipPath = FileUtils.getMemeticameMemeaudiosDirectory() + "/" + zipFileName;
         ZipOutputStream out = new ZipOutputStream(new BufferedOutputStream(new FileOutputStream(zipPath)));
         try {
             byte data[] = new byte[BUFFER_SIZE];
@@ -55,17 +55,14 @@ public class ZipManager {
     }
 
     public static boolean fastUnzip(String inputZipFile) {
-        String destinationDirectory = FileUtils.getMemeticameDirectory();
+        String destinationDirectory = FileUtils.getMemeticameUnzipsDirectory();
 
         try {
             List<String> zipFiles = new ArrayList();
 
             File sourceZipFile = new File(inputZipFile);
-
             File unzipDestinationDirectory = new File(destinationDirectory);
-
             ZipFile zipFile = new ZipFile(sourceZipFile, ZipFile.OPEN_READ);
-
             unzipDestinationDirectory.mkdir();
 
             Enumeration zipFileEntries = zipFile.entries();
