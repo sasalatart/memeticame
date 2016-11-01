@@ -14,6 +14,7 @@ import android.widget.ListView;
 import com.salatart.memeticame.Listeners.OnRequestIndexListener;
 import com.salatart.memeticame.Models.ChatInvitation;
 import com.salatart.memeticame.R;
+import com.salatart.memeticame.Utils.CallbackUtils;
 import com.salatart.memeticame.Utils.ChatInvitationsUtils;
 import com.salatart.memeticame.Utils.FilterUtils;
 import com.salatart.memeticame.Utils.Routes;
@@ -68,7 +69,6 @@ public class ChatInvitationsFragment extends Fragment {
         final View view = inflater.inflate(R.layout.fragment_chat_invitations, container, false);
 
         mChatInvitationsListView = (ListView) view.findViewById(R.id.list_view_chat_invitations);
-
         mLoading = (com.wang.avi.AVLoadingIndicatorView) view.findViewById(R.id.loading_chat_invitations);
 
         setChatInvitations();
@@ -93,7 +93,7 @@ public class ChatInvitationsFragment extends Fragment {
     public void setChatInvitations() {
         mLoading.show();
         Request request = Routes.chatInvitationsIndex(getActivity());
-        ChatInvitationsUtils.indexRequest(getActivity(), request, new OnRequestIndexListener<ChatInvitation>() {
+        ChatInvitationsUtils.indexRequest(request, new OnRequestIndexListener<ChatInvitation>() {
             @Override
             public void OnSuccess(ArrayList<ChatInvitation> chatInvitations) {
                 mChatInvitations = chatInvitations;
@@ -105,6 +105,11 @@ public class ChatInvitationsFragment extends Fragment {
                         mLoading.hide();
                     }
                 });
+            }
+
+            @Override
+            public void OnFailure(String message) {
+                CallbackUtils.onUnsuccessfulRequestWithSpinner(getActivity(), message, mLoading);
             }
         });
     }

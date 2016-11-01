@@ -1,8 +1,5 @@
 package com.salatart.memeticame.Utils;
 
-import android.app.Activity;
-import android.util.Log;
-
 import com.salatart.memeticame.Listeners.OnRequestIndexListener;
 
 import org.json.JSONArray;
@@ -21,12 +18,11 @@ import okhttp3.Response;
  */
 
 public class PlainMemeUtils {
-    public static void indexRequest(final Activity activity, Request request, final com.wang.avi.AVLoadingIndicatorView loadingSpinner, final OnRequestIndexListener<String[]> listener) {
-        loadingSpinner.show();
+    public static void indexRequest(Request request, final OnRequestIndexListener<String[]> listener) {
         HttpClient.getInstance().newCall(request).enqueue(new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
-                CallbackUtils.onUnsuccessfulRequestWithSpinner(activity, "Error", loadingSpinner);
+                listener.OnFailure("Error");
             }
 
             @Override
@@ -36,11 +32,10 @@ public class PlainMemeUtils {
                         JSONObject jsonResponse = new JSONObject(response.body().string());
                         listener.OnSuccess(ParserUtils.memesFromJsonArray(new JSONArray(jsonResponse.getString("plain_memes"))));
                     } catch (JSONException e) {
-                        Log.e("ERROR", e.toString());
-                        CallbackUtils.onUnsuccessfulRequestWithSpinner(activity, "Error", loadingSpinner);
+                        listener.OnFailure("Error");
                     }
                 } else {
-                    CallbackUtils.onUnsuccessfulRequestWithSpinner(activity, HttpClient.parseErrorMessage(response), loadingSpinner);
+                    listener.OnFailure(HttpClient.parseErrorMessage(response));
                 }
                 response.body().close();
             }

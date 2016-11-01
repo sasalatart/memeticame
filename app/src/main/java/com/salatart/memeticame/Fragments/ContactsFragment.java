@@ -15,6 +15,7 @@ import android.widget.ListView;
 import com.salatart.memeticame.Listeners.OnContactsReadListener;
 import com.salatart.memeticame.Models.User;
 import com.salatart.memeticame.R;
+import com.salatart.memeticame.Utils.CallbackUtils;
 import com.salatart.memeticame.Utils.ContactsUtils;
 import com.salatart.memeticame.Utils.FilterUtils;
 import com.salatart.memeticame.Views.ContactsAdapter;
@@ -94,6 +95,11 @@ public class ContactsFragment extends Fragment {
                 mLocalContacts = localContacts;
                 mContacts = intersectedContacts;
                 setAdapter();
+            }
+
+            @Override
+            public void OnFailure(String message) {
+                CallbackUtils.onUnsuccessfulRequestWithSpinner(getActivity(), message, mLoadingContacts);
             }
         });
     }

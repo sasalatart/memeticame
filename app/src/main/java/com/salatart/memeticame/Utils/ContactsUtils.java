@@ -57,7 +57,7 @@ public class ContactsUtils {
                 HttpClient.getInstance().newCall(request).enqueue(new Callback() {
                     @Override
                     public void onFailure(Call call, IOException e) {
-                        CallbackUtils.onUnsuccessfulRequest(activity, "Error");
+                        listener.OnFailure("error");
                     }
 
                     @Override
@@ -71,10 +71,10 @@ public class ContactsUtils {
                             try {
                                 listener.OnRead(ParserUtils.usersFromJsonArray(new JSONArray(response.body().string())), contacts);
                             } catch (JSONException e) {
-                                CallbackUtils.onUnsuccessfulRequest(activity, e.toString());
+                                listener.OnFailure("error");
                             }
                         } else {
-                            CallbackUtils.onUnsuccessfulRequest(activity, HttpClient.parseErrorMessage(response));
+                            listener.OnFailure("error");
                         }
 
                         response.body().close();

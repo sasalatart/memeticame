@@ -7,5 +7,7 @@ import java.util.ArrayList;
  */
 
 public interface OnRequestIndexListener<T> {
-    public void OnSuccess(ArrayList<T> arrayList);
+    void OnSuccess(ArrayList<T> arrayList);
+
+    void OnFailure(String message);
 }

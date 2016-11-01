@@ -19,6 +19,7 @@ import com.salatart.memeticame.Models.Chat;
 import com.salatart.memeticame.Models.ChatInvitation;
 import com.salatart.memeticame.Models.User;
 import com.salatart.memeticame.R;
+import com.salatart.memeticame.Utils.CallbackUtils;
 import com.salatart.memeticame.Utils.ChatInvitationsUtils;
 import com.salatart.memeticame.Utils.ContactsUtils;
 import com.salatart.memeticame.Utils.FilterUtils;
@@ -136,13 +137,18 @@ public class AddParticipantsActivity extends AppCompatActivity {
 
     public void getInvitations() {
         Request request = Routes.chatInvitationsFromChat(AddParticipantsActivity.this, mChat);
-        ChatInvitationsUtils.indexRequest(AddParticipantsActivity.this, request, new OnRequestIndexListener<ChatInvitation>() {
+        ChatInvitationsUtils.indexRequest(request, new OnRequestIndexListener<ChatInvitation>() {
             @Override
             public void OnSuccess(ArrayList<ChatInvitation> chatInvitations) {
                 for (ChatInvitation chatInvitation : chatInvitations) {
                     mInvitedUsers.add(chatInvitation.getUser());
                 }
                 setAdapter();
+            }
+
+            @Override
+            public void OnFailure(String message) {
+                CallbackUtils.onUnsuccessfulRequest(AddParticipantsActivity.this, message);
             }
         });
     }
@@ -154,6 +160,11 @@ public class AddParticipantsActivity extends AppCompatActivity {
             public void OnRead(ArrayList<User> intersectedContacts, ArrayList<User> localContacts) {
                 mUsers = User.difference(intersectedContacts, mChat.getParticipants());
                 getInvitations();
+            }
+
+            @Override
+            public void OnFailure(String message) {
+                CallbackUtils.onUnsuccessfulRequestWithSpinner(AddParticipantsActivity.this, message, mLoading);
             }
         });
     }

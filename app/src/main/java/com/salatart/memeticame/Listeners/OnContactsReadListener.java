@@ -9,5 +9,7 @@ import java.util.ArrayList;
  */
 
 public interface OnContactsReadListener {
-    public void OnRead(ArrayList<User> intersectedContacts, ArrayList<User> localContacts);
+    void OnRead(ArrayList<User> intersectedContacts, ArrayList<User> localContacts);
+
+    void OnFailure(String message);
 }

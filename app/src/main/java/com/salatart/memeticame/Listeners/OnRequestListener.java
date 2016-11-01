@@ -5,5 +5,7 @@ package com.salatart.memeticame.Listeners;
  */
 
 public interface OnRequestListener {
-    public void OnSuccess();
+    void OnSuccess();
+
+    void OnFailure(String message);
 }

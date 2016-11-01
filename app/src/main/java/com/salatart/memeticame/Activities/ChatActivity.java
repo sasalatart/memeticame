@@ -41,6 +41,7 @@ import com.salatart.memeticame.Models.MessageCount;
 import com.salatart.memeticame.Models.User;
 import com.salatart.memeticame.R;
 import com.salatart.memeticame.Utils.AudioRecorderManager;
+import com.salatart.memeticame.Utils.CallbackUtils;
 import com.salatart.memeticame.Utils.ChatUtils;
 import com.salatart.memeticame.Utils.FileUtils;
 import com.salatart.memeticame.Utils.FilterUtils;
@@ -225,11 +226,17 @@ public class ChatActivity extends AppCompatActivity {
     }
 
     public void getChat() {
-        ChatUtils.showRequest(ChatActivity.this, mChat, new OnRequestShowListener() {
+        Request request = Routes.chatShow(ChatActivity.this, mChat);
+        ChatUtils.showRequest(request, new OnRequestShowListener() {
             @Override
             public void OnSuccess(Object chat) {
                 mChat = (Chat) chat;
                 setAdapter();
+            }
+
+            @Override
+            public void OnFailure(String message) {
+                CallbackUtils.onUnsuccessfulRequest(ChatActivity.this, message);
             }
         });
     }
