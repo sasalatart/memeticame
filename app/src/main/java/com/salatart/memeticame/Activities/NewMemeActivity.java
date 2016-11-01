@@ -118,7 +118,7 @@ public class NewMemeActivity extends AppCompatActivity {
         }
 
         Bitmap meme = mCanvas.getBitmap();
-        String imagePath = FileUtils.getMemeticameMemesDirectory() + "/" + mMemeName.getText().toString().replace(' ', '_') + ".jpg";
+        String imagePath = FileUtils.getMemeticameMemesDirectory() + "/" + Meme.createName(mMemeName.getText().toString());
         File memeFile = new File(imagePath);
         try {
             memeFile.createNewFile();

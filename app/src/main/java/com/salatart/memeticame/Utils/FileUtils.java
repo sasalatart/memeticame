@@ -1,21 +1,21 @@
 package com.salatart.memeticame.Utils;
 
-import android.annotation.SuppressLint;
+import android.Manifest;
 import android.app.DownloadManager;
 import android.content.ActivityNotFoundException;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.media.MediaMetadataRetriever;
 import android.net.Uri;
 import android.os.Environment;
-import android.provider.DocumentsContract;
-import android.provider.MediaStore;
 import android.provider.OpenableColumns;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.util.Base64;
 import android.util.Log;
@@ -56,6 +56,13 @@ public class FileUtils {
 
     public static String getMemeticameUnzipsDirectory() {
         return checkAndReturnDir(getMemeticameDirectory() + "/Unzips");
+    }
+
+    public static boolean hasMediaPermissions(Context context) {
+        boolean canRecordAudio = ContextCompat.checkSelfPermission(context, Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED;
+        boolean canUseCamera = ContextCompat.checkSelfPermission(context, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED;
+        boolean canWriteToStorage = ContextCompat.checkSelfPermission(context, Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED;
+        return canRecordAudio && canUseCamera && canWriteToStorage;
     }
 
     private static String checkAndReturnDir(String path) {

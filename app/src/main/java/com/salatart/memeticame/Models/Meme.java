@@ -3,6 +3,9 @@ package com.salatart.memeticame.Models;
 import android.graphics.Color;
 import android.graphics.Typeface;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
 /**
  * Created by Sebastian on 26-10-2016.
  */
@@ -10,6 +13,7 @@ import android.graphics.Typeface;
 public class Meme {
     public static String URI_KEY = "memeUri";
     public static String GALLERY_MODE_KEY = "galleryModeKey";
+    public static String SEPARATOR = "-meme-";
 
     private String mText;
     private float mPositionX;
@@ -26,6 +30,11 @@ public class Meme {
         mFontSize = 256F;
         mFontFamily = Typeface.DEFAULT;
         mPaintColor = Color.BLACK;
+    }
+
+    public static String createName(String baseName) {
+        String timestamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
+        return baseName.replace(' ', '_') + SEPARATOR + timestamp + ".jpg";
     }
 
     public String getText() {
