@@ -21,7 +21,7 @@ import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.Toast;
 
-import com.salatart.memeticame.Models.Memetext;
+import com.salatart.memeticame.Models.Meme;
 import com.salatart.memeticame.R;
 import com.salatart.memeticame.Utils.AudioRecorderManager;
 import com.salatart.memeticame.Utils.FileUtils;
@@ -40,7 +40,7 @@ import butterknife.ButterKnife;
 
 import static com.salatart.memeticame.Utils.FilterUtils.REQUEST_PICK_FILE;
 
-public class NewMemetextActivity extends AppCompatActivity {
+public class NewMemeActivity extends AppCompatActivity {
 
     @BindView(R.id.canvas) CanvasView mCanvas;
     @BindView(R.id.input_meme_name) EditText mMemeName;
@@ -71,7 +71,7 @@ public class NewMemetextActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_new_memetext);
+        setContentView(R.layout.activity_new_meme);
 
         ButterKnife.bind(this);
 
@@ -115,12 +115,12 @@ public class NewMemetextActivity extends AppCompatActivity {
 
     private void createMeme() {
         if (mMemeName.getText().length() == 0) {
-            Toast.makeText(NewMemetextActivity.this, "Insert a name for the meme", Toast.LENGTH_SHORT).show();
+            Toast.makeText(NewMemeActivity.this, "Insert a name for the meme", Toast.LENGTH_SHORT).show();
             return;
         }
 
         Bitmap meme = mCanvas.getBitmap();
-        String imagePath = FileUtils.getMemeticameDirectory() + "/" + mMemeName.getText().toString().replace(' ', '_') + ".jpg";
+        String imagePath = FileUtils.getMemeticameMemesDirectory() + "/" + mMemeName.getText().toString().replace(' ', '_') + ".jpg";
         File memeFile = new File(imagePath);
         try {
             memeFile.createNewFile();
@@ -131,13 +131,13 @@ public class NewMemetextActivity extends AppCompatActivity {
             Intent returnIntent = new Intent();
             Uri imageUri = Uri.fromFile(memeFile);
             if (mAudioUri != null) {
-                String zipFileName = FileUtils.getName(NewMemetextActivity.this, imageUri) + ZipManager.SEPARATOR + FileUtils.getName(NewMemetextActivity.this, mAudioUri) + ".zip";
+                String zipFileName = FileUtils.getName(NewMemeActivity.this, imageUri) + ZipManager.SEPARATOR + FileUtils.getName(NewMemeActivity.this, mAudioUri) + ".zip";
                 String audioPath = audioFile.getAbsolutePath();
                 Uri memeaudioZipUri = ZipManager.zip(new String[]{audioPath, imagePath}, zipFileName);
 
-                returnIntent.putExtra(Memetext.PARCELABLE_KEY, memeaudioZipUri);
+                returnIntent.putExtra(Meme.URI_KEY, memeaudioZipUri);
             } else {
-                returnIntent.putExtra(Memetext.PARCELABLE_KEY, imageUri);
+                returnIntent.putExtra(Meme.URI_KEY, imageUri);
             }
 
             setResult(Activity.RESULT_OK, returnIntent);
@@ -150,18 +150,18 @@ public class NewMemetextActivity extends AppCompatActivity {
     public void toggleRecording(View view) {
         if (mCurrentlyRecording) {
             audioFile = mAudioRecorderManager.stopAudioRecording();
-            mAudioUri = mAudioRecorderManager.addRecordingToMediaLibrary(NewMemetextActivity.this, audioFile);
+            mAudioUri = mAudioRecorderManager.addRecordingToMediaLibrary(NewMemeActivity.this, audioFile);
             mRecordButton.setColorFilter(Color.BLACK);
             setMediaPlayer();
         } else {
-            mAudioRecorderManager.startAudioRecording(NewMemetextActivity.this);
+            mAudioRecorderManager.startAudioRecording(NewMemeActivity.this);
             mRecordButton.setColorFilter(Color.RED);
         }
         mCurrentlyRecording = !mCurrentlyRecording;
     }
 
     public void setMediaPlayer() {
-        mMediaPlayer = MediaPlayer.create(NewMemetextActivity.this, mAudioUri);
+        mMediaPlayer = MediaPlayer.create(NewMemeActivity.this, mAudioUri);
         mMediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
             @Override
             public void onCompletion(MediaPlayer mp) {
@@ -262,7 +262,7 @@ public class NewMemetextActivity extends AppCompatActivity {
     }
 
     public void chooseImageFromPlainGallery() {
-        startActivityForResult(new Intent(NewMemetextActivity.this, PlainMemeGalleryActivity.class), FilterUtils.REQUEST_PICK_PLAIN_MEME);
+        startActivityForResult(new Intent(NewMemeActivity.this, PlainMemeGalleryActivity.class), FilterUtils.REQUEST_PICK_PLAIN_MEME);
     }
 
     @Override
@@ -279,8 +279,8 @@ public class NewMemetextActivity extends AppCompatActivity {
                 @Override
                 public void run() {
                     try {
-                        String imageUri = (String) data.getExtras().get(Memetext.PARCELABLE_KEY);
-                        drawBitmap(FileUtils.getBitmapFromURL(imageUri), 0);
+                        String imageUri = (String) data.getExtras().get(Meme.URI_KEY);
+                        drawBitmap(FileUtils.getBitmapFromURL(imageUri),0);
                     } catch (Exception e) {
                         e.printStackTrace();
                     }

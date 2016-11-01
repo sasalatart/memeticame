@@ -41,8 +41,8 @@
     <string name="select_contacts_to_add">Select contacts to add</string>
     <string name="see_plain_meme_gallery">See plain meme gallery</string>
     <string name="send_memeaudio">Send memeaudio</string>
-    <string name="send_memetext">Send memetext</string>
-    <string name="create_memetext">Create memetext</string>
+    <string name="send_meme">Send meme</string>
+    <string name="create_memetext">Create meme</string>
     <string name="from_device">From device</string>
     <string name="from_camera">From camera</string>
     <string name="from_gallery">From gallery</string>
@@ -56,4 +56,5 @@
     <string name="meme_dialog_text_placeholder">Enter a text</string>
     <string name="ok">OK</string>
     <string name="color">Color</string>
+    <string name="see_memes_gallery">See memes gallery</string>
 </resources>

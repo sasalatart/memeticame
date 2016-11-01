@@ -32,7 +32,6 @@ import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Date;
 
 /**
@@ -45,6 +44,18 @@ public class FileUtils {
 
     public static String getMemeticameDownloadsDirectory() {
         return checkAndReturnDir(getMemeticameDirectory() + "/Downloads");
+    }
+
+    public static String getMemeticameMemeaudiosDirectory() {
+        return checkAndReturnDir(getMemeticameDirectory() + "/Memeaudios");
+    }
+
+    public static String getMemeticameMemesDirectory() {
+        return checkAndReturnDir(getMemeticameDirectory() + "/Memes");
+    }
+
+    public static String getMemeticameUnzipsDirectory() {
+        return checkAndReturnDir(getMemeticameDirectory() + "/Unzips");
     }
 
     private static String checkAndReturnDir(String path) {
@@ -176,19 +187,23 @@ public class FileUtils {
     public static boolean checkFileExistence(Context context, String name) {
         File file1 = new File(getMemeticameDirectory() + "/" + name);
         File file2 = new File(getMemeticameDownloadsDirectory() + "/" + name);
+        File file3 = new File(getMemeticameMemeaudiosDirectory() + "/" + name);
+        File file4 = new File(getMemeticameMemesDirectory() + "/" + name);
+        File file5 = new File(getMemeticameUnzipsDirectory() + "/" + name);
+        File file6 = new File(context.getExternalFilesDir(Environment.DIRECTORY_PICTURES) + "/" + name);
+        File file7 = new File(context.getExternalFilesDir(Environment.DIRECTORY_MUSIC) + "/" + name);
 
-
-        File file3 = new File(context.getExternalFilesDir(Environment.DIRECTORY_PICTURES) + "/" + name);
-        File file4 = new File(context.getExternalFilesDir(Environment.DIRECTORY_MUSIC) + "/" + name);
-
-        return file1.exists() || file2.exists() || file3.exists() || file4.exists();
+        return file1.exists() || file2.exists() || file3.exists() || file4.exists() || file5.exists() || file6.exists() || file7.exists();
     }
 
     public static Uri getUriFromFileName(Context context, String name) {
         File file1 = new File(getMemeticameDirectory() + "/" + name);
         File file2 = new File(getMemeticameDownloadsDirectory() + "/" + name);
-        File file3 = new File(context.getExternalFilesDir(Environment.DIRECTORY_PICTURES) + "/" + name);
-        File file4 = new File(context.getExternalFilesDir(Environment.DIRECTORY_MUSIC) + "/" + name);
+        File file3 = new File(getMemeticameMemeaudiosDirectory() + "/" + name);
+        File file4 = new File(getMemeticameMemesDirectory() + "/" + name);
+        File file5 = new File(getMemeticameUnzipsDirectory() + "/" + name);
+        File file6 = new File(context.getExternalFilesDir(Environment.DIRECTORY_PICTURES) + "/" + name);
+        File file7 = new File(context.getExternalFilesDir(Environment.DIRECTORY_MUSIC) + "/" + name);
 
         if (file1.exists()) {
             return Uri.fromFile(file1);
@@ -198,6 +213,12 @@ public class FileUtils {
             return Uri.fromFile(file3);
         } else if (file4.exists()) {
             return Uri.fromFile(file4);
+        } else if (file5.exists()) {
+            return Uri.fromFile(file5);
+        } else if (file6.exists()) {
+            return Uri.fromFile(file6);
+        } else if (file7.exists()) {
+            return Uri.fromFile(file7);
         } else {
             return null;
         }
@@ -238,46 +259,6 @@ public class FileUtils {
                     }
                 })
                 .setNegativeButton(android.R.string.no, null).show();
-    }
-
-    public static ArrayList<Attachment> getAllDownloadedAttachments(Context context) {
-        ArrayList<Attachment> attachments = new ArrayList<>();
-
-        File parentDir = new File(getMemeticameDownloadsDirectory());
-        if (!parentDir.exists()) {
-            parentDir.mkdirs();
-        }
-
-        File[] files = parentDir.listFiles();
-        if (files != null) {
-            for (File file : files) {
-                attachments.add(ParserUtils.attachmentFromUri(context, Uri.fromFile(file)));
-            }
-        }
-
-        return attachments;
-    }
-
-    @SuppressLint("NewApi")
-    public static String getRealPathFromURI(Context context, Uri uri) {
-        String filePath = "";
-        String wholeID = DocumentsContract.getDocumentId(uri);
-
-        String id = wholeID.split(":")[1];
-
-        String[] column = {MediaStore.Images.Media.DATA};
-
-        String sel = MediaStore.Images.Media._ID + "=?";
-
-        Cursor cursor = context.getContentResolver().query(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, column, sel, new String[]{id}, null);
-
-        int columnIndex = cursor.getColumnIndex(column[0]);
-
-        if (cursor.moveToFirst()) {
-            filePath = cursor.getString(columnIndex);
-        }
-        cursor.close();
-        return filePath;
     }
 
     public static Bitmap getBitmapFromURL(String src) {

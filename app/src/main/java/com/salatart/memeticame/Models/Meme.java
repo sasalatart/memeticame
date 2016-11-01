@@ -7,8 +7,9 @@ import android.graphics.Typeface;
  * Created by Sebastian on 26-10-2016.
  */
 
-public class Memetext {
-    public static String PARCELABLE_KEY = "memetext";
+public class Meme {
+    public static String URI_KEY = "memeUri";
+    public static String GALLERY_MODE_KEY = "galleryModeKey";
 
     private String mText;
     private float mPositionX;
@@ -18,7 +19,7 @@ public class Memetext {
     private Typeface mFontFamily;
     private int mPaintColor;
 
-    public Memetext(String text, float posX, float posY) {
+    public Meme(String text, float posX, float posY) {
         mText = text;
         mPositionX = posX;
         mPositionY = posY;

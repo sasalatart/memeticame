@@ -57,18 +57,18 @@
         <activity android:name=".Activities.NewChatGroupActivity" />
         <activity android:name=".Activities.ParticipantsActivity" />
         <activity android:name=".Activities.AddParticipantsActivity" />
-        <activity android:name=".Activities.NewMemeaudioActivity" />
-        <activity android:name=".Activities.GalleryActivity" />
+        <activity android:name=".Activities.DownloadsGalleryActivity" />
         <activity android:name=".Activities.MemeaudioActivity" />
 
         <service
             android:name=".Services.ChatInvitationService"
             android:exported="false" />
 
-        <activity android:name=".Activities.PlainMemeGalleryActivity"></activity>
-        <activity android:name=".Activities.NewMemetextActivity"
-            android:screenOrientation="portrait">
-        </activity>
+        <activity android:name=".Activities.PlainMemeGalleryActivity" />
+        <activity android:name=".Activities.NewMemeActivity"
+            android:screenOrientation="portrait"/>
+        <activity android:name=".Activities.MemeGalleryActivity"></activity>
+>
     </application>
 
 </manifest>
