@@ -4,6 +4,7 @@ import android.content.Context;
 import android.net.Uri;
 import android.util.Log;
 
+import com.salatart.memeticame.Managers.ZipManager;
 import com.salatart.memeticame.Models.Attachment;
 import com.salatart.memeticame.Models.Chat;
 import com.salatart.memeticame.Models.ChatInvitation;

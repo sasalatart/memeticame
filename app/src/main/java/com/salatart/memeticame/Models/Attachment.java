@@ -7,7 +7,7 @@ import android.os.Parcelable;
 
 import com.salatart.memeticame.Utils.FileUtils;
 import com.salatart.memeticame.Utils.Routes;
-import com.salatart.memeticame.Utils.ZipManager;
+import com.salatart.memeticame.Managers.ZipManager;
 
 /**
  * Created by sasalatart on 9/14/16.

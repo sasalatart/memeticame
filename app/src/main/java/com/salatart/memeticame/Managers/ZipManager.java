@@ -1,6 +1,8 @@
-package com.salatart.memeticame.Utils;
+package com.salatart.memeticame.Managers;
 
 import android.net.Uri;
+
+import com.salatart.memeticame.Utils.FileUtils;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;

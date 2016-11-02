@@ -1,4 +1,4 @@
-package com.salatart.memeticame.Utils;
+package com.salatart.memeticame.Managers;
 
 import android.content.ContentResolver;
 import android.content.ContentValues;
@@ -8,6 +8,8 @@ import android.net.Uri;
 import android.os.Environment;
 import android.provider.MediaStore;
 import android.util.Log;
+
+import com.salatart.memeticame.Utils.FileUtils;
 
 import java.io.File;
 import java.io.IOException;

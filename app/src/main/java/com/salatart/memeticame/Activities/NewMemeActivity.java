@@ -23,11 +23,11 @@ import android.widget.Toast;
 
 import com.salatart.memeticame.Models.Meme;
 import com.salatart.memeticame.R;
-import com.salatart.memeticame.Utils.AudioRecorderManager;
+import com.salatart.memeticame.Managers.AudioRecorderManager;
 import com.salatart.memeticame.Utils.FileUtils;
 import com.salatart.memeticame.Utils.FilterUtils;
 import com.salatart.memeticame.Utils.MemeUtils;
-import com.salatart.memeticame.Utils.ZipManager;
+import com.salatart.memeticame.Managers.ZipManager;
 import com.salatart.memeticame.Views.CanvasView;
 
 import java.io.BufferedOutputStream;
