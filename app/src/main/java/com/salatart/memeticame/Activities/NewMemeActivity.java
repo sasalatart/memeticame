@@ -21,13 +21,13 @@ import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.Toast;
 
+import com.salatart.memeticame.Managers.AudioRecorderManager;
+import com.salatart.memeticame.Managers.ZipManager;
 import com.salatart.memeticame.Models.Meme;
 import com.salatart.memeticame.R;
-import com.salatart.memeticame.Managers.AudioRecorderManager;
 import com.salatart.memeticame.Utils.FileUtils;
 import com.salatart.memeticame.Utils.FilterUtils;
 import com.salatart.memeticame.Utils.MemeUtils;
-import com.salatart.memeticame.Managers.ZipManager;
 import com.salatart.memeticame.Views.CanvasView;
 
 import java.io.BufferedOutputStream;
@@ -62,8 +62,10 @@ public class NewMemeActivity extends AppCompatActivity {
     private File audioFile;
 
     public static Bitmap RotateBitmap(Bitmap source, float angle) {
-        if(angle == 0)
+        if (angle == 0) {
             return source;
+        }
+
         Matrix matrix = new Matrix();
         matrix.postRotate(angle);
         return Bitmap.createBitmap(source, 0, 0, source.getWidth(), source.getHeight(), matrix, true);
@@ -111,7 +113,7 @@ public class NewMemeActivity extends AppCompatActivity {
     }
 
     public void drawBitmap(Bitmap picture, float rotateAngle) {
-        mCanvas.drawBitmap((Bitmap.createScaledBitmap(RotateBitmap(picture,rotateAngle), mCanvas.getWidth(), mCanvas.getHeight(), false)));
+        mCanvas.drawBitmap((Bitmap.createScaledBitmap(RotateBitmap(picture, rotateAngle), mCanvas.getWidth(), mCanvas.getHeight(), false)));
     }
 
     private void createMeme() {
@@ -162,6 +164,10 @@ public class NewMemeActivity extends AppCompatActivity {
     }
 
     public void setMediaPlayer() {
+        mPlayButton.setVisibility(View.VISIBLE);
+        mPauseButton.setVisibility(View.VISIBLE);
+        mStopButton.setVisibility(View.VISIBLE);
+
         mMediaPlayer = MediaPlayer.create(NewMemeActivity.this, mAudioUri);
         mMediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
             @Override
@@ -175,30 +181,18 @@ public class NewMemeActivity extends AppCompatActivity {
     }
 
     public void onPlay(View view) {
-        if (mAudioUri == null) {
-            Toast.makeText(this, "Please, add an audio", Toast.LENGTH_SHORT).show();
-            return;
-        }
         setEnabled(false, true, true);
         setColors(Color.RED, Color.BLACK, Color.BLACK);
         mMediaPlayer.start();
     }
 
     public void onPause(View view) {
-        if (mAudioUri == null) {
-            Toast.makeText(this, "Please, add an audio", Toast.LENGTH_SHORT).show();
-            return;
-        }
         setEnabled(true, false, true);
         setColors(Color.BLACK, Color.RED, Color.BLACK);
         mMediaPlayer.pause();
     }
 
     public void onStop(View view) {
-        if (mAudioUri == null) {
-            Toast.makeText(this, "Please, add an audio", Toast.LENGTH_SHORT).show();
-            return;
-        }
         setEnabled(true, false, false);
         mMediaPlayer.stop();
         setMediaPlayer();
@@ -251,7 +245,6 @@ public class NewMemeActivity extends AppCompatActivity {
             File photoFile = FileUtils.createMediaFile(getApplicationContext(), "jpg", Environment.DIRECTORY_PICTURES);
             if (photoFile != null) {
                 mCurrentImageUri = FileProvider.getUriForFile(this, "com.salatart.memeticame.fileprovider", photoFile);
-                System.out.println("hola:" + mCurrentImageUri.toString());
                 takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, mCurrentImageUri);
                 startActivityForResult(takePictureIntent, FilterUtils.REQUEST_IMAGE_CAPTURE);
             }
@@ -281,7 +274,7 @@ public class NewMemeActivity extends AppCompatActivity {
                 public void run() {
                     try {
                         String imageUri = (String) data.getExtras().get(Meme.URI_KEY);
-                        drawBitmap(FileUtils.getBitmapFromURL(imageUri),0);
+                        drawBitmap(FileUtils.getBitmapFromURL(imageUri), 0);
                     } catch (Exception e) {
                         e.printStackTrace();
                     }

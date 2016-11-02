@@ -39,21 +39,24 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:onClick="onPlay"
-            android:src="@drawable/ic_play_circle_outline_black_24dp" />
+            android:src="@drawable/ic_play_circle_outline_black_24dp"
+            android:visibility="gone" />
 
         <ImageButton
             android:id="@+id/button_pause"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:onClick="onPause"
-            android:src="@drawable/ic_pause_circle_outline_black_24dp" />
+            android:src="@drawable/ic_pause_circle_outline_black_24dp"
+            android:visibility="gone" />
 
         <ImageButton
             android:id="@+id/button_stop"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:onClick="onStop"
-            android:src="@drawable/ic_stop_black_24dp" />
+            android:src="@drawable/ic_stop_black_24dp"
+            android:visibility="gone" />
     </LinearLayout>
 
     <LinearLayout
