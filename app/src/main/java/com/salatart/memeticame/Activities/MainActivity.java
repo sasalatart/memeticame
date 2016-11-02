@@ -45,8 +45,6 @@ public class MainActivity extends AppCompatActivity implements ChatsFragment.OnC
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        Realm.init(this);
-
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && !FileUtils.hasMediaPermissions(MainActivity.this)) {
             requestPermissions(mMediaPermissions, PERMISSIONS_REQUEST_MEDIA);
         }
