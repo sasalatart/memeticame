@@ -50,6 +50,7 @@ public class AddParticipantsActivity extends AppCompatActivity {
             Chat chat = intent.getParcelableExtra(Chat.PARCELABLE_KEY);
             User user = intent.getParcelableExtra(User.PARCELABLE_KEY);
             if (mChat.getId() == chat.getId() && mChat.onUserRemoved(AddParticipantsActivity.this, user)) {
+                mUsers.add(user);
                 mAdapter.notifyDataSetChanged();
             }
         }

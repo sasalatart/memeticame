@@ -11,6 +11,7 @@ import android.os.Build;
 import android.provider.ContactsContract;
 import android.support.v4.content.ContextCompat;
 
+import com.salatart.memeticame.Activities.MemeticameApplication;
 import com.salatart.memeticame.Listeners.OnContactsReadListener;
 import com.salatart.memeticame.Models.User;
 
@@ -50,6 +51,12 @@ public class ContactsUtils {
             return;
         }
 
+        final MemeticameApplication application = (MemeticameApplication) activity.getApplication();
+        if (application.getUsers() != null && application.getLocalContacts() != null) {
+            listener.OnRead(application.getUsers(), application.getLocalContacts());
+            return;
+        }
+
         ContactsUtils.getContacts(activity, new ContactsUtils.ContactsProviderListener() {
             @Override
             public void OnContactsReady(final ArrayList<User> contacts) {
@@ -62,14 +69,11 @@ public class ContactsUtils {
 
                     @Override
                     public void onResponse(Call call, final Response response) throws IOException {
-                        if (activity == null) {
-                            response.body().close();
-                            return;
-                        }
-
                         if (response.isSuccessful()) {
                             try {
-                                listener.OnRead(ParserUtils.usersFromJsonArray(new JSONArray(response.body().string())), contacts);
+                                ArrayList<User> users = ParserUtils.usersFromJsonArray(new JSONArray(response.body().string()));
+                                application.setUsers(users, contacts);
+                                listener.OnRead(users, contacts);
                             } catch (JSONException e) {
                                 listener.OnFailure("error");
                             }
@@ -123,8 +127,7 @@ public class ContactsUtils {
             }
 
             ArrayList<User> contacts = new ArrayList<>();
-            Cursor cursor = mResolver.query(ContactsContract.Contacts.CONTENT_URI, null, null, null,
-                    ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME + " ASC");
+            Cursor cursor = mResolver.query(ContactsContract.Contacts.CONTENT_URI, null, null, null, ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME + " ASC");
             if (cursor != null && cursor.getCount() != 0 && cursor.moveToFirst()) {
                 do {
                     User contact = getContact(cursor);
@@ -134,6 +137,7 @@ public class ContactsUtils {
                 } while (cursor.moveToNext());
                 cursor.close();
             }
+
             return contacts;
         }
 
@@ -141,19 +145,17 @@ public class ContactsUtils {
             User contact = null;
             String id = cursor.getString(cursor.getColumnIndex(ContactsContract.Contacts._ID));
 
-            if (Integer.parseInt(cursor.getString(cursor.getColumnIndex(
-                    ContactsContract.Contacts.HAS_PHONE_NUMBER))) > 0) {
+            if (Integer.parseInt(cursor.getString(cursor.getColumnIndex(ContactsContract.Contacts.HAS_PHONE_NUMBER))) > 0) {
                 Cursor c = mResolver.query(
                         ContactsContract.CommonDataKinds.Phone.CONTENT_URI,
                         null,
                         ContactsContract.CommonDataKinds.Phone.CONTACT_ID + " = ?",
                         new String[]{id},
                         null);
+
                 if (c != null && c.getCount() != 0 && c.moveToFirst()) {
-                    String phoneNumber = c.getString(c.getColumnIndex(
-                            ContactsContract.CommonDataKinds.Phone.NUMBER));
-                    String name = c.getString(c.getColumnIndex(
-                            ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME));
+                    String phoneNumber = c.getString(c.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER));
+                    String name = c.getString(c.getColumnIndex(ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME));
                     contact = new User(-1, name, phoneNumber);
                     c.close();
                 }

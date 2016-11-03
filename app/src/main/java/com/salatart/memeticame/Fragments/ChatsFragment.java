@@ -1,5 +1,6 @@
 package com.salatart.memeticame.Fragments;
 
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -169,9 +170,12 @@ public class ChatsFragment extends Fragment {
         ChatUtils.indexRequest(request, new OnRequestIndexListener<Chat>() {
             @Override
             public void OnSuccess(ArrayList<Chat> chats) {
+                final Activity activity = getActivity();
+                if (activity == null) return;
+
                 mChats = chats;
-                mAdapter = new ChatsAdapter(getContext(), R.layout.list_item_contact, mChats);
-                getActivity().runOnUiThread(new Runnable() {
+                mAdapter = new ChatsAdapter(activity, R.layout.list_item_contact, mChats);
+                activity.runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
                         mChatsListView.setAdapter(mAdapter);

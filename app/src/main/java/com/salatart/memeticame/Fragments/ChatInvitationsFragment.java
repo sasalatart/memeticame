@@ -1,5 +1,6 @@
 package com.salatart.memeticame.Fragments;
 
+import android.app.Activity;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -96,9 +97,12 @@ public class ChatInvitationsFragment extends Fragment {
         ChatInvitationsUtils.indexRequest(request, new OnRequestIndexListener<ChatInvitation>() {
             @Override
             public void OnSuccess(ArrayList<ChatInvitation> chatInvitations) {
+                final Activity activity = getActivity();
+                if (activity == null) return;
+
                 mChatInvitations = chatInvitations;
-                mAdapter = new ChatInvitationsAdapter(getContext(), R.layout.list_item_chat_invitation, mChatInvitations);
-                getActivity().runOnUiThread(new Runnable() {
+                mAdapter = new ChatInvitationsAdapter(activity, R.layout.list_item_chat_invitation, mChatInvitations);
+                activity.runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
                         mChatInvitationsListView.setAdapter(mAdapter);

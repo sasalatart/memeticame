@@ -1,5 +1,6 @@
 package com.salatart.memeticame.Fragments;
 
+import android.app.Activity;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -23,8 +24,6 @@ import com.salatart.memeticame.Views.ContactsAdapter;
 import java.util.ArrayList;
 
 public class ContactsFragment extends Fragment {
-
-    private ArrayList<User> mLocalContacts = new ArrayList<>();
     private ArrayList<User> mContacts = new ArrayList<>();
     private ContactsAdapter mAdapter;
 
@@ -36,11 +35,7 @@ public class ContactsFragment extends Fragment {
     private BroadcastReceiver mUsersReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            User user = intent.getParcelableExtra(User.PARCELABLE_KEY);
-            if (User.isPresent(mLocalContacts, user.getPhoneNumber())) {
-                mContacts.add(user);
-                mAdapter.notifyDataSetChanged();
-            }
+            mAdapter.notifyDataSetChanged();
         }
     };
 
@@ -92,7 +87,6 @@ public class ContactsFragment extends Fragment {
         ContactsUtils.retrieveContacts(getActivity(), new OnContactsReadListener() {
             @Override
             public void OnRead(ArrayList<User> intersectedContacts, ArrayList<User> localContacts) {
-                mLocalContacts = localContacts;
                 mContacts = intersectedContacts;
                 setAdapter();
             }
@@ -105,10 +99,13 @@ public class ContactsFragment extends Fragment {
     }
 
     public void setAdapter() {
-        getActivity().runOnUiThread(new Runnable() {
+        final Activity activity = getActivity();
+        if (activity == null) return;
+
+        activity.runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                mAdapter = new ContactsAdapter(getContext(), R.layout.list_item_contact, mContacts);
+                mAdapter = new ContactsAdapter(activity, R.layout.list_item_contact, mContacts);
                 mContactsListView.setAdapter(mAdapter);
                 mLoadingContacts.hide();
             }

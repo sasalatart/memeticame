@@ -73,6 +73,14 @@ public class Routes {
                 .build();
     }
 
+    public static Request userShow(Context context, User user) {
+        return new Request.Builder()
+                .url(DOMAIN + "/users/" + user.getPhoneNumber())
+                .addHeader("content-type", "application/json")
+                .addHeader("authorization", "Token token=" + SessionUtils.getToken(context))
+                .build();
+    }
+
     public static Request chatsIndex(Context context) {
         return new Request.Builder()
                 .url(DOMAIN + "/chats")

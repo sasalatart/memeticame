@@ -12,6 +12,7 @@ import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
 import com.salatart.memeticame.Activities.ChatActivity;
 import com.salatart.memeticame.Activities.MainActivity;
+import com.salatart.memeticame.Activities.MemeticameApplication;
 import com.salatart.memeticame.Models.Chat;
 import com.salatart.memeticame.Models.ChatInvitation;
 import com.salatart.memeticame.Models.Message;
@@ -98,13 +99,12 @@ public class MyFcmListenerService extends FirebaseMessagingService {
     }
 
     public void broadcastNewUser(Map data) {
-        Intent intent = new Intent(FilterUtils.NEW_USER_FILTER);
         try {
-            intent.putExtra(User.PARCELABLE_KEY, ParserUtils.userFromJson(new JSONObject(data.get("user").toString())));
+            User user = ParserUtils.userFromJson(new JSONObject(data.get("user").toString()));
+            ((MemeticameApplication) getApplication()).onAccountCreated(user);
         } catch (JSONException e) {
             Log.e("ERROR", e.toString());
         }
-        getApplicationContext().sendBroadcast(intent);
     }
 
     public void broadcastUserKicked(Map data) {

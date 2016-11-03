@@ -25,7 +25,7 @@ import com.salatart.memeticame.Utils.FileUtils;
 import com.salatart.memeticame.Utils.SessionUtils;
 import com.salatart.memeticame.Views.ViewPagerAdapter;
 
-import io.realm.Realm;
+import java.util.ArrayList;
 
 import static com.salatart.memeticame.Utils.FilterUtils.REQUEST_NEW_CONTACT;
 
@@ -118,10 +118,7 @@ public class MainActivity extends AppCompatActivity implements ChatsFragment.OnC
 
     @Override
     public void onContactSelected(User user) {
-        Intent intent = new Intent(this, NewChatActivity.class);
-        intent.putExtra(User.PARCELABLE_KEY, user);
-        intent.putParcelableArrayListExtra(Chat.PARCELABLE_ARRAY_KEY, user.findChats(mChatsFragment.getChats()));
-        startActivity(intent);
+        startActivity(NewChatActivity.getIntent(MainActivity.this, user, user.findChats(mChatsFragment.getChats())));
     }
 
     @Override
@@ -138,7 +135,12 @@ public class MainActivity extends AppCompatActivity implements ChatsFragment.OnC
         super.onActivityResult(requestCode, resultCode, data);
 
         if (requestCode == REQUEST_NEW_CONTACT) {
-            mContactsFragment.setContacts();
+            ContactsUtils.getContacts(MainActivity.this, new ContactsUtils.ContactsProviderListener() {
+                @Override
+                public void OnContactsReady(ArrayList<User> localContacts) {
+                    ((MemeticameApplication) getApplication()).onContactsAdded(localContacts);
+                }
+            });
         }
     }
 
@@ -148,8 +150,6 @@ public class MainActivity extends AppCompatActivity implements ChatsFragment.OnC
             case PERMISSIONS_REQUEST_READ_CONTACTS: {
                 if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     mContactsFragment.setContacts();
-                } else {
-                    // Disable the functionality that depends on this permission.
                 }
             }
         }

@@ -1,5 +1,6 @@
 package com.salatart.memeticame.Activities;
 
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.ActionBar;
@@ -35,6 +36,13 @@ public class NewChatActivity extends AppCompatActivity {
 
     private User mUser;
 
+    public static Intent getIntent(Context context, User user, ArrayList<Chat> currentChats) {
+        Intent intent = new Intent(context, NewChatActivity.class);
+        intent.putExtra(User.PARCELABLE_KEY, user);
+        intent.putParcelableArrayListExtra(Chat.PARCELABLE_ARRAY_KEY, currentChats);
+        return intent;
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -50,7 +58,6 @@ public class NewChatActivity extends AppCompatActivity {
         Bundle data = getIntent().getExtras();
         mUser = data.getParcelable(User.PARCELABLE_KEY);
         final ArrayList<Chat> currentChats = data.getParcelableArrayList(Chat.PARCELABLE_ARRAY_KEY);
-
         setCurrentChats(currentChats);
     }
 
@@ -94,7 +101,7 @@ public class NewChatActivity extends AppCompatActivity {
 
     public void setCurrentChats(final ArrayList<Chat> currentChats) {
         ListView currentChatsListView = (ListView) findViewById(R.id.list_view_existing_chats);
-        if (currentChats.size() > 0) {
+        if (currentChats != null && currentChats.size() > 0) {
             ChatsAdapter mAdapter = new ChatsAdapter(getApplicationContext(), R.layout.list_item_chat, currentChats);
             currentChatsListView.setAdapter(mAdapter);
             currentChatsListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
