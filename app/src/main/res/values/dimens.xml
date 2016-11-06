@@ -8,5 +8,6 @@
     <dimen name="custom_tab_layout_height">72dp</dimen>
     <dimen name="message_padding">4dp</dimen>
     <dimen name="chat_padding">4dp</dimen>
-    <dimen name="new_chat_margin">16dp</dimen>
+    <dimen name="separator_margin">16dp</dimen>
+    <dimen name="list_item_icon_size">64dp</dimen>
 </resources>

@@ -23,13 +23,22 @@
             android:hint="@string/group_name" />
     </android.support.design.widget.TextInputLayout>
 
+    <View
+        android:id="@+id/separator"
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_below="@id/submit_new_chat"
+        android:layout_marginBottom="@dimen/separator_margin"
+        android:layout_marginTop="@dimen/separator_margin"
+        android:background="@android:color/darker_gray" />
+
     <TextView
         android:id="@+id/label_choose_contacts"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/submit_new_chat"
+        android:layout_below="@+id/separator"
         android:layout_centerHorizontal="true"
-        android:layout_marginTop="@dimen/new_chat_margin"
+        android:layout_marginBottom="@dimen/separator_margin"
         android:text="@string/select_contacts_to_add"
         android:textAppearance="?android:attr/textAppearanceLarge" />
 
