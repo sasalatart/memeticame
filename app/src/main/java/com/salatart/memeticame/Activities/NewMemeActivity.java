@@ -3,14 +3,11 @@ package com.salatart.memeticame.Activities;
 import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Color;
-import android.graphics.Matrix;
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.Environment;
-import android.provider.MediaStore;
-import android.support.v4.content.FileProvider;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.view.ContextMenu;
@@ -30,16 +27,11 @@ import com.salatart.memeticame.Utils.FilterUtils;
 import com.salatart.memeticame.Utils.MemeUtils;
 import com.salatart.memeticame.Views.CanvasView;
 
-import java.io.BufferedOutputStream;
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.OutputStream;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
-
-import static com.salatart.memeticame.Utils.FilterUtils.REQUEST_PICK_FILE;
 
 public class NewMemeActivity extends AppCompatActivity {
 
@@ -52,24 +44,13 @@ public class NewMemeActivity extends AppCompatActivity {
     @BindView(R.id.button_pause) ImageButton mPauseButton;
     @BindView(R.id.button_stop) ImageButton mStopButton;
 
-    private Uri mCurrentImageUri;
-
     private boolean mCurrentlyRecording;
     private AudioRecorderManager mAudioRecorderManager;
 
     private MediaPlayer mMediaPlayer;
     private Uri mAudioUri;
     private File audioFile;
-
-    public static Bitmap RotateBitmap(Bitmap source, float angle) {
-        if (angle == 0) {
-            return source;
-        }
-
-        Matrix matrix = new Matrix();
-        matrix.postRotate(angle);
-        return Bitmap.createBitmap(source, 0, 0, source.getWidth(), source.getHeight(), matrix, true);
-    }
+    private String mImagePath;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -103,33 +84,25 @@ public class NewMemeActivity extends AppCompatActivity {
         createMeme();
     }
 
-    public void setImageFromCurrentUri(float rotateAngle) {
-        try {
-            Bitmap picture = MediaStore.Images.Media.getBitmap(getContentResolver(), mCurrentImageUri);
-            drawBitmap(picture, rotateAngle);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    public void drawBitmap(Bitmap picture, float rotateAngle) {
-        mCanvas.drawBitmap((Bitmap.createScaledBitmap(RotateBitmap(picture, rotateAngle), mCanvas.getWidth(), mCanvas.getHeight(), false)));
+    public void drawBitmap(Bitmap picture) {
+        mCanvas.drawBitmap((Bitmap.createScaledBitmap(picture, mCanvas.getWidth(), mCanvas.getHeight(), false)));
     }
 
     private void createMeme() {
+        if(mImagePath == null){
+            Toast.makeText(NewMemeActivity.this, "Create a meme first", Toast.LENGTH_SHORT).show();
+            return;
+        }
         if (mMemeName.getText().length() == 0) {
             Toast.makeText(NewMemeActivity.this, "Insert a name for the meme", Toast.LENGTH_SHORT).show();
             return;
         }
 
-        Bitmap meme = mCanvas.getBitmap();
         String imagePath = FileUtils.getMemeticameMemesDirectory() + "/" + MemeUtils.createName(mMemeName.getText().toString());
         File memeFile = new File(imagePath);
         try {
             memeFile.createNewFile();
-            OutputStream os = new BufferedOutputStream(new FileOutputStream(memeFile));
-            meme.compress(Bitmap.CompressFormat.JPEG, 100, os);
-            os.close();
+            FileUtils.copyFileUsingStream(new File(mImagePath), memeFile);
 
             Intent returnIntent = new Intent();
             Uri imageUri = Uri.fromFile(memeFile);
@@ -216,8 +189,7 @@ public class NewMemeActivity extends AppCompatActivity {
         menu.setHeaderTitle("Select image from...");
 
         menu.add(Menu.NONE, 0, 0, "Meme Gallery");
-        menu.add(Menu.NONE, 1, 1, "Device");
-        menu.add(Menu.NONE, 2, 2, "Camera");
+        menu.add(Menu.NONE, 1, 1, "Device or Camera");
     }
 
     @Override
@@ -227,9 +199,7 @@ public class NewMemeActivity extends AppCompatActivity {
         if (menuItemId == 0) {
             chooseImageFromPlainGallery();
         } else if (menuItemId == 1) {
-            chooseImageFromDevice();
-        } else if (menuItemId == 2) {
-            chooseImageFromCamera();
+            editMemeFromCameraOrGallery();
         }
 
         return true;
@@ -239,20 +209,11 @@ public class NewMemeActivity extends AppCompatActivity {
         openContextMenu(view);
     }
 
-    public void chooseImageFromCamera() {
-        Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-        if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
-            File photoFile = FileUtils.createMediaFile(getApplicationContext(), "jpg", Environment.DIRECTORY_PICTURES);
-            if (photoFile != null) {
-                mCurrentImageUri = FileProvider.getUriForFile(this, "com.salatart.memeticame.fileprovider", photoFile);
-                takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, mCurrentImageUri);
-                startActivityForResult(takePictureIntent, FilterUtils.REQUEST_IMAGE_CAPTURE);
-            }
-        }
-    }
+    public void editMemeFromCameraOrGallery(){
 
-    public void chooseImageFromDevice() {
-        startActivityForResult(FileUtils.getSelectFileIntent("image/jpeg"), REQUEST_PICK_FILE);
+        Intent editMemeIntent = new Intent(NewMemeActivity.this, MemeEditorActivity.class);
+        startActivityForResult(editMemeIntent, FilterUtils.REQUEST_GET_MEME);
+
     }
 
     public void chooseImageFromPlainGallery() {
@@ -263,18 +224,16 @@ public class NewMemeActivity extends AppCompatActivity {
     protected void onActivityResult(int requestCode, int resultCode, final Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
-        if (requestCode == FilterUtils.REQUEST_IMAGE_CAPTURE && resultCode == RESULT_OK) {
-            setImageFromCurrentUri(90);
-        } else if (requestCode == FilterUtils.REQUEST_PICK_FILE && resultCode == RESULT_OK && data != null) {
-            mCurrentImageUri = data.getData();
-            setImageFromCurrentUri(0);
+        if (requestCode == FilterUtils.REQUEST_GET_MEME && resultCode == RESULT_OK) {
+            mImagePath = (String) data.getExtras().get(Meme.PATH_KEY);
+            drawBitmap(BitmapFactory.decodeFile(mImagePath));
         } else if (requestCode == FilterUtils.REQUEST_PICK_PLAIN_MEME && resultCode == RESULT_OK) {
             Thread thread = new Thread(new Runnable() {
                 @Override
                 public void run() {
                     try {
                         String imageUri = (String) data.getExtras().get(Meme.URI_KEY);
-                        drawBitmap(FileUtils.getBitmapFromURL(imageUri), 0);
+                        drawBitmap(FileUtils.getBitmapFromURL(imageUri));
                     } catch (Exception e) {
                         e.printStackTrace();
                     }

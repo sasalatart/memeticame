@@ -13,6 +13,7 @@ import com.salatart.memeticame.Utils.UserUtils;
 import java.util.ArrayList;
 
 import io.realm.Realm;
+import ly.img.android.ImgLySdk;
 import okhttp3.Request;
 
 /**
@@ -29,6 +30,8 @@ public class MemeticameApplication extends Application {
         super.onCreate();
 
         Realm.init(this);
+        ImgLySdk.init(this);
+        
     }
 
     public void setUsers(ArrayList<User> users, ArrayList<User> localContacts) {
