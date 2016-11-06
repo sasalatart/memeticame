@@ -346,7 +346,7 @@ public class ChatActivity extends AppCompatActivity {
         }
     }
 
-    public void selectMediaResource(View view) {
+    public void selectFileFromDevice(View view) {
         startActivityForResult(FileUtils.getSelectFileIntent("*/*"), FilterUtils.REQUEST_PICK_FILE);
     }
 

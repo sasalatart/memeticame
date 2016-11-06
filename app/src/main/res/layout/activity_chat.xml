@@ -21,48 +21,44 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="end"
-        android:layout_marginEnd="15dp"
-        android:layout_marginStart="15dp"
-        android:orientation="horizontal">
+        android:layout_marginEnd="@dimen/activity_horizontal_margin"
+        android:layout_marginRight="@dimen/activity_horizontal_margin"
+        android:orientation="horizontal"
+        android:padding="@dimen/attachment_button_padding">
 
         <ImageButton
             android:id="@+id/meme_options"
-            android:layout_width="42dp"
-            android:layout_height="42dp"
-            android:layout_margin="4dp"
+            android:layout_width="@dimen/attachment_button_size"
+            android:layout_height="@dimen/attachment_button_size"
             android:onClick="showMemeOptionsMenu"
             android:src="@drawable/ic_sentiment_very_satisfied_black_24dp" />
 
         <ImageButton
             android:id="@+id/take_picture"
-            android:layout_width="42dp"
-            android:layout_height="42dp"
-            android:layout_margin="4dp"
+            android:layout_width="@dimen/attachment_button_size"
+            android:layout_height="@dimen/attachment_button_size"
             android:onClick="dispatchTakePictureIntent"
             android:src="@drawable/ic_camera_alt_black_24dp" />
 
         <ImageButton
             android:id="@+id/take_video"
-            android:layout_width="42dp"
-            android:layout_height="42dp"
-            android:layout_margin="4dp"
+            android:layout_width="@dimen/attachment_button_size"
+            android:layout_height="@dimen/attachment_button_size"
             android:onClick="dispatchTakeVideoIntent"
             android:src="@drawable/ic_videocam_black_24dp" />
 
         <ImageButton
             android:id="@+id/take_audio"
-            android:layout_width="42dp"
-            android:layout_height="42dp"
-            android:layout_margin="4dp"
+            android:layout_width="@dimen/attachment_button_size"
+            android:layout_height="@dimen/attachment_button_size"
             android:onClick="toggleRecording"
             android:src="@drawable/ic_settings_voice_black_24dp" />
 
         <ImageButton
             android:id="@+id/select_resource"
-            android:layout_width="42dp"
-            android:layout_height="42dp"
-            android:layout_margin="4dp"
-            android:onClick="selectMediaResource"
+            android:layout_width="@dimen/attachment_button_size"
+            android:layout_height="@dimen/attachment_button_size"
+            android:onClick="selectFileFromDevice"
             android:src="@drawable/ic_attach_file_black_24dp" />
     </LinearLayout>
 

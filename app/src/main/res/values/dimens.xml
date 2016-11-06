@@ -10,4 +10,6 @@
     <dimen name="chat_padding">4dp</dimen>
     <dimen name="separator_margin">16dp</dimen>
     <dimen name="list_item_icon_size">64dp</dimen>
+    <dimen name="attachment_button_size">48dp</dimen>
+    <dimen name="attachment_button_padding">2dp</dimen>
 </resources>
