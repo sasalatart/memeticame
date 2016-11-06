@@ -26,10 +26,6 @@ public class MemeEditorActivity extends AppCompatActivity {
 
     private static final String FOLDER = "Camera";
     public static int CAMERA_PREVIEW_RESULT = 1;
-    /**
-     * ATTENTION: This was auto-generated to implement the App Indexing API.
-     * See https://g.co/AppIndexing/AndroidStudio for more information.
-     */
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -59,6 +55,9 @@ public class MemeEditorActivity extends AppCompatActivity {
                         }
                     }
             );
+        }
+        else {
+            finish();
         }
     }
 
