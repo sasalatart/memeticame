@@ -1,12 +1,9 @@
 package com.salatart.memeticame.Utils;
 
-import android.app.Activity;
 import android.util.Log;
-import android.view.View;
 
-import com.salatart.memeticame.Activities.ChatActivity;
 import com.salatart.memeticame.Listeners.OnRequestIndexListener;
-import com.salatart.memeticame.Models.Chat;
+import com.salatart.memeticame.Listeners.OnRequestListener;
 import com.salatart.memeticame.Models.ChatInvitation;
 
 import org.json.JSONArray;
@@ -48,26 +45,19 @@ public class ChatInvitationsUtils {
         });
     }
 
-    public static void addParticipantsRequest(final Activity activity, Request request, final Chat chat, final View submitButton) {
-        submitButton.setEnabled(false);
+    public static void addParticipantsRequest(Request request, final OnRequestListener listener) {
         HttpClient.getInstance().newCall(request).enqueue(new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
-                CallbackUtils.onUnsuccessfulSubmit(activity, "Error", submitButton);
+                listener.OnFailure("Error");
             }
 
             @Override
             public void onResponse(Call call, final Response response) throws IOException {
-                if (activity == null) {
-                    response.body().close();
-                    return;
-                }
-
                 if (response.isSuccessful()) {
-                    activity.startActivity(ChatActivity.getIntent(activity, chat));
-                    activity.finish();
+                    listener.OnSuccess();
                 } else {
-                    CallbackUtils.onUnsuccessfulSubmit(activity, HttpClient.parseErrorMessage(response), submitButton);
+                    listener.OnFailure(HttpClient.parseErrorMessage(response));
                 }
 
                 response.body().close();

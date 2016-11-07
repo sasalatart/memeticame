@@ -5,10 +5,9 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.util.Log;
-import android.view.View;
 
 import com.salatart.memeticame.Activities.LoginActivity;
-import com.salatart.memeticame.Activities.MainActivity;
+import com.salatart.memeticame.Listeners.OnRequestShowListener;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -32,9 +31,7 @@ public class SessionUtils {
     }
 
     public static String getToken(Context context) {
-        if (context == null) {
-            return "";
-        }
+        if (context == null) return "";
 
         return context.getSharedPreferences(PREFERENCES, 0).getString("Token", "");
     }
@@ -47,19 +44,19 @@ public class SessionUtils {
         return context.getSharedPreferences(PREFERENCES, 0).getString("FCMToken", "");
     }
 
-    public static void saveToken(String token, Context context) {
+    public static void saveToken(Context context, String token) {
         SharedPreferences.Editor editor = context.getSharedPreferences(PREFERENCES, 0).edit();
         editor.putString("Token", token);
         editor.commit();
     }
 
-    public static void savePhoneNumber(String phoneNumber, Context context) {
+    public static void savePhoneNumber(Context context, String phoneNumber) {
         SharedPreferences.Editor editor = context.getSharedPreferences(PREFERENCES, 0).edit();
         editor.putString("PhoneNumber", phoneNumber);
         editor.commit();
     }
 
-    public static void saveFCMToken(String fcmToken, Context context) {
+    public static void saveFCMToken(Context context, String fcmToken) {
         SharedPreferences.Editor editor = context.getSharedPreferences(PREFERENCES, 0).edit();
         editor.putString("FCMToken", fcmToken);
         editor.commit();
@@ -80,35 +77,25 @@ public class SessionUtils {
         });
     }
 
-    public static void login(final Activity activity, Request request, final String phoneNumber, final View submitButton, final com.wang.avi.AVLoadingIndicatorView loadingLogin) {
-        submitButton.setEnabled(false);
-        loadingLogin.show();
+    public static void login(Request request, final OnRequestShowListener<String> listener) {
         HttpClient.getInstance().newCall(request).enqueue(new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
-                CallbackUtils.onUnsuccessfulSubmitWithSpinner(activity, "Failed to login", submitButton, loadingLogin);
+                listener.OnFailure("Failed to login");
             }
 
             @Override
             public void onResponse(Call call, final Response response) throws IOException {
-                if (activity == null) {
-                    return;
-                }
-
                 if (response.isSuccessful()) {
                     try {
-                        JSONObject jsonResponse = new JSONObject(response.body().string());
-                        SessionUtils.saveToken(jsonResponse.getString("api_key"), activity);
-                        SessionUtils.savePhoneNumber(phoneNumber, activity);
-                        SessionUtils.registerFCMToken(activity);
-                        activity.startActivity(new Intent(activity, MainActivity.class));
-                        activity.finish();
+                        listener.OnSuccess(new JSONObject(response.body().string()).getString("api_key"));
                     } catch (JSONException e) {
-                        CallbackUtils.onUnsuccessfulSubmitWithSpinner(activity, "Error", submitButton, loadingLogin);
+                        listener.OnFailure("Error");
                     }
                 } else {
-                    CallbackUtils.onUnsuccessfulSubmitWithSpinner(activity, HttpClient.parseErrorMessage(response), submitButton, loadingLogin);
+                    listener.OnFailure(HttpClient.parseErrorMessage(response));
                 }
+
                 response.body().close();
             }
         });
@@ -124,9 +111,7 @@ public class SessionUtils {
 
             @Override
             public void onResponse(Call call, Response response) throws IOException {
-                if (activity == null) {
-                    return;
-                }
+                if (activity == null) return;
 
                 SharedPreferences.Editor editor = activity.getSharedPreferences(PREFERENCES, 0).edit();
                 editor.remove("Token");

@@ -10,9 +10,12 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Toast;
 
+import com.salatart.memeticame.Listeners.OnRequestShowListener;
 import com.salatart.memeticame.Models.SignupForm;
 import com.salatart.memeticame.R;
+import com.salatart.memeticame.Utils.CallbackUtils;
 import com.salatart.memeticame.Utils.Routes;
+import com.salatart.memeticame.Utils.SessionUtils;
 import com.salatart.memeticame.Utils.UserUtils;
 import com.salatart.memeticame.databinding.ActivitySignupBinding;
 
@@ -58,8 +61,25 @@ public class SignupActivity extends AppCompatActivity {
             return;
         }
 
-        com.wang.avi.AVLoadingIndicatorView loadingSignup = (com.wang.avi.AVLoadingIndicatorView) findViewById(R.id.loading_signup);
+        final com.wang.avi.AVLoadingIndicatorView loadingSignup = (com.wang.avi.AVLoadingIndicatorView) findViewById(R.id.loading_signup);
+
+        submitButton.setEnabled(false);
+        loadingSignup.show();
         Request request = Routes.signup(mSignupForm.getName(), mSignupForm.getPhoneNumber(), mSignupForm.getPassword(), mSignupForm.getPasswordConfirmation());
-        UserUtils.signup(SignupActivity.this, request, mSignupForm.getPhoneNumber(), submitButton, loadingSignup);
+        UserUtils.signup(request, new OnRequestShowListener<String>() {
+            @Override
+            public void OnSuccess(String apiKey) {
+                SessionUtils.saveToken(SignupActivity.this, apiKey);
+                SessionUtils.savePhoneNumber(SignupActivity.this, mSignupForm.getPhoneNumber());
+                SessionUtils.registerFCMToken(SignupActivity.this);
+                SignupActivity.this.startActivity(new Intent(SignupActivity.this, MainActivity.class));
+                SignupActivity.this.finish();
+            }
+
+            @Override
+            public void OnFailure(String message) {
+                CallbackUtils.onUnsuccessfulSubmitWithSpinner(SignupActivity.this, message, submitButton, loadingSignup);
+            }
+        });
     }
 }

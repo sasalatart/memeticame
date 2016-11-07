@@ -107,4 +107,24 @@ public class ChatUtils {
             }
         });
     }
+
+    public static void kickRequest(Request request, final OnRequestListener listener) {
+        HttpClient.getInstance().newCall(request).enqueue(new Callback() {
+            @Override
+            public void onFailure(Call call, IOException e) {
+                listener.OnFailure("Error");
+            }
+
+            @Override
+            public void onResponse(Call call, Response response) throws IOException {
+                if (response.isSuccessful()) {
+                    listener.OnSuccess();
+                } else {
+                    listener.OnFailure(HttpClient.parseErrorMessage(response));
+                }
+
+                response.body().close();
+            }
+        });
+    }
 }

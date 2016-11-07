@@ -1,10 +1,5 @@
 package com.salatart.memeticame.Utils;
 
-import android.app.Activity;
-import android.content.Intent;
-import android.view.View;
-
-import com.salatart.memeticame.Activities.MainActivity;
 import com.salatart.memeticame.Listeners.OnRequestShowListener;
 import com.salatart.memeticame.Models.User;
 
@@ -24,35 +19,23 @@ import okhttp3.Response;
  */
 
 public class UserUtils {
-    public static void signup(final Activity activity, Request request, final String phoneNumber, final View submitButton, final com.wang.avi.AVLoadingIndicatorView loadingSignup) {
-        submitButton.setEnabled(false);
-        loadingSignup.show();
+    public static void signup(Request request, final OnRequestShowListener<String> listener) {
         HttpClient.getInstance().newCall(request).enqueue(new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
-                CallbackUtils.onUnsuccessfulSubmitWithSpinner(activity, "Failed to signup", submitButton, loadingSignup);
+                listener.OnFailure("Failed to signup");
             }
 
             @Override
             public void onResponse(Call call, Response response) throws IOException {
-                if (activity == null) {
-                    response.body().close();
-                    return;
-                }
-
                 if (response.isSuccessful()) {
                     try {
-                        JSONObject jsonResponse = new JSONObject(response.body().string());
-                        SessionUtils.saveToken(jsonResponse.getString("api_key"), activity);
-                        SessionUtils.savePhoneNumber(phoneNumber, activity);
-                        SessionUtils.registerFCMToken(activity);
-                        activity.startActivity(new Intent(activity, MainActivity.class));
-                        activity.finish();
+                        listener.OnSuccess(new JSONObject(response.body().string()).getString("api_key"));
                     } catch (Exception e) {
-                        CallbackUtils.onUnsuccessfulSubmitWithSpinner(activity, "Error", submitButton, loadingSignup);
+                        listener.OnFailure("Error");
                     }
                 } else {
-                    CallbackUtils.onUnsuccessfulSubmitWithSpinner(activity, HttpClient.parseErrorMessage(response), submitButton, loadingSignup);
+                    listener.OnSuccess(HttpClient.parseErrorMessage(response));
                 }
                 response.body().close();
             }

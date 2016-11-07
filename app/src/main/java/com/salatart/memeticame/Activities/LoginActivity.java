@@ -9,8 +9,10 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 
+import com.salatart.memeticame.Listeners.OnRequestShowListener;
 import com.salatart.memeticame.Models.LoginForm;
 import com.salatart.memeticame.R;
+import com.salatart.memeticame.Utils.CallbackUtils;
 import com.salatart.memeticame.Utils.Routes;
 import com.salatart.memeticame.Utils.SessionUtils;
 import com.salatart.memeticame.databinding.ActivityLoginBinding;
@@ -56,9 +58,26 @@ public class LoginActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
-    public void login(final View view) {
-        com.wang.avi.AVLoadingIndicatorView loadingLogin = (com.wang.avi.AVLoadingIndicatorView) findViewById(R.id.loading_login);
+    public void login(final View submitButton) {
+        final com.wang.avi.AVLoadingIndicatorView loadingLogin = (com.wang.avi.AVLoadingIndicatorView) findViewById(R.id.loading_login);
+
+        submitButton.setEnabled(false);
+        loadingLogin.show();
         Request request = Routes.login(mLoginForm.getPhoneNumber(), mLoginForm.getPassword());
-        SessionUtils.login(LoginActivity.this, request, mLoginForm.getPhoneNumber(), view, loadingLogin);
+        SessionUtils.login(request, new OnRequestShowListener<String>() {
+            @Override
+            public void OnSuccess(String apiKey) {
+                SessionUtils.saveToken(LoginActivity.this, apiKey);
+                SessionUtils.savePhoneNumber(LoginActivity.this, mLoginForm.getPhoneNumber());
+                SessionUtils.registerFCMToken(LoginActivity.this);
+                LoginActivity.this.startActivity(new Intent(LoginActivity.this, MainActivity.class));
+                LoginActivity.this.finish();
+            }
+
+            @Override
+            public void OnFailure(String message) {
+                CallbackUtils.onUnsuccessfulSubmitWithSpinner(LoginActivity.this, message, submitButton, loadingLogin);
+            }
+        });
     }
 }

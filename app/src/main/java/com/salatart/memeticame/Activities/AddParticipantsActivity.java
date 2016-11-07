@@ -15,6 +15,7 @@ import android.widget.Toast;
 
 import com.salatart.memeticame.Listeners.OnContactsReadListener;
 import com.salatart.memeticame.Listeners.OnRequestIndexListener;
+import com.salatart.memeticame.Listeners.OnRequestListener;
 import com.salatart.memeticame.Models.Chat;
 import com.salatart.memeticame.Models.ChatInvitation;
 import com.salatart.memeticame.Models.User;
@@ -176,8 +177,20 @@ public class AddParticipantsActivity extends AppCompatActivity {
             return;
         }
 
+        submitButton.setEnabled(false);
         Request request = Routes.inviteUsers(AddParticipantsActivity.this, mChat, mSelectedUsers);
-        ChatInvitationsUtils.addParticipantsRequest(AddParticipantsActivity.this, request, mChat, submitButton);
+        ChatInvitationsUtils.addParticipantsRequest(request, new OnRequestListener() {
+            @Override
+            public void OnSuccess() {
+                AddParticipantsActivity.this.startActivity(ChatActivity.getIntent(AddParticipantsActivity.this, mChat));
+                AddParticipantsActivity.this.finish();
+            }
+
+            @Override
+            public void OnFailure(String message) {
+                CallbackUtils.onUnsuccessfulSubmit(AddParticipantsActivity.this, message, submitButton);
+            }
+        });
     }
 
     public void setAdapter() {

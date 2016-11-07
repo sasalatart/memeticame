@@ -10,9 +10,7 @@ import android.widget.Toast;
 
 public class CallbackUtils {
     public static void onUnsuccessfulRequestWithSpinner(final Activity activity, final String message, final com.wang.avi.AVLoadingIndicatorView loading) {
-        if (activity == null) {
-            return;
-        }
+        if (activity == null) return;
 
         activity.runOnUiThread(new Runnable() {
             @Override
@@ -24,9 +22,7 @@ public class CallbackUtils {
     }
 
     public static void onUnsuccessfulRequest(final Activity activity, final String message) {
-        if (activity == null) {
-            return;
-        }
+        if (activity == null) return;
 
         activity.runOnUiThread(new Runnable() {
             @Override
@@ -37,9 +33,7 @@ public class CallbackUtils {
     }
 
     public static void onUnsuccessfulSubmit(final Activity activity, final String message, final View submitButton) {
-        if (activity == null) {
-            return;
-        }
+        if (activity == null) return;
 
         activity.runOnUiThread(new Runnable() {
             public void run() {
@@ -50,9 +44,7 @@ public class CallbackUtils {
     }
 
     public static void onUnsuccessfulSubmitWithSpinner(final Activity activity, final String message, final View submitButton, final com.wang.avi.AVLoadingIndicatorView loading) {
-        if (activity == null) {
-            return;
-        }
+        if (activity == null) return;
 
         activity.runOnUiThread(new Runnable() {
             @Override
