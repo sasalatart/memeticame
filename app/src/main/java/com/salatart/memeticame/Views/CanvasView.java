@@ -330,7 +330,6 @@ public class CanvasView extends View {
             case TEXT   :
                 this.startX = event.getX();
                 this.startY = event.getY();
-                showDialog(this.startX, this.startY);
 
                 break;
             default :

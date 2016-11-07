@@ -11,6 +11,7 @@ public class Meme {
     public static String URI_KEY = "memeUri";
     public static String GALLERY_MODE_KEY = "galleryModeKey";
     public static String SEPARATOR = "-meme-";
+    public static String PATH_KEY = "memePath";
 
     private String mText;
     private float mPositionX;
