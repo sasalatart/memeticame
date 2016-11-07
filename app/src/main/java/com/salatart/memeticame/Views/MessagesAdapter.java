@@ -1,8 +1,6 @@
 package com.salatart.memeticame.Views;
 
 import android.content.Context;
-import android.graphics.Color;
-import android.media.MediaPlayer;
 import android.net.Uri;
 import android.support.v4.content.ContextCompat;
 import android.view.LayoutInflater;
@@ -18,6 +16,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
+import com.salatart.memeticame.Managers.MediaPlayerManager;
 import com.salatart.memeticame.Models.Attachment;
 import com.salatart.memeticame.Models.Chat;
 import com.salatart.memeticame.Models.Message;
@@ -232,66 +231,27 @@ public class MessagesAdapter extends ArrayAdapter<Message> {
         final ImageButton pauseButton = ((ImageButton) view.findViewById(R.id.button_pause));
         final ImageButton stopButton = ((ImageButton) view.findViewById(R.id.button_stop));
 
-        final MediaPlayer mediaPlayer = MediaPlayer.create(getContext(), audioUri);
-        mediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
-            @Override
-            public void onCompletion(MediaPlayer mp) {
-                setMediaPlayer(view, audioUri);
-            }
-        });
+        final MediaPlayerManager mediaPlayerManager = new MediaPlayerManager(getContext(), audioUri, playButton, pauseButton, stopButton);
 
         playButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                onPlay(mediaPlayer, playButton, pauseButton, stopButton);
+                mediaPlayerManager.onPlay();
             }
         });
 
         pauseButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                onPause(mediaPlayer, playButton, pauseButton, stopButton);
+                mediaPlayerManager.onPause();
             }
         });
 
         stopButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                onStop(mediaPlayer, playButton, pauseButton, stopButton);
-                setMediaPlayer(view, audioUri);
+                mediaPlayerManager.onStop();
             }
         });
-
-        setEnabled(true, false, false, playButton, pauseButton, stopButton);
-        setColors(Color.BLACK, Color.BLACK, Color.BLACK, playButton, pauseButton, stopButton);
-    }
-
-    public void onPlay(MediaPlayer mediaPlayer, ImageButton playButton, ImageButton pauseButton, ImageButton stopButton) {
-        setEnabled(false, true, true, playButton, pauseButton, stopButton);
-        setColors(Color.RED, Color.BLACK, Color.BLACK, playButton, pauseButton, stopButton);
-        mediaPlayer.start();
-    }
-
-    public void onPause(MediaPlayer mediaPlayer, ImageButton playButton, ImageButton pauseButton, ImageButton stopButton) {
-        setEnabled(true, false, true, playButton, pauseButton, stopButton);
-        setColors(Color.BLACK, Color.RED, Color.BLACK, playButton, pauseButton, stopButton);
-        mediaPlayer.pause();
-    }
-
-    public void onStop(MediaPlayer mediaPlayer, ImageButton playButton, ImageButton pauseButton, ImageButton stopButton) {
-        setEnabled(true, false, false, playButton, pauseButton, stopButton);
-        mediaPlayer.stop();
-    }
-
-    private void setEnabled(boolean playButtonEnabled, boolean pauseButtonEnabled, boolean stopButtonEnabled, ImageButton playButton, ImageButton pauseButton, ImageButton stopButton) {
-        playButton.setEnabled(playButtonEnabled);
-        pauseButton.setEnabled(pauseButtonEnabled);
-        stopButton.setEnabled(stopButtonEnabled);
-    }
-
-    private void setColors(int playColor, int pauseColor, int stopColor, ImageButton playButton, ImageButton pauseButton, ImageButton stopButton) {
-        playButton.setColorFilter(playColor);
-        pauseButton.setColorFilter(pauseColor);
-        stopButton.setColorFilter(stopColor);
     }
 }
