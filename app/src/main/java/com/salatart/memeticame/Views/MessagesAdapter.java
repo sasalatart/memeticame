@@ -4,6 +4,7 @@ import android.content.Context;
 import android.graphics.Color;
 import android.media.MediaPlayer;
 import android.net.Uri;
+import android.support.v4.content.ContextCompat;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -23,6 +24,8 @@ import com.salatart.memeticame.Models.Message;
 import com.salatart.memeticame.R;
 import com.salatart.memeticame.Utils.FileUtils;
 import com.salatart.memeticame.Utils.MessageUtils;
+
+import us.feras.mdv.MarkdownView;
 
 /**
  * Created by sasalatart on 9/4/16.
@@ -82,6 +85,13 @@ public class MessagesAdapter extends ArrayAdapter<Message> {
 
     private void setTextViews(View view, Message message) {
         TextView senderLabel = (TextView) view.findViewById(R.id.label_sender);
+
+        ((TextView) view.findViewById(R.id.label_timestamp)).setText(message.getCreatedAt());
+
+        MarkdownView messageMarkdownView = (MarkdownView) view.findViewById(R.id.message);
+        messageMarkdownView.setBackgroundColor(0);
+        messageMarkdownView.loadMarkdown(message.getContent());
+
         if (message.isMine(getContext())) {
             senderLabel.setText(R.string.me);
 
@@ -91,16 +101,15 @@ public class MessagesAdapter extends ArrayAdapter<Message> {
             } else {
                 statusImageView.setImageResource(R.drawable.ic_check_black_24dp);
             }
+            messageMarkdownView.setBackgroundColor(ContextCompat.getColor(getContext(), R.color.outWellColor));
         } else {
             String sender = mParentChat.getParticipantsHash().get(message.getSenderPhone());
             if (sender == null) {
                 sender = message.getSenderPhone();
             }
             senderLabel.setText(sender);
+            messageMarkdownView.setBackgroundColor(ContextCompat.getColor(getContext(), R.color.inWellColor));
         }
-
-        ((TextView) view.findViewById(R.id.label_timestamp)).setText(message.getCreatedAt());
-        ((TextView) view.findViewById(R.id.message)).setText(message.getContent());
     }
 
     private void setAttachment(View view, final Message message) {

@@ -4,70 +4,20 @@
     android:layout_height="wrap_content"
     android:orientation="horizontal">
 
-    <View
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:layout_weight="3" />
+    <include layout="@layout/layout_message_space" />
 
-    <RelativeLayout
+    <LinearLayout
         android:layout_width="0dp"
         android:layout_height="wrap_content"
+        android:layout_marginBottom="@dimen/message_well_margin"
+        android:layout_marginTop="@dimen/message_well_margin"
         android:layout_weight="7"
         android:background="@drawable/message_in_well"
-        android:padding="8dp">
+        android:orientation="vertical"
+        android:padding="@dimen/message_well_padding">
 
-        <LinearLayout
-            android:id="@+id/first_row"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentEnd="true"
-            android:layout_alignParentRight="true">
+        <include layout="@layout/layout_message_from_in" />
 
-            <TextView
-                android:id="@+id/label_sender"
-                android:layout_width="wrap_content"
-                android:layout_height="24dp"
-                android:gravity="center"
-                android:text="@string/sender_label"
-                android:textAppearance="?android:attr/textAppearanceSmall"
-                android:textColor="@color/colorBlack"
-                android:textStyle="bold" />
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="24dp"
-                android:gravity="center"
-                android:paddingLeft="2dp"
-                android:paddingRight="2dp"
-                android:text="@string/at"
-                android:textAppearance="?android:attr/textAppearanceSmall"
-                android:textColor="@color/colorBlack" />
-
-            <TextView
-                android:id="@+id/label_timestamp"
-                android:layout_width="wrap_content"
-                android:layout_height="24dp"
-                android:gravity="center"
-                android:text="@string/timestamp_label"
-                android:textAppearance="?android:attr/textAppearanceSmall"
-                android:textColor="@color/colorBlack" />
-
-            <ImageView
-                android:id="@+id/label_attachment_type"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:src="@drawable/ic_textsms_black_24dp" />
-        </LinearLayout>
-
-        <TextView
-            android:id="@+id/message"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_below="@id/first_row"
-            android:layout_marginTop="10dp"
-            android:gravity="end"
-            android:text="@string/message_label"
-            android:textColor="@color/colorBlack"
-            android:textStyle="italic" />
-    </RelativeLayout>
+        <include layout="@layout/layout_message" />
+    </LinearLayout>
 </LinearLayout>
