@@ -7,6 +7,8 @@
     <dimen name="tab_label">14sp</dimen>
     <dimen name="custom_tab_layout_height">72dp</dimen>
     <dimen name="message_padding">4dp</dimen>
+    <dimen name="message_well_padding">8dp</dimen>
+    <dimen name="message_well_margin">8dp</dimen>
     <dimen name="chat_padding">4dp</dimen>
     <dimen name="separator_margin">16dp</dimen>
     <dimen name="list_item_icon_size">64dp</dimen>
