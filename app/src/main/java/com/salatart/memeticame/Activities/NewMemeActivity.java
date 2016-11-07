@@ -59,14 +59,14 @@ public class NewMemeActivity extends AppCompatActivity {
 
         ButterKnife.bind(this);
 
-        mCanvas.setMode(CanvasView.Mode.TEXT);
-        mAudioRecorderManager = new AudioRecorderManager();
-        registerForContextMenu(mSelectImageButton);
-
         ActionBar actionBar = getSupportActionBar();
         actionBar.setDisplayHomeAsUpEnabled(true);
 
         setTitle("New Meme");
+
+        mCanvas.setMode(CanvasView.Mode.TEXT);
+        mAudioRecorderManager = new AudioRecorderManager();
+        registerForContextMenu(mSelectImageButton);
     }
 
     @Override
@@ -76,20 +76,12 @@ public class NewMemeActivity extends AppCompatActivity {
         return true;
     }
 
-    public void onUndoText(View view) {
-        mCanvas.undoText();
-    }
-
-    public void onCreate(View view) {
-        createMeme();
-    }
-
     public void drawBitmap(Bitmap picture) {
         mCanvas.drawBitmap((Bitmap.createScaledBitmap(picture, mCanvas.getWidth(), mCanvas.getHeight(), false)));
     }
 
     private void createMeme() {
-        if(mImagePath == null){
+        if (mImagePath == null) {
             Toast.makeText(NewMemeActivity.this, "Create a meme first", Toast.LENGTH_SHORT).show();
             return;
         }
@@ -121,6 +113,10 @@ public class NewMemeActivity extends AppCompatActivity {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    public void editMemeFromCameraOrGallery() {
+        startActivityForResult(MemeEditorActivity.getIntent(NewMemeActivity.this, null), FilterUtils.REQUEST_GET_MEME);
     }
 
     public void toggleRecording(View view) {
@@ -209,15 +205,16 @@ public class NewMemeActivity extends AppCompatActivity {
         openContextMenu(view);
     }
 
-    public void editMemeFromCameraOrGallery(){
-
-        Intent editMemeIntent = new Intent(NewMemeActivity.this, MemeEditorActivity.class);
-        startActivityForResult(editMemeIntent, FilterUtils.REQUEST_GET_MEME);
-
-    }
-
     public void chooseImageFromPlainGallery() {
         startActivityForResult(new Intent(NewMemeActivity.this, PlainMemeGalleryActivity.class), FilterUtils.REQUEST_PICK_PLAIN_MEME);
+    }
+
+    public void onCreateMeme(View view) {
+        createMeme();
+    }
+
+    public void onUndoText(View view) {
+        mCanvas.undoText();
     }
 
     @Override
@@ -227,20 +224,9 @@ public class NewMemeActivity extends AppCompatActivity {
         if (requestCode == FilterUtils.REQUEST_GET_MEME && resultCode == RESULT_OK) {
             mImagePath = (String) data.getExtras().get(Meme.PATH_KEY);
             drawBitmap(BitmapFactory.decodeFile(mImagePath));
-        } else if (requestCode == FilterUtils.REQUEST_PICK_PLAIN_MEME && resultCode == RESULT_OK) {
-            Thread thread = new Thread(new Runnable() {
-                @Override
-                public void run() {
-                    try {
-                        String imageUri = (String) data.getExtras().get(Meme.URI_KEY);
-                        drawBitmap(FileUtils.getBitmapFromURL(imageUri));
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-                }
-            });
-
-            thread.start();
+        } else if (requestCode == FilterUtils.REQUEST_PICK_PLAIN_MEME && resultCode == RESULT_OK && data != null) {
+            Uri fileUri = data.getParcelableExtra(Meme.URI_KEY);
+            startActivityForResult(MemeEditorActivity.getIntent(NewMemeActivity.this, fileUri), FilterUtils.REQUEST_GET_MEME);
         }
     }
 }

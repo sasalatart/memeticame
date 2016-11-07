@@ -29,31 +29,31 @@
 
         <ImageButton
             android:id="@+id/take_audio"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="@dimen/attachment_button_size"
+            android:layout_height="@dimen/attachment_button_size"
             android:onClick="toggleRecording"
             android:src="@drawable/ic_settings_voice_black_24dp" />
 
         <ImageButton
             android:id="@+id/button_play"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="@dimen/attachment_button_size"
+            android:layout_height="@dimen/attachment_button_size"
             android:onClick="onPlay"
             android:src="@drawable/ic_play_circle_outline_black_24dp"
             android:visibility="gone" />
 
         <ImageButton
             android:id="@+id/button_pause"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="@dimen/attachment_button_size"
+            android:layout_height="@dimen/attachment_button_size"
             android:onClick="onPause"
             android:src="@drawable/ic_pause_circle_outline_black_24dp"
             android:visibility="gone" />
 
         <ImageButton
             android:id="@+id/button_stop"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="@dimen/attachment_button_size"
+            android:layout_height="@dimen/attachment_button_size"
             android:onClick="onStop"
             android:src="@drawable/ic_stop_black_24dp"
             android:visibility="gone" />
@@ -70,23 +70,23 @@
 
         <ImageButton
             android:id="@+id/button_undo_text"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="@dimen/attachment_button_size"
+            android:layout_height="@dimen/attachment_button_size"
             android:onClick="onUndoText"
             android:src="@drawable/ic_undo_black_24dp" />
 
         <ImageButton
             android:id="@+id/button_select_image"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="@dimen/attachment_button_size"
+            android:layout_height="@dimen/attachment_button_size"
             android:onClick="showMemeOptionsMenu"
             android:src="@drawable/ic_image_black_24dp" />
 
         <ImageButton
             android:id="@+id/button_create"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:onClick="onCreate"
+            android:layout_width="@dimen/attachment_button_size"
+            android:layout_height="@dimen/attachment_button_size"
+            android:onClick="onCreateMeme"
             android:src="@drawable/ic_save_black_24dp" />
     </LinearLayout>
 

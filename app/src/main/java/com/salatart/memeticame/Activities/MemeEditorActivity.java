@@ -1,15 +1,16 @@
 package com.salatart.memeticame.Activities;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.media.MediaScannerConnection;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
-import android.widget.Toast;
 
 import com.salatart.memeticame.Models.Meme;
 import com.salatart.memeticame.R;
+import com.salatart.memeticame.Utils.FilterUtils;
 
 import java.io.File;
 
@@ -25,50 +26,31 @@ import ly.img.android.ui.activities.PhotoEditorBuilder;
 public class MemeEditorActivity extends AppCompatActivity {
 
     private static final String FOLDER = "Camera";
-    public static int CAMERA_PREVIEW_RESULT = 1;
+
+    public static Intent getIntent(Context context, Uri fileUri) {
+        Intent intent = new Intent(context, MemeEditorActivity.class);
+        intent.putExtra(Meme.URI_KEY, fileUri);
+        return intent;
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_meme_editor);
 
-        memeEditorWithCamera();
-
-    }
-
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        if (resultCode == RESULT_OK && requestCode == CAMERA_PREVIEW_RESULT) {
-            String path = data.getStringExtra(CameraPreviewActivity.RESULT_IMAGE_PATH);
-
-            Toast.makeText(this, "Image saved at: " + path, Toast.LENGTH_LONG).show();
-
-            File mMediaFolder = new File(path);
-
-            MediaScannerConnection.scanFile(this, new String[]{mMediaFolder.getAbsolutePath()}, null, new MediaScannerConnection.OnScanCompletedListener() {
-                        public void onScanCompleted(String path, Uri uri) {
-                            Intent returnIntent = new Intent();
-                            returnIntent.putExtra(Meme.PATH_KEY, path);
-                            setResult(Activity.RESULT_OK, returnIntent);
-                            finish();
-                        }
-                    }
-            );
-        }
-        else {
-            finish();
+        Bundle data = getIntent().getExtras();
+        if (data != null && data.getParcelable(Meme.URI_KEY) != null) {
+            memeEditorWithPlainMeme(((Uri) data.getParcelable(Meme.URI_KEY)).getPath());
+        } else {
+            memeEditorWithCamera();
         }
     }
 
     private void memeEditorWithCamera() {
-
         SettingsList settingsList = new SettingsList();
-        settingsList
-                .getSettingsModel(CameraSettings.class)
+        settingsList.getSettingsModel(CameraSettings.class)
                 .setExportDir(Directory.DCIM, FOLDER)
                 .setExportPrefix("camera_")
-
                 .getSettingsModel(EditorSaveSettings.class)
                 .setExportDir(Directory.DCIM, FOLDER)
                 .setExportPrefix("result_")
@@ -76,30 +58,42 @@ public class MemeEditorActivity extends AppCompatActivity {
 
         new CameraPreviewBuilder(this)
                 .setSettingsList(settingsList)
-                .startActivityForResult(this, CAMERA_PREVIEW_RESULT);
-
+                .startActivityForResult(this, FilterUtils.REQUEST_CAMERA_PREVIEW);
     }
 
 
-    private void memeEditorWithPlainMeme(String myPicture) {
-
+    private void memeEditorWithPlainMeme(String myPicturePath) {
         SettingsList settingsList = new SettingsList();
-        settingsList
-                .getSettingsModel(EditorLoadSettings.class)
-                .setImageSourcePath(myPicture, true) // Load with delete protection true!
-
+        settingsList.getSettingsModel(EditorLoadSettings.class)
+                .setImageSourcePath(myPicturePath, true) // Load with delete protection true!
                 .getSettingsModel(EditorSaveSettings.class)
                 .setExportDir(Directory.DCIM, FOLDER)
                 .setExportPrefix("result_")
-                .setSavePolicy(
-                        EditorSaveSettings.SavePolicy.KEEP_SOURCE_AND_CREATE_ALWAYS_OUTPUT
-                );
+                .setSavePolicy(EditorSaveSettings.SavePolicy.KEEP_SOURCE_AND_CREATE_ALWAYS_OUTPUT);
 
         new PhotoEditorBuilder(this)
                 .setSettingsList(settingsList)
-                .startActivityForResult(this, CAMERA_PREVIEW_RESULT);
-
-
+                .startActivityForResult(this, FilterUtils.REQUEST_CAMERA_PREVIEW);
     }
 
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (resultCode == RESULT_OK && requestCode == FilterUtils.REQUEST_CAMERA_PREVIEW) {
+            String path = data.getStringExtra(CameraPreviewActivity.RESULT_IMAGE_PATH);
+
+            File mMediaFolder = new File(path);
+            MediaScannerConnection.scanFile(this, new String[]{mMediaFolder.getAbsolutePath()}, null, new MediaScannerConnection.OnScanCompletedListener() {
+                public void onScanCompleted(String path, Uri uri) {
+                    Intent returnIntent = new Intent();
+                    returnIntent.putExtra(Meme.PATH_KEY, path);
+                    setResult(Activity.RESULT_OK, returnIntent);
+                    finish();
+                }
+            });
+        } else {
+            finish();
+        }
+    }
 }

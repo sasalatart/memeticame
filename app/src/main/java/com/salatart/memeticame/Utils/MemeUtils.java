@@ -10,6 +10,12 @@ import java.util.Date;
  */
 
 public class MemeUtils {
+    public static String getNameFromUrl(String url) {
+        int start = url.lastIndexOf("/") + 1;
+        int end = url.lastIndexOf("?");
+        return start < end ? url.substring(start, end) : url.substring(start);
+    }
+
     public static String createName(String baseName) {
         String timestamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
         return baseName.replace(' ', '_') + Meme.SEPARATOR + timestamp + ".jpg";
