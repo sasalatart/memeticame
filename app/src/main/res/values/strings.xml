@@ -16,7 +16,6 @@
     <string name="logout">Logout</string>
     <string name="add_contact">Add contact</string>
     <string name="create_chat">Create chat</string>
-    <string name="cancel">cancel</string>
     <string name="attachment_name">attachment name</string>
     <string name="create_group">Create group</string>
     <string name="group_name">Group Name</string>
@@ -35,11 +34,6 @@
     <string name="create_meme">Create meme</string>
     <string name="percentage">percentage</string>
     <string name="meme_name">Meme name</string>
-    <string name="meme_dialog_font_size_title">Font size</string>
-    <string name="meme_dialog_font_family_title">Font family</string>
-    <string name="meme_dialog_text_placeholder">Enter a text</string>
-    <string name="ok">OK</string>
-    <string name="color">Color</string>
     <string name="see_memes_gallery">See memes gallery</string>
     <string name="attachment_mime_type">Mime Type</string>
 </resources>

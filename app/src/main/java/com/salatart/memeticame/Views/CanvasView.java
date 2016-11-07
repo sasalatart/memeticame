@@ -22,7 +22,6 @@ import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
 
-import com.salatart.memeticame.Listeners.OnConfirmMemeListener;
 import com.salatart.memeticame.Models.Meme;
 
 import java.io.ByteArrayOutputStream;
@@ -36,67 +35,41 @@ import java.util.List;
  */
 public class CanvasView extends View {
 
-    // Enumeration for Mode
-    public enum Mode {
-        DRAW,
-        TEXT,
-        ERASER;
-    }
-
-    // Enumeration for Drawer
-    public enum Drawer {
-        PEN,
-        LINE,
-        RECTANGLE,
-        CIRCLE,
-        ELLIPSE,
-        QUADRATIC_BEZIER,
-        QUBIC_BEZIER;
-    }
-
     private Context context = null;
-    private Canvas canvas   = null;
-    private Bitmap bitmap   = null;
-
-    private List<Path>  pathLists  = new ArrayList<Path>();
+    private Canvas canvas = null;
+    private Bitmap bitmap = null;
+    private List<Path> pathLists = new ArrayList<Path>();
     private List<Paint> paintLists = new ArrayList<Paint>();
     private List<Meme> memeLists = new ArrayList<>();
-
     // for Eraser
     private int baseColor = Color.WHITE;
-
     // for Undo, Redo
     private int historyPointer = 0;
-
     // Flags
-    private Mode mode      = Mode.DRAW;
-    private Drawer drawer  = Drawer.PEN;
+    private Mode mode = Mode.DRAW;
+    private Drawer drawer = Drawer.PEN;
     private boolean isDown = false;
-
     // for Paint
     private Paint.Style paintStyle = Paint.Style.FILL;
-    private int paintStrokeColor   = Color.BLACK;
-    private int paintFillColor     = Color.BLACK;
+    private int paintStrokeColor = Color.BLACK;
+    private int paintFillColor = Color.BLACK;
     private float paintStrokeWidth = 3F;
-    private int opacity            = 255;
-    private float blur             = 0F;
-    private Paint.Cap lineCap      = Paint.Cap.ROUND;
-
+    private int opacity = 255;
+    private float blur = 0F;
+    private Paint.Cap lineCap = Paint.Cap.ROUND;
     // for Text
-    private String text           = "";
-    private Typeface fontFamily   = Typeface.DEFAULT;
-    private float fontSize        = 128F;
+    private String text = "";
+    private Typeface fontFamily = Typeface.DEFAULT;
+    private float fontSize = 128F;
     private Paint.Align textAlign = Paint.Align.RIGHT;  // fixed
-    private Paint textPaint       = new Paint();
-    private float textX           = 0F;
-    private float textY           = 0F;
-
+    private Paint textPaint = new Paint();
+    private float textX = 0F;
+    private float textY = 0F;
     // for Drawer
-    private float startX   = 0F;
-    private float startY   = 0F;
+    private float startX = 0F;
+    private float startY = 0F;
     private float controlX = 0F;
     private float controlY = 0F;
-
     /**
      * Copy Constructor
      *
@@ -108,7 +81,6 @@ public class CanvasView extends View {
         super(context, attrs, defStyle);
         this.setup(context);
     }
-
     /**
      * Copy Constructor
      *
@@ -128,6 +100,21 @@ public class CanvasView extends View {
     public CanvasView(Context context) {
         super(context);
         this.setup(context);
+    }
+
+    /**
+     * This static method gets the designated bitmap as byte array.
+     *
+     * @param bitmap
+     * @param format
+     * @param quality
+     * @return This is returned as byte array of bitmap.
+     */
+    public static byte[] getBitmapAsByteArray(Bitmap bitmap, CompressFormat format, int quality) {
+        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+        bitmap.compress(format, quality, byteArrayOutputStream);
+
+        return byteArrayOutputStream.toByteArray();
     }
 
     /**
@@ -261,12 +248,12 @@ public class CanvasView extends View {
         Paint paintForMeasureText = new Paint();
 
         // Line break automatically
-        float textLength   = paintForMeasureText.measureText(this.text);
-        float lengthOfChar = textLength / (float)this.text.length();
-        float restWidth    = canvas.getWidth() - textX;  // text-align : right
-        int numChars       = (lengthOfChar <= 0) ? 1 : (int)Math.floor((double)(restWidth / lengthOfChar));  // The number of characters at 1 line
-        int modNumChars    = (numChars < 1) ? 1 : numChars;
-        float y            = textY;
+        float textLength = paintForMeasureText.measureText(this.text);
+        float lengthOfChar = textLength / (float) this.text.length();
+        float restWidth = canvas.getWidth() - textX;  // text-align : right
+        int numChars = (lengthOfChar <= 0) ? 1 : (int) Math.floor((double) (restWidth / lengthOfChar));  // The number of characters at 1 line
+        int modNumChars = (numChars < 1) ? 1 : numChars;
+        float y = textY;
 
         for (int i = 0, len = this.text.length(); i < len; i += modNumChars) {
             String substring = "";
@@ -286,13 +273,13 @@ public class CanvasView extends View {
 
     private void drawTextList(Canvas canvas) {
 
-        if(memeLists.size() == 0)
+        if (memeLists.size() == 0)
             return;
 
         this.textPaint = this.createPaint();
         this.textPaint.setTextAlign(Paint.Align.LEFT);
 
-        for(Meme meme : memeLists){
+        for (Meme meme : memeLists) {
             this.textPaint.setTextSize(meme.getFontSize());
             this.textPaint.setTypeface(meme.getFontFamily());
             this.textPaint.setColor(meme.getPaintColor());
@@ -307,8 +294,8 @@ public class CanvasView extends View {
      */
     private void onActionDown(MotionEvent event) {
         switch (this.mode) {
-            case DRAW   :
-            case ERASER :
+            case DRAW:
+            case ERASER:
                 if ((this.drawer != Drawer.QUADRATIC_BEZIER) && (this.drawer != Drawer.QUBIC_BEZIER)) {
                     // Oherwise
                     this.updateHistory(this.createPath(event));
@@ -327,29 +314,14 @@ public class CanvasView extends View {
                     }
                 }
                 break;
-            case TEXT   :
+            case TEXT:
                 this.startX = event.getX();
                 this.startY = event.getY();
 
                 break;
-            default :
+            default:
                 break;
         }
-    }
-
-    public void showDialog(final float x, final float y){
-
-        final MemeDialog dialog = new MemeDialog(context,x,y);
-
-
-        dialog.setConfirmMemeListener(new OnConfirmMemeListener() {
-            @Override
-            public void onConfirm(Meme meme) {
-                memeLists.add(meme);
-            }
-        });
-
-        dialog.show();
     }
 
     /**
@@ -362,8 +334,8 @@ public class CanvasView extends View {
         float y = event.getY();
 
         switch (this.mode) {
-            case DRAW   :
-            case ERASER :
+            case DRAW:
+            case ERASER:
 
                 if ((this.drawer != Drawer.QUADRATIC_BEZIER) && (this.drawer != Drawer.QUBIC_BEZIER)) {
                     if (!isDown) {
@@ -373,33 +345,33 @@ public class CanvasView extends View {
                     Path path = this.getCurrentPath();
 
                     switch (this.drawer) {
-                        case PEN :
+                        case PEN:
                             path.lineTo(x, y);
                             break;
-                        case LINE :
+                        case LINE:
                             path.reset();
                             path.moveTo(this.startX, this.startY);
                             path.lineTo(x, y);
                             break;
-                        case RECTANGLE :
+                        case RECTANGLE:
                             path.reset();
                             path.addRect(this.startX, this.startY, x, y, Path.Direction.CCW);
                             break;
-                        case CIRCLE :
-                            double distanceX = Math.abs((double)(this.startX - x));
-                            double distanceY = Math.abs((double)(this.startX - y));
-                            double radius    = Math.sqrt(Math.pow(distanceX, 2.0) + Math.pow(distanceY, 2.0));
+                        case CIRCLE:
+                            double distanceX = Math.abs((double) (this.startX - x));
+                            double distanceY = Math.abs((double) (this.startX - y));
+                            double radius = Math.sqrt(Math.pow(distanceX, 2.0) + Math.pow(distanceY, 2.0));
 
                             path.reset();
-                            path.addCircle(this.startX, this.startY, (float)radius, Path.Direction.CCW);
+                            path.addCircle(this.startX, this.startY, (float) radius, Path.Direction.CCW);
                             break;
-                        case ELLIPSE :
+                        case ELLIPSE:
                             RectF rect = new RectF(this.startX, this.startY, x, y);
 
                             path.reset();
                             path.addOval(rect, Path.Direction.CCW);
                             break;
-                        default :
+                        default:
                             break;
                     }
                 } else {
@@ -415,12 +387,12 @@ public class CanvasView extends View {
                 }
 
                 break;
-            case TEXT :
+            case TEXT:
                 this.startX = x;
                 this.startY = y;
 
                 break;
-            default :
+            default:
                 break;
         }
     }
@@ -455,7 +427,7 @@ public class CanvasView extends View {
         }
 
         for (int i = 0; i < this.historyPointer; i++) {
-            Path path   = this.pathLists.get(i);
+            Path path = this.pathLists.get(i);
             Paint paint = this.paintLists.get(i);
 
             canvas.drawPath(path, paint);
@@ -481,13 +453,13 @@ public class CanvasView extends View {
             case MotionEvent.ACTION_DOWN:
                 this.onActionDown(event);
                 break;
-            case MotionEvent.ACTION_MOVE :
+            case MotionEvent.ACTION_MOVE:
                 this.onActionMove(event);
                 break;
-            case MotionEvent.ACTION_UP :
+            case MotionEvent.ACTION_UP:
                 this.onActionUp(event);
                 break;
-            default :
+            default:
                 break;
         }
 
@@ -550,7 +522,7 @@ public class CanvasView extends View {
     }
 
     public void undoText() {
-        if(this.memeLists.size() == 0)
+        if (this.memeLists.size() == 0)
             return;
 
         this.memeLists.remove(this.memeLists.size() - 1);
@@ -690,7 +662,7 @@ public class CanvasView extends View {
      */
     public int getPaintFillColor() {
         return this.paintFillColor;
-    };
+    }
 
     /**
      * This method is setter for fill color.
@@ -701,6 +673,8 @@ public class CanvasView extends View {
     public void setPaintFillColor(int color) {
         this.paintFillColor = color;
     }
+
+    ;
 
     /**
      * This method is getter for stroke width.
@@ -743,7 +717,7 @@ public class CanvasView extends View {
         if ((opacity >= 0) && (opacity <= 255)) {
             this.opacity = opacity;
         } else {
-            this.opacity= 255;
+            this.opacity = 255;
         }
     }
 
@@ -873,21 +847,6 @@ public class CanvasView extends View {
     }
 
     /**
-     * This static method gets the designated bitmap as byte array.
-     *
-     * @param bitmap
-     * @param format
-     * @param quality
-     * @return This is returned as byte array of bitmap.
-     */
-    public static byte[] getBitmapAsByteArray(Bitmap bitmap, CompressFormat format, int quality) {
-        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-        bitmap.compress(format, quality, byteArrayOutputStream);
-
-        return byteArrayOutputStream.toByteArray();
-    }
-
-    /**
      * This method gets the bitmap as byte array.
      *
      * @param format
@@ -909,6 +868,24 @@ public class CanvasView extends View {
      */
     public byte[] getBitmapAsByteArray() {
         return this.getBitmapAsByteArray(CompressFormat.PNG, 100);
+    }
+
+    // Enumeration for Mode
+    public enum Mode {
+        DRAW,
+        TEXT,
+        ERASER;
+    }
+
+    // Enumeration for Drawer
+    public enum Drawer {
+        PEN,
+        LINE,
+        RECTANGLE,
+        CIRCLE,
+        ELLIPSE,
+        QUADRATIC_BEZIER,
+        QUBIC_BEZIER;
     }
 
 }
