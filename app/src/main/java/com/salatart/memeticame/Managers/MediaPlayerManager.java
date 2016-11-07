@@ -31,21 +31,29 @@ public class MediaPlayerManager {
 
     public void setMediaPlayer() {
         mMediaPlayer = MediaPlayer.create(mContext, mAudioUri);
-        mMediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
-            @Override
-            public void onCompletion(MediaPlayer mp) {
-                setMediaPlayer();
-            }
-        });
 
         setEnabled(true, false, false);
         setColors(Color.BLACK, Color.BLACK, Color.BLACK);
+
+        if (mMediaPlayer == null) return;
+
+        mMediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+            @Override
+            public void onCompletion(MediaPlayer mp) {
+                mp.release();
+                setMediaPlayer();
+            }
+        });
     }
 
     public void onPlay() {
-        setEnabled(false, true, true);
-        setColors(Color.RED, Color.BLACK, Color.BLACK);
-        mMediaPlayer.start();
+        if (mMediaPlayer == null) {
+            setMediaPlayer();
+        } else {
+            setEnabled(false, true, true);
+            setColors(Color.RED, Color.BLACK, Color.BLACK);
+            mMediaPlayer.start();
+        }
     }
 
     public void onPause() {
@@ -57,6 +65,7 @@ public class MediaPlayerManager {
     public void onStop() {
         setEnabled(true, false, false);
         mMediaPlayer.stop();
+        mMediaPlayer.release();
         setMediaPlayer();
     }
 
