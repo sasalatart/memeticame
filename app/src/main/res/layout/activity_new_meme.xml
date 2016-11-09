@@ -10,15 +10,6 @@
     android:paddingTop="@dimen/activity_vertical_margin"
     tools:context="com.salatart.memeticame.Activities.NewMemeActivity">
 
-    <EditText
-        android:id="@+id/input_meme_name"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_alignParentTop="true"
-        android:gravity="bottom"
-        android:hint="@string/meme_name"
-        android:textSize="18sp" />
-
     <LinearLayout
         android:id="@+id/group_meme_audio_options"
         android:layout_width="match_parent"
@@ -68,25 +59,33 @@
         android:orientation="horizontal"
         android:weightSum="2">
 
-        <ImageButton
+        <Button
             android:id="@+id/button_select_image"
-            android:layout_width="@dimen/attachment_button_size"
+            android:layout_width="wrap_content"
             android:layout_height="@dimen/attachment_button_size"
             android:onClick="showMemeOptionsMenu"
-            android:src="@drawable/ic_image_black_24dp" />
+            android:text="@string/select_image" />
 
-        <ImageButton
+        <Button
             android:id="@+id/button_create"
-            android:layout_width="@dimen/attachment_button_size"
+            android:layout_width="wrap_content"
             android:layout_height="@dimen/attachment_button_size"
             android:onClick="onCreateMeme"
-            android:src="@drawable/ic_save_black_24dp" />
+            android:text="@string/save"
+            android:visibility="gone" />
+
+        <Button
+            android:id="@+id/button_delete"
+            android:layout_width="wrap_content"
+            android:layout_height="@dimen/attachment_button_size"
+            android:onClick="onDeleteMeme"
+            android:text="@string/delete"
+            android:visibility="gone" />
     </LinearLayout>
 
     <com.salatart.memeticame.Views.CanvasView
         android:id="@+id/canvas"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_above="@id/group_meme_general_options"
-        android:layout_below="@id/input_meme_name" />
+        android:layout_above="@id/group_meme_general_options" />
 </RelativeLayout>

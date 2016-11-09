@@ -1,6 +1,7 @@
 package com.salatart.memeticame.Activities;
 
 import android.app.Activity;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -8,13 +9,17 @@ import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v7.app.ActionBar;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.view.ContextMenu;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.RelativeLayout;
 import android.widget.Toast;
 
 import com.salatart.memeticame.Managers.AudioRecorderManager;
@@ -35,13 +40,17 @@ import butterknife.ButterKnife;
 
 public class NewMemeActivity extends AppCompatActivity {
 
+    public static final String IMAGE_STATE = "imageState";
+    public static final String AUDIO_STATE = "audioState";
+
     @BindView(R.id.canvas) CanvasView mCanvas;
-    @BindView(R.id.input_meme_name) EditText mMemeName;
     @BindView(R.id.take_audio) ImageButton mRecordButton;
-    @BindView(R.id.button_select_image) ImageButton mSelectImageButton;
     @BindView(R.id.button_play) ImageButton mPlayButton;
     @BindView(R.id.button_pause) ImageButton mPauseButton;
     @BindView(R.id.button_stop) ImageButton mStopButton;
+    @BindView(R.id.button_select_image) Button mSelectImageButton;
+    @BindView(R.id.button_create) Button mCreateButton;
+    @BindView(R.id.button_delete) Button mDeleteButton;
 
     private boolean mCurrentlyRecording;
     private AudioRecorderManager mAudioRecorderManager;
@@ -63,9 +72,35 @@ public class NewMemeActivity extends AppCompatActivity {
 
         setTitle("New Meme");
 
-        mCanvas.setMode(CanvasView.Mode.TEXT);
+        if (savedInstanceState != null) {
+            mImagePath = savedInstanceState.getString(IMAGE_STATE);
+            mAudioUri = savedInstanceState.getParcelable(AUDIO_STATE);
+
+            if (mImagePath != null) {
+                mCanvas.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        drawBitmap(BitmapFactory.decodeFile(mImagePath));
+                    }
+                });
+            }
+
+            if (mAudioUri != null) {
+                setMediaPlayer();
+            }
+        }
+
         mAudioRecorderManager = new AudioRecorderManager();
         registerForContextMenu(mSelectImageButton);
+
+        mCanvas.setMode(CanvasView.Mode.TEXT);
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle savedInstanceState) {
+        savedInstanceState.putString(IMAGE_STATE, mImagePath);
+        savedInstanceState.putParcelable(AUDIO_STATE, mAudioUri);
+        super.onSaveInstanceState(savedInstanceState);
     }
 
     @Override
@@ -95,19 +130,18 @@ public class NewMemeActivity extends AppCompatActivity {
         int centreY = (mCanvas.getHeight() - outHeight) / 2;
 
         mCanvas.drawBitmap(Bitmap.createScaledBitmap(picture, outWidth, outHeight, false), centreX, centreY);
+
+        mDeleteButton.setVisibility(View.VISIBLE);
+        mCreateButton.setVisibility(View.VISIBLE);
     }
 
-    private void createMeme() {
+    private void createMeme(String memeName) {
         if (mImagePath == null) {
             Toast.makeText(NewMemeActivity.this, "Create a meme first", Toast.LENGTH_SHORT).show();
             return;
         }
-        if (mMemeName.getText().length() == 0) {
-            Toast.makeText(NewMemeActivity.this, "Insert a name for the meme", Toast.LENGTH_SHORT).show();
-            return;
-        }
 
-        String imagePath = FileUtils.getMemeticameMemesDirectory() + "/" + MemeUtils.createName(mMemeName.getText().toString());
+        String imagePath = FileUtils.getMemeticameMemesDirectory() + "/" + MemeUtils.createName(memeName);
         File memeFile = new File(imagePath);
         try {
             memeFile.createNewFile();
@@ -137,10 +171,13 @@ public class NewMemeActivity extends AppCompatActivity {
         startActivityForResult(MemeEditorActivity.getIntent(NewMemeActivity.this, null), FilterUtils.REQUEST_GET_MEME);
     }
 
+    public void chooseImageFromPlainGallery() {
+        startActivityForResult(new Intent(NewMemeActivity.this, PlainMemeGalleryActivity.class), FilterUtils.REQUEST_PICK_PLAIN_MEME);
+    }
+
     public void toggleRecording(View view) {
         if (mCurrentlyRecording) {
             mAudioFile = mAudioRecorderManager.stopAudioRecording();
-            mAudioUri = mAudioRecorderManager.addRecordingToMediaLibrary(NewMemeActivity.this, mAudioFile);
             mRecordButton.setColorFilter(Color.BLACK);
             setMediaPlayer();
         } else {
@@ -155,7 +192,9 @@ public class NewMemeActivity extends AppCompatActivity {
         mPauseButton.setVisibility(View.VISIBLE);
         mStopButton.setVisibility(View.VISIBLE);
 
+        mAudioUri = mAudioRecorderManager.addRecordingToMediaLibrary(NewMemeActivity.this, mAudioFile);
         mMediaPlayerManager = new MediaPlayerManager(NewMemeActivity.this, mAudioUri, mPlayButton, mPauseButton, mStopButton);
+        mDeleteButton.setVisibility(View.VISIBLE);
     }
 
     public void onPlay(View view) {
@@ -196,12 +235,67 @@ public class NewMemeActivity extends AppCompatActivity {
         openContextMenu(view);
     }
 
-    public void chooseImageFromPlainGallery() {
-        startActivityForResult(new Intent(NewMemeActivity.this, PlainMemeGalleryActivity.class), FilterUtils.REQUEST_PICK_PLAIN_MEME);
+    public void onCreateMeme(View view) {
+        LayoutInflater layoutInflater = LayoutInflater.from(NewMemeActivity.this);
+        View promptView = layoutInflater.inflate(R.layout.prompt_input, null);
+
+        final EditText memeNameInput = (EditText) promptView.findViewById(R.id.input_meme_name);
+
+        AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(NewMemeActivity.this);
+        alertDialogBuilder.setView(promptView);
+
+        alertDialogBuilder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                String memeName = memeNameInput.getText().toString();
+                if (memeName.isEmpty()) {
+                    Toast.makeText(NewMemeActivity.this, "You must insert a name.", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+
+                createMeme(memeName);
+            }
+        }).setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.cancel();
+            }
+        });
+
+        AlertDialog alertDialog = alertDialogBuilder.create();
+        alertDialog.show();
     }
 
-    public void onCreateMeme(View view) {
-        createMeme();
+    public void onDeleteMeme(View view) {
+        mPlayButton.setVisibility(View.GONE);
+        mPauseButton.setVisibility(View.GONE);
+        mStopButton.setVisibility(View.GONE);
+        mDeleteButton.setVisibility(View.GONE);
+        mCreateButton.setVisibility(View.GONE);
+
+        mCurrentlyRecording = false;
+        mMediaPlayerManager = null;
+        mAudioUri = null;
+
+        if (mImagePath != null) {
+            FileUtils.deleteFile(mImagePath);
+        }
+
+        mImagePath = null;
+
+        mCanvas.clear();
+        resetCanvas();
+    }
+
+    public void resetCanvas() {
+        mCanvas = new CanvasView(NewMemeActivity.this);
+
+        RelativeLayout.LayoutParams layoutParams = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.MATCH_PARENT, RelativeLayout.LayoutParams.MATCH_PARENT);
+        layoutParams.addRule(RelativeLayout.ABOVE, R.id.group_meme_general_options);
+        mCanvas.setLayoutParams(layoutParams);
+
+        RelativeLayout root = (RelativeLayout) findViewById(R.id.activity_new_meme);
+        root.addView(mCanvas);
     }
 
     @Override
