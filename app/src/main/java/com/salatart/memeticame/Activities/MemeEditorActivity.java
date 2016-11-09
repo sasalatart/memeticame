@@ -10,11 +10,11 @@ import android.support.v7.app.AppCompatActivity;
 
 import com.salatart.memeticame.Models.Meme;
 import com.salatart.memeticame.R;
+import com.salatart.memeticame.Utils.FileUtils;
 import com.salatart.memeticame.Utils.FilterUtils;
 
 import java.io.File;
 
-import ly.img.android.sdk.models.constant.Directory;
 import ly.img.android.sdk.models.state.CameraSettings;
 import ly.img.android.sdk.models.state.EditorLoadSettings;
 import ly.img.android.sdk.models.state.EditorSaveSettings;
@@ -24,9 +24,6 @@ import ly.img.android.ui.activities.CameraPreviewBuilder;
 import ly.img.android.ui.activities.PhotoEditorBuilder;
 
 public class MemeEditorActivity extends AppCompatActivity {
-
-    private static final String FOLDER = "Camera";
-
     public static Intent getIntent(Context context, Uri fileUri) {
         Intent intent = new Intent(context, MemeEditorActivity.class);
         intent.putExtra(Meme.URI_KEY, fileUri);
@@ -49,16 +46,16 @@ public class MemeEditorActivity extends AppCompatActivity {
     private void memeEditorWithCamera() {
         SettingsList settingsList = new SettingsList();
         settingsList.getSettingsModel(CameraSettings.class)
-                .setExportDir(Directory.DCIM, FOLDER)
+                .setExportDir(FileUtils.getMemeticameTempDirectory())
                 .setExportPrefix("camera_")
                 .getSettingsModel(EditorSaveSettings.class)
-                .setExportDir(Directory.DCIM, FOLDER)
+                .setExportDir(FileUtils.getMemeticameTempDirectory())
                 .setExportPrefix("result_")
-                .setSavePolicy(EditorSaveSettings.SavePolicy.KEEP_SOURCE_AND_CREATE_ALWAYS_OUTPUT);
+                .setSavePolicy(EditorSaveSettings.SavePolicy.RETURN_ALWAYS_ONLY_OUTPUT);
 
         new CameraPreviewBuilder(this)
                 .setSettingsList(settingsList)
-                .startActivityForResult(this, FilterUtils.REQUEST_CAMERA_PREVIEW);
+                .startActivityForResult(this, FilterUtils.REQUEST_EDITED_MEME);
     }
 
 
@@ -67,20 +64,20 @@ public class MemeEditorActivity extends AppCompatActivity {
         settingsList.getSettingsModel(EditorLoadSettings.class)
                 .setImageSourcePath(myPicturePath, true) // Load with delete protection true!
                 .getSettingsModel(EditorSaveSettings.class)
-                .setExportDir(Directory.DCIM, FOLDER)
+                .setExportDir(FileUtils.getMemeticameTempDirectory())
                 .setExportPrefix("result_")
-                .setSavePolicy(EditorSaveSettings.SavePolicy.KEEP_SOURCE_AND_CREATE_ALWAYS_OUTPUT);
+                .setSavePolicy(EditorSaveSettings.SavePolicy.RETURN_ALWAYS_ONLY_OUTPUT);
 
         new PhotoEditorBuilder(this)
                 .setSettingsList(settingsList)
-                .startActivityForResult(this, FilterUtils.REQUEST_CAMERA_PREVIEW);
+                .startActivityForResult(this, FilterUtils.REQUEST_EDITED_MEME);
     }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
-        if (resultCode == RESULT_OK && requestCode == FilterUtils.REQUEST_CAMERA_PREVIEW) {
+        if (resultCode == RESULT_OK && requestCode == FilterUtils.REQUEST_EDITED_MEME) {
             String path = data.getStringExtra(CameraPreviewActivity.RESULT_IMAGE_PATH);
 
             File mMediaFolder = new File(path);

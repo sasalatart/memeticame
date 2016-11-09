@@ -57,6 +57,10 @@ public class FileUtils {
         return checkAndReturnDir(getMemeticameDirectory() + "/Unzips");
     }
 
+    public static String getMemeticameTempDirectory() {
+        return checkAndReturnDir(getMemeticameDirectory() + "/Temp");
+    }
+
     public static boolean hasMediaPermissions(Context context) {
         boolean canRecordAudio = ContextCompat.checkSelfPermission(context, Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED;
         boolean canUseCamera = ContextCompat.checkSelfPermission(context, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED;
@@ -284,4 +288,8 @@ public class FileUtils {
         }
     }
 
+    public static void deleteFile(String path) {
+        File fileToDelete = new File(path);
+        fileToDelete.delete();
+    }
 }

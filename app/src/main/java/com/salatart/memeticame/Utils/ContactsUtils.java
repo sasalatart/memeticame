@@ -64,7 +64,7 @@ public class ContactsUtils {
                 HttpClient.getInstance().newCall(request).enqueue(new Callback() {
                     @Override
                     public void onFailure(Call call, IOException e) {
-                        listener.OnFailure("error");
+                        listener.OnFailure(e.toString());
                     }
 
                     @Override
@@ -75,10 +75,10 @@ public class ContactsUtils {
                                 application.setUsers(users, contacts);
                                 listener.OnRead(users, contacts);
                             } catch (JSONException e) {
-                                listener.OnFailure("error");
+                                listener.OnFailure(e.toString());
                             }
                         } else {
-                            listener.OnFailure("error");
+                            listener.OnFailure(HttpClient.parseErrorMessage(response));
                         }
 
                         response.body().close();

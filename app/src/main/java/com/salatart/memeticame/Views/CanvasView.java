@@ -70,6 +70,9 @@ public class CanvasView extends View {
     private float startY = 0F;
     private float controlX = 0F;
     private float controlY = 0F;
+    private int centreX = 0;
+    private int centreY = 0;
+
     /**
      * Copy Constructor
      *
@@ -81,6 +84,7 @@ public class CanvasView extends View {
         super(context, attrs, defStyle);
         this.setup(context);
     }
+
     /**
      * Copy Constructor
      *
@@ -423,7 +427,7 @@ public class CanvasView extends View {
         canvas.drawColor(this.baseColor);
 
         if (this.bitmap != null) {
-            canvas.drawBitmap(this.bitmap, 0F, 0F, new Paint());
+            canvas.drawBitmap(this.bitmap, centreX, centreY, new Paint());
         }
 
         for (int i = 0; i < this.historyPointer; i++) {
@@ -832,7 +836,9 @@ public class CanvasView extends View {
      *
      * @param bitmap
      */
-    public void drawBitmap(Bitmap bitmap) {
+    public void drawBitmap(Bitmap bitmap, int centreX, int centreY) {
+        this.centreX = centreX;
+        this.centreY = centreY;
         this.bitmap = bitmap;
         this.invalidate();
     }
@@ -842,8 +848,8 @@ public class CanvasView extends View {
      *
      * @param byteArray This is returned as byte array of bitmap.
      */
-    public void drawBitmap(byte[] byteArray) {
-        this.drawBitmap(BitmapFactory.decodeByteArray(byteArray, 0, byteArray.length));
+    public void drawBitmap(byte[] byteArray, int centreX, int centreY) {
+        this.drawBitmap(BitmapFactory.decodeByteArray(byteArray, 0, byteArray.length), centreX, centreY);
     }
 
     /**

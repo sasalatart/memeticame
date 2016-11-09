@@ -25,7 +25,7 @@ public class ChatUtils {
         HttpClient.getInstance().newCall(request).enqueue(new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
-                listener.OnFailure("Error");
+                listener.OnFailure(e.toString());
             }
 
             @Override
@@ -34,7 +34,7 @@ public class ChatUtils {
                     try {
                         listener.OnSuccess(ParserUtils.chatsFromJsonArray(new JSONArray(response.body().string())));
                     } catch (JSONException e) {
-                        listener.OnFailure("Error");
+                        listener.OnFailure(e.toString());
                     }
                 } else {
                     listener.OnFailure(HttpClient.parseErrorMessage(response));

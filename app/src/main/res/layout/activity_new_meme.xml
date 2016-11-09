@@ -66,14 +66,7 @@
         android:layout_above="@id/group_meme_audio_options"
         android:gravity="center"
         android:orientation="horizontal"
-        android:weightSum="6">
-
-        <ImageButton
-            android:id="@+id/button_undo_text"
-            android:layout_width="@dimen/attachment_button_size"
-            android:layout_height="@dimen/attachment_button_size"
-            android:onClick="onUndoText"
-            android:src="@drawable/ic_undo_black_24dp" />
+        android:weightSum="2">
 
         <ImageButton
             android:id="@+id/button_select_image"

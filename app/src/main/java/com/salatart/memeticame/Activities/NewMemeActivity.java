@@ -37,7 +37,6 @@ public class NewMemeActivity extends AppCompatActivity {
 
     @BindView(R.id.canvas) CanvasView mCanvas;
     @BindView(R.id.input_meme_name) EditText mMemeName;
-    @BindView(R.id.button_undo_text) ImageButton mUndoText;
     @BindView(R.id.take_audio) ImageButton mRecordButton;
     @BindView(R.id.button_select_image) ImageButton mSelectImageButton;
     @BindView(R.id.button_play) ImageButton mPlayButton;
@@ -49,7 +48,7 @@ public class NewMemeActivity extends AppCompatActivity {
     private MediaPlayerManager mMediaPlayerManager;
 
     private Uri mAudioUri;
-    private File audioFile;
+    private File mAudioFile;
     private String mImagePath;
 
     @Override
@@ -77,7 +76,25 @@ public class NewMemeActivity extends AppCompatActivity {
     }
 
     public void drawBitmap(Bitmap picture) {
-        mCanvas.drawBitmap((Bitmap.createScaledBitmap(picture, mCanvas.getWidth(), mCanvas.getHeight(), false)));
+        final int maxSize = mCanvas.getHeight();
+
+        int outWidth;
+        int outHeight;
+        int inWidth = picture.getWidth();
+        int inHeight = picture.getHeight();
+
+        if (inWidth > inHeight) {
+            outWidth = maxSize;
+            outHeight = (inHeight * maxSize) / inWidth;
+        } else {
+            outHeight = maxSize;
+            outWidth = (inWidth * maxSize) / inHeight;
+        }
+
+        int centreX = (mCanvas.getWidth() - outWidth) / 2;
+        int centreY = (mCanvas.getHeight() - outHeight) / 2;
+
+        mCanvas.drawBitmap(Bitmap.createScaledBitmap(picture, outWidth, outHeight, false), centreX, centreY);
     }
 
     private void createMeme() {
@@ -100,7 +117,7 @@ public class NewMemeActivity extends AppCompatActivity {
             Uri imageUri = Uri.fromFile(memeFile);
             if (mAudioUri != null) {
                 String zipFileName = FileUtils.getName(NewMemeActivity.this, imageUri) + ZipManager.SEPARATOR + FileUtils.getName(NewMemeActivity.this, mAudioUri) + ".zip";
-                String audioPath = audioFile.getAbsolutePath();
+                String audioPath = mAudioFile.getAbsolutePath();
                 Uri memeaudioZipUri = ZipManager.zip(new String[]{audioPath, imagePath}, zipFileName);
 
                 returnIntent.putExtra(Meme.URI_KEY, memeaudioZipUri);
@@ -108,6 +125,7 @@ public class NewMemeActivity extends AppCompatActivity {
                 returnIntent.putExtra(Meme.URI_KEY, imageUri);
             }
 
+            FileUtils.deleteFile(mImagePath);
             setResult(Activity.RESULT_OK, returnIntent);
             finish();
         } catch (IOException e) {
@@ -121,8 +139,8 @@ public class NewMemeActivity extends AppCompatActivity {
 
     public void toggleRecording(View view) {
         if (mCurrentlyRecording) {
-            audioFile = mAudioRecorderManager.stopAudioRecording();
-            mAudioUri = mAudioRecorderManager.addRecordingToMediaLibrary(NewMemeActivity.this, audioFile);
+            mAudioFile = mAudioRecorderManager.stopAudioRecording();
+            mAudioUri = mAudioRecorderManager.addRecordingToMediaLibrary(NewMemeActivity.this, mAudioFile);
             mRecordButton.setColorFilter(Color.BLACK);
             setMediaPlayer();
         } else {
@@ -184,10 +202,6 @@ public class NewMemeActivity extends AppCompatActivity {
 
     public void onCreateMeme(View view) {
         createMeme();
-    }
-
-    public void onUndoText(View view) {
-        mCanvas.undoText();
     }
 
     @Override
