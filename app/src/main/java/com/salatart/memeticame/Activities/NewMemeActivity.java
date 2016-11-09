@@ -181,6 +181,12 @@ public class NewMemeActivity extends AppCompatActivity {
             mRecordButton.setColorFilter(Color.BLACK);
             setMediaPlayer();
         } else {
+            if (mAudioUri != null) {
+                FileUtils.deleteFile(mAudioUri.getPath());
+                mMediaPlayerManager = null;
+                mAudioUri = null;
+            }
+
             mAudioRecorderManager.startAudioRecording(NewMemeActivity.this);
             mRecordButton.setColorFilter(Color.RED);
         }
@@ -192,7 +198,10 @@ public class NewMemeActivity extends AppCompatActivity {
         mPauseButton.setVisibility(View.VISIBLE);
         mStopButton.setVisibility(View.VISIBLE);
 
-        mAudioUri = mAudioRecorderManager.addRecordingToMediaLibrary(NewMemeActivity.this, mAudioFile);
+        if (mAudioUri == null) {
+            mAudioUri = mAudioRecorderManager.addRecordingToMediaLibrary(NewMemeActivity.this, mAudioFile);
+        }
+
         mMediaPlayerManager = new MediaPlayerManager(NewMemeActivity.this, mAudioUri, mPlayButton, mPauseButton, mStopButton);
         mDeleteButton.setVisibility(View.VISIBLE);
     }
@@ -274,14 +283,17 @@ public class NewMemeActivity extends AppCompatActivity {
         mCreateButton.setVisibility(View.GONE);
 
         mCurrentlyRecording = false;
-        mMediaPlayerManager = null;
-        mAudioUri = null;
+
+        if (mAudioUri != null) {
+            FileUtils.deleteFile(mAudioUri.getPath());
+            mMediaPlayerManager = null;
+            mAudioUri = null;
+        }
 
         if (mImagePath != null) {
             FileUtils.deleteFile(mImagePath);
+            mImagePath = null;
         }
-
-        mImagePath = null;
 
         mCanvas.clear();
         resetCanvas();
