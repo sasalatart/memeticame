@@ -183,9 +183,15 @@ public class ParserUtils {
         return categories;
     }
 
-    public static Channel channelFromJson(JSONObject jsonObject) throws JSONException {
+    public static Channel channelFromJson(JSONObject jsonObject, boolean lazyLoading) throws JSONException {
+        ArrayList<Category> categories = new ArrayList<>();
+        if (!lazyLoading) {
+            categories = categoriesFromJsonArray(new JSONArray(jsonObject.getString("categories")));
+        }
+
         return new Channel(jsonObject.getInt("id"),
                 jsonObject.getString("name"),
+                categories,
                 userFromJson(jsonObject.getJSONObject("owner")),
                 jsonObject.getDouble("rating"),
                 jsonObject.getString("created_at"));
@@ -195,7 +201,7 @@ public class ParserUtils {
         ArrayList<Channel> channels = new ArrayList<>();
 
         for (int i = 0; i < jsonArray.length(); i++) {
-            channels.add(channelFromJson(jsonArray.getJSONObject(i)));
+            channels.add(channelFromJson(jsonArray.getJSONObject(i), true));
         }
 
         return channels;

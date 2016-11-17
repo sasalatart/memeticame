@@ -75,7 +75,7 @@ public class ChannelsActivity extends AppCompatActivity {
         mChannelsListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                startActivity(ChannelActivity.getIntent(ChannelsActivity.this, mChannels.get(position)));
+                startActivity(CategoriesActivity.getIntent(ChannelsActivity.this, mChannels.get(position)));
             }
         });
     }

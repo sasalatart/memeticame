@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/activity_meme_gallery"
     android:layout_width="match_parent"
@@ -9,17 +8,7 @@
     android:paddingLeft="@dimen/activity_horizontal_margin"
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="4dp"
-    tools:context="com.salatart.memeticame.Activities.CategoryActivity">
-
-    <com.wang.avi.AVLoadingIndicatorView
-        android:id="@+id/loading_category"
-        style="@style/AVLoadingIndicatorView.Large"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_centerInParent="true"
-        android:layout_gravity="center"
-        app:indicatorColor="@color/colorPrimary"
-        app:indicatorName="BallGridPulseIndicator" />
+    tools:context="com.salatart.memeticame.Activities.MemesActivity">
 
     <GridView
         android:id="@+id/grid_view_memes"

@@ -1,10 +1,12 @@
 package com.salatart.memeticame.Utils;
 
 import com.salatart.memeticame.Listeners.OnRequestIndexListener;
+import com.salatart.memeticame.Listeners.OnRequestShowListener;
 import com.salatart.memeticame.Models.Channel;
 
 import org.json.JSONArray;
 import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.IOException;
 
@@ -30,6 +32,30 @@ public class ChannelsUtils {
                 if (response.isSuccessful()) {
                     try {
                         listener.OnSuccess(ParserUtils.channelsFromJsonArray(new JSONArray(response.body().string())));
+                    } catch (JSONException e) {
+                        listener.OnFailure(e.toString());
+                    }
+                } else {
+                    listener.OnFailure(HttpClient.parseErrorMessage(response));
+                }
+
+                response.body().close();
+            }
+        });
+    }
+
+    public static void showRequest(Request request, final OnRequestShowListener<Channel> listener) {
+        HttpClient.getInstance().newCall(request).enqueue(new Callback() {
+            @Override
+            public void onFailure(Call call, IOException e) {
+                listener.OnFailure(e.toString());
+            }
+
+            @Override
+            public void onResponse(Call call, Response response) throws IOException {
+                if (response.isSuccessful()) {
+                    try {
+                        listener.OnSuccess(ParserUtils.channelFromJson(new JSONObject(response.body().string()), false));
                     } catch (JSONException e) {
                         listener.OnFailure(e.toString());
                     }

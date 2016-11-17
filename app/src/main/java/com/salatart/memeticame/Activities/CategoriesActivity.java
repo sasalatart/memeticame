@@ -9,31 +9,28 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ListView;
 
-import com.salatart.memeticame.Listeners.OnRequestIndexListener;
+import com.salatart.memeticame.Listeners.OnRequestShowListener;
 import com.salatart.memeticame.Models.Category;
 import com.salatart.memeticame.Models.Channel;
 import com.salatart.memeticame.R;
 import com.salatart.memeticame.Utils.CallbackUtils;
-import com.salatart.memeticame.Utils.CategoriesUtils;
+import com.salatart.memeticame.Utils.ChannelsUtils;
 import com.salatart.memeticame.Utils.Routes;
 import com.salatart.memeticame.Views.CategoriesAdapter;
-
-import java.util.ArrayList;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import okhttp3.Request;
 
-public class ChannelActivity extends AppCompatActivity {
+public class CategoriesActivity extends AppCompatActivity {
 
     @BindView(R.id.list_view_categories) ListView mCategoriesListView;
     @BindView(R.id.loading_channel) com.wang.avi.AVLoadingIndicatorView mLoading;
 
     private Channel mChannel;
-    private ArrayList<Category> mCategories;
 
     public static Intent getIntent(Context context, Channel channel) {
-        Intent intent = new Intent(context, ChannelActivity.class);
+        Intent intent = new Intent(context, CategoriesActivity.class);
         intent.putExtra(Channel.PARCELABLE_KEY, channel);
         return intent;
     }
@@ -41,7 +38,7 @@ public class ChannelActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_channel);
+        setContentView(R.layout.activity_categories);
 
         ButterKnife.bind(this);
 
@@ -57,19 +54,19 @@ public class ChannelActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        getCategories();
+        getChannel();
     }
 
-    public void getCategories() {
-        Request request = Routes.categoriesIndex(ChannelActivity.this, mChannel);
-        CategoriesUtils.indexRequest(request, new OnRequestIndexListener<Category>() {
+    public void getChannel() {
+        Request request = Routes.channelsShow(CategoriesActivity.this, mChannel);
+        ChannelsUtils.showRequest(request, new OnRequestShowListener<Channel>() {
             @Override
-            public void OnSuccess(final ArrayList<Category> categories) {
-                ChannelActivity.this.runOnUiThread(new Runnable() {
+            public void OnSuccess(final Channel channel) {
+                CategoriesActivity.this.runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
                         mLoading.hide();
-                        mCategories = categories;
+                        mChannel = channel;
                         setAdapter();
                     }
                 });
@@ -77,18 +74,19 @@ public class ChannelActivity extends AppCompatActivity {
 
             @Override
             public void OnFailure(String message) {
-                CallbackUtils.onUnsuccessfulRequestWithSpinner(ChannelActivity.this, message, mLoading);
+                CallbackUtils.onUnsuccessfulRequestWithSpinner(CategoriesActivity.this, message, mLoading);
             }
         });
     }
 
     public void setAdapter() {
-        final CategoriesAdapter adapter = new CategoriesAdapter(ChannelActivity.this, R.layout.list_item_category, mCategories);
+        final CategoriesAdapter adapter = new CategoriesAdapter(CategoriesActivity.this, R.layout.list_item_category, mChannel.getCategories());
         mCategoriesListView.setAdapter(adapter);
         mCategoriesListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                startActivity(CategoryActivity.getIntent(ChannelActivity.this, adapter.getItem(position)));
+                Category category = adapter.getItem(position);
+                startActivity(MemesActivity.getIntent(CategoriesActivity.this, category.getMemes(), category.getName()));
             }
         });
     }

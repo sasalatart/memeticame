@@ -232,9 +232,9 @@ public class Routes {
                 .build();
     }
 
-    public static Request categoriesIndex(Context context, Channel channel) {
+    public static Request channelsShow(Context context, Channel channel) {
         return new Request.Builder()
-                .url(DOMAIN + "/channels/" + channel.getId() + "/categories")
+                .url(DOMAIN + "/channels/" + channel.getId())
                 .addHeader("content-type", "application/json")
                 .addHeader("authorization", "Token token=" + SessionUtils.getToken(context))
                 .build();

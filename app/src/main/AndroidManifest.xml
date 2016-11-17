@@ -63,20 +63,14 @@
         </activity>
 
         <activity
-            android:name=".Activities.ChannelActivity"
+            android:name=".Activities.CategoriesActivity"
             android:launchMode="singleTop">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".Activities.ChannelsActivity" />
         </activity>
 
-        <activity
-            android:name=".Activities.CategoryActivity"
-            android:launchMode="singleTop">
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value=".Activities.ChannelActivity" />
-        </activity>
+        <activity android:name=".Activities.MemesActivity" />
 
         <provider
             android:name="android.support.v4.content.FileProvider"
@@ -87,10 +81,9 @@
                 android:name="android.support.FILE_PROVIDER_PATHS"
                 android:resource="@xml/file_paths" />
         </provider>
-        <!--
- ATTENTION: This was auto-generated to add Google Play services to your project for
-     App Indexing.  See https://g.co/AppIndexing/AndroidStudio for more information.
-        -->
+
+        <!-- ATTENTION: This was auto-generated to add Google Play services to your project for
+             App Indexing.  See https://g.co/AppIndexing/AndroidStudio for more information. -->
         <meta-data
             android:name="com.google.android.gms.version"
             android:value="@integer/google_play_services_version" />

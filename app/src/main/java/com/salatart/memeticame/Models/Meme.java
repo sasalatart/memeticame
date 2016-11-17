@@ -20,6 +20,9 @@ public class Meme implements Parcelable {
         }
     };
 
+    public static String PARCELABLE_KEY = "com.salatart.memeticame.Models.Meme";
+    public static String PARCELABLE_ARRAY_KEY = "com.salatart.memeticame.Models.MemeArrayList";
+
     public static String URI_KEY = "memeUri";
     public static String SEPARATOR = "-meme-";
     public static String PATH_KEY = "memePath";
