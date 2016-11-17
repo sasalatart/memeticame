@@ -4,6 +4,7 @@ import android.app.Application;
 import android.content.Intent;
 import android.util.Log;
 
+import com.facebook.stetho.Stetho;
 import com.salatart.memeticame.Listeners.OnRequestShowListener;
 import com.salatart.memeticame.Models.User;
 import com.salatart.memeticame.Utils.FilterUtils;
@@ -31,7 +32,7 @@ public class MemeticameApplication extends Application {
 
         Realm.init(this);
         ImgLySdk.init(this);
-        
+        Stetho.initializeWithDefaults(this);
     }
 
     public void setUsers(ArrayList<User> users, ArrayList<User> localContacts) {

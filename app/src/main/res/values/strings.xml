@@ -40,4 +40,10 @@
     <string name="delete">Delete</string>
     <string name="save">Save</string>
     <string name="select_image">Select Image</string>
+    <string name="channels">Channels</string>
+    <string name="channel_name">Channel name</string>
+    <string name="onwer_name">Onwer name</string>
+    <string name="number_of_memes">Number of memes</string>
+    <string name="category_name">Category name</string>
+    <string name="rating">Rating</string>
 </resources>

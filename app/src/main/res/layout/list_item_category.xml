@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="@dimen/list_item_icon_size"
+    android:gravity="center"
+    android:orientation="horizontal"
+    android:padding="@dimen/list_item_padding">
+
+    <ImageView
+        android:id="@+id/label_category_identification"
+        android:layout_width="@dimen/list_item_icon_size"
+        android:layout_height="@dimen/list_item_icon_size"
+        android:padding="@dimen/list_item_icon_padding" />
+
+    <TextView
+        android:id="@+id/label_category_name"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:text="@string/category_name"
+        android:textAppearance="@style/Base.TextAppearance.AppCompat.Large" />
+
+    <TextView
+        android:id="@+id/label_number_of_memes"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/number_of_memes"
+        android:textAppearance="@style/Base.TextAppearance.AppCompat.Medium" />
+
+    <ImageView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/ic_sentiment_very_satisfied_black_24dp" />
+</LinearLayout>

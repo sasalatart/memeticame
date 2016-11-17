@@ -22,8 +22,6 @@ import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
 
-import com.salatart.memeticame.Models.Meme;
-
 import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
 import java.util.List;
@@ -40,7 +38,6 @@ public class CanvasView extends View {
     private Bitmap bitmap = null;
     private List<Path> pathLists = new ArrayList<Path>();
     private List<Paint> paintLists = new ArrayList<Paint>();
-    private List<Meme> memeLists = new ArrayList<>();
     // for Eraser
     private int baseColor = Color.WHITE;
     // for Undo, Redo
@@ -275,22 +272,6 @@ public class CanvasView extends View {
 
     }
 
-    private void drawTextList(Canvas canvas) {
-
-        if (memeLists.size() == 0)
-            return;
-
-        this.textPaint = this.createPaint();
-        this.textPaint.setTextAlign(Paint.Align.LEFT);
-
-        for (Meme meme : memeLists) {
-            this.textPaint.setTextSize(meme.getFontSize());
-            this.textPaint.setTypeface(meme.getFontFamily());
-            this.textPaint.setColor(meme.getPaintColor());
-            canvas.drawText(meme.getText(), meme.getPositionX(), meme.getPositionY(), this.textPaint);
-        }
-    }
-
     /**
      * This method defines processes on MotionEvent.ACTION_DOWN
      *
@@ -437,10 +418,6 @@ public class CanvasView extends View {
             canvas.drawPath(path, paint);
         }
 
-        //this.drawText(canvas);
-
-        this.drawTextList(canvas);
-
 
         this.canvas = canvas;
     }
@@ -523,14 +500,6 @@ public class CanvasView extends View {
         } else {
             return false;
         }
-    }
-
-    public void undoText() {
-        if (this.memeLists.size() == 0)
-            return;
-
-        this.memeLists.remove(this.memeLists.size() - 1);
-        this.invalidate();
     }
 
     /**

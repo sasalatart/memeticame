@@ -26,6 +26,11 @@
         android:title="@string/create_meme" />
 
     <item
+        android:id="@+id/action_see_channels"
+        android:orderInCategory="100"
+        android:title="@string/channels" />
+
+    <item
         android:id="@+id/action_logout"
         android:orderInCategory="100"
         android:title="@string/logout" />

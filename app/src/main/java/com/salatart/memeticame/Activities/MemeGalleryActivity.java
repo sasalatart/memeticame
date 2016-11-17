@@ -13,7 +13,6 @@ import android.widget.AdapterView;
 import android.widget.GridView;
 
 import com.salatart.memeticame.Models.Attachment;
-import com.salatart.memeticame.Models.Meme;
 import com.salatart.memeticame.R;
 import com.salatart.memeticame.Utils.AttachmentUtils;
 import com.salatart.memeticame.Utils.FileUtils;
@@ -26,6 +25,7 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 
 public class MemeGalleryActivity extends AppCompatActivity {
+    public static String GALLERY_MODE_KEY = "galleryModeKey";
 
     @BindView(R.id.grid_view_memes) GridView mGridView;
 
@@ -34,7 +34,7 @@ public class MemeGalleryActivity extends AppCompatActivity {
 
     public static Intent getIntent(Context context, int mode) {
         Intent intent = new Intent(context, MemeGalleryActivity.class);
-        intent.putExtra(Meme.GALLERY_MODE_KEY, mode);
+        intent.putExtra(GALLERY_MODE_KEY, mode);
         return intent;
     }
 
@@ -53,7 +53,7 @@ public class MemeGalleryActivity extends AppCompatActivity {
         mMemes.addAll(AttachmentUtils.attachmentsFromDir(MemeGalleryActivity.this, new File(FileUtils.getMemeticameMemeaudiosDirectory())));
         mMemes.addAll(AttachmentUtils.attachmentsFromDir(MemeGalleryActivity.this, new File(FileUtils.getMemeticameMemesDirectory())));
 
-        mMode = getIntent().getExtras().getInt(Meme.GALLERY_MODE_KEY);
+        mMode = getIntent().getExtras().getInt(GALLERY_MODE_KEY);
         setAdapter();
     }
 
@@ -63,8 +63,8 @@ public class MemeGalleryActivity extends AppCompatActivity {
     }
 
     public void setAdapter() {
-        MemeGalleryAdapter mAdapter = new MemeGalleryAdapter(MemeGalleryActivity.this, R.layout.grid_item_meme, mMemes);
-        mGridView.setAdapter(mAdapter);
+        MemeGalleryAdapter adapter = new MemeGalleryAdapter(MemeGalleryActivity.this, R.layout.grid_item_local_meme, mMemes);
+        mGridView.setAdapter(adapter);
         mGridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {

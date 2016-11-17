@@ -1,5 +1,7 @@
 package com.salatart.memeticame.Utils;
 
+import com.facebook.stetho.okhttp3.StethoInterceptor;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -25,6 +27,7 @@ public class HttpClient {
                     .connectTimeout(300, TimeUnit.SECONDS)
                     .writeTimeout(300, TimeUnit.SECONDS)
                     .readTimeout(300, TimeUnit.SECONDS)
+                    .addNetworkInterceptor(new StethoInterceptor())
                     .build();
         }
 

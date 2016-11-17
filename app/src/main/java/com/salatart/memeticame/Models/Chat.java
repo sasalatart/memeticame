@@ -4,25 +4,12 @@ import android.app.Activity;
 import android.content.Intent;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.view.View;
 
-import com.salatart.memeticame.Activities.ChatActivity;
 import com.salatart.memeticame.Activities.MainActivity;
-import com.salatart.memeticame.Utils.HttpClient;
-import com.salatart.memeticame.Utils.ParserUtils;
 import com.salatart.memeticame.Utils.SessionUtils;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
-
-import okhttp3.Call;
-import okhttp3.Callback;
-import okhttp3.Request;
-import okhttp3.Response;
 
 /**
  * Created by sasalatart on 8/29/16.
@@ -49,11 +36,11 @@ public class Chat implements Parcelable {
     private ArrayList<User> mParticipants;
     private ArrayList<Message> mMessages;
 
-    public Chat(int mId, String mTitle, boolean mIsGroup, String mCreatedAt, String admin, ArrayList<User> participants, ArrayList<Message> messages) {
-        this.mId = mId;
-        this.mTitle = mTitle;
-        this.mIsGroup = mIsGroup;
-        this.mCreatedAt = mCreatedAt;
+    public Chat(int id, String title, boolean isGroup, String createdAt, String admin, ArrayList<User> participants, ArrayList<Message> messages) {
+        this.mId = id;
+        this.mTitle = title;
+        this.mIsGroup = isGroup;
+        this.mCreatedAt = createdAt;
         this.mAdmin = admin;
         this.mParticipants = participants;
         this.mMessages = messages;

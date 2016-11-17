@@ -6,8 +6,11 @@ import android.util.Log;
 
 import com.salatart.memeticame.Managers.ZipManager;
 import com.salatart.memeticame.Models.Attachment;
+import com.salatart.memeticame.Models.Category;
+import com.salatart.memeticame.Models.Channel;
 import com.salatart.memeticame.Models.Chat;
 import com.salatart.memeticame.Models.ChatInvitation;
+import com.salatart.memeticame.Models.Meme;
 import com.salatart.memeticame.Models.Message;
 import com.salatart.memeticame.Models.User;
 
@@ -130,7 +133,7 @@ public class ParserUtils {
         return chatInvitations;
     }
 
-    public static ArrayList<String[]> memesFromJsonArray(JSONArray jsonArray) throws JSONException {
+    public static ArrayList<String[]> plainMemesFromJsonArray(JSONArray jsonArray) throws JSONException {
         ArrayList<String[]> memes = new ArrayList<>();
 
         for (int i = 0; i < jsonArray.length(); i++) {
@@ -141,5 +144,60 @@ public class ParserUtils {
         }
 
         return memes;
+    }
+
+    public static Meme memeFromJson(JSONObject jsonObject) throws JSONException {
+        return new Meme(jsonObject.getInt("id"),
+                jsonObject.getString("name"),
+                userFromJson(jsonObject.getJSONObject("owner")),
+                jsonObject.getString("thumb_url"),
+                jsonObject.getString("original_url"),
+                jsonObject.getDouble("rating"),
+                jsonObject.getString("created_at"));
+    }
+
+    public static ArrayList<Meme> memesFromJsonArray(JSONArray jsonArray) throws JSONException {
+        ArrayList<Meme> memes = new ArrayList<>();
+
+        for (int i = 0; i < jsonArray.length(); i++) {
+            memes.add(memeFromJson(jsonArray.getJSONObject(i)));
+        }
+
+        return memes;
+    }
+
+    public static Category categoryFromJson(JSONObject jsonObject) throws JSONException {
+        return new Category(jsonObject.getInt("id"),
+                jsonObject.getString("name"),
+                memesFromJsonArray(jsonObject.getJSONArray("memes")),
+                jsonObject.getString("created_at"));
+    }
+
+    public static ArrayList<Category> categoriesFromJsonArray(JSONArray jsonArray) throws JSONException {
+        ArrayList<Category> categories = new ArrayList<>();
+
+        for (int i = 0; i < jsonArray.length(); i++) {
+            categories.add(categoryFromJson(jsonArray.getJSONObject(i)));
+        }
+
+        return categories;
+    }
+
+    public static Channel channelFromJson(JSONObject jsonObject) throws JSONException {
+        return new Channel(jsonObject.getInt("id"),
+                jsonObject.getString("name"),
+                userFromJson(jsonObject.getJSONObject("owner")),
+                jsonObject.getDouble("rating"),
+                jsonObject.getString("created_at"));
+    }
+
+    public static ArrayList<Channel> channelsFromJsonArray(JSONArray jsonArray) throws JSONException {
+        ArrayList<Channel> channels = new ArrayList<>();
+
+        for (int i = 0; i < jsonArray.length(); i++) {
+            channels.add(channelFromJson(jsonArray.getJSONObject(i)));
+        }
+
+        return channels;
     }
 }

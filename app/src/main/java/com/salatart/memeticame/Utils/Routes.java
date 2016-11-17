@@ -4,6 +4,8 @@ import android.content.Context;
 import android.util.Log;
 
 import com.salatart.memeticame.Models.Attachment;
+import com.salatart.memeticame.Models.Category;
+import com.salatart.memeticame.Models.Channel;
 import com.salatart.memeticame.Models.Chat;
 import com.salatart.memeticame.Models.ChatInvitation;
 import com.salatart.memeticame.Models.Message;
@@ -25,8 +27,8 @@ import okhttp3.RequestBody;
  * Created by sasalatart on 8/27/16.
  */
 public class Routes {
-    public static String DOMAIN = "https://memeticame.salatart.com";
-    // public static String DOMAIN = "http://10.0.2.2:3000";
+    // public static String DOMAIN = "https://memeticame.salatart.com";
+    public static String DOMAIN = "http://10.0.2.2:3000";
     public static String UNZIP_ROUTE = DOMAIN + "/system/unzipped";
 
     private static MediaType JSON = MediaType.parse("application/json; charset=utf-8");
@@ -214,17 +216,41 @@ public class Routes {
                 .build();
     }
 
-    public static Request logout(Context context) {
+    public static Request plainMemesIndex(Context context) {
         return new Request.Builder()
-                .url(DOMAIN + "/logout")
+                .url(DOMAIN + "/plain_memes")
                 .addHeader("content-type", "application/json")
                 .addHeader("authorization", "Token token=" + SessionUtils.getToken(context))
                 .build();
     }
 
-    public static Request plainMemesIndex(Context context) {
+    public static Request channelsIndex(Context context) {
         return new Request.Builder()
-                .url(DOMAIN + "/plain_memes")
+                .url(DOMAIN + "/channels")
+                .addHeader("content-type", "application/json")
+                .addHeader("authorization", "Token token=" + SessionUtils.getToken(context))
+                .build();
+    }
+
+    public static Request categoriesIndex(Context context, Channel channel) {
+        return new Request.Builder()
+                .url(DOMAIN + "/channels/" + channel.getId() + "/categories")
+                .addHeader("content-type", "application/json")
+                .addHeader("authorization", "Token token=" + SessionUtils.getToken(context))
+                .build();
+    }
+
+    public static Request categoriesShow(Context context, Category category) {
+        return new Request.Builder()
+                .url(DOMAIN + "/categories/" + category.getId())
+                .addHeader("content-type", "application/json")
+                .addHeader("authorization", "Token token=" + SessionUtils.getToken(context))
+                .build();
+    }
+
+    public static Request logout(Context context) {
+        return new Request.Builder()
+                .url(DOMAIN + "/logout")
                 .addHeader("content-type", "application/json")
                 .addHeader("authorization", "Token token=" + SessionUtils.getToken(context))
                 .build();

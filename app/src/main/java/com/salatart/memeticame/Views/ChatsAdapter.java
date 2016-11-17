@@ -20,12 +20,10 @@ import java.util.ArrayList;
  * Created by sasalatart on 8/29/16.
  */
 public class ChatsAdapter extends ArrayAdapter<Chat> {
-    private ArrayList<Chat> mChats;
     private LayoutInflater mLayoutInflater;
 
     public ChatsAdapter(Context context, int resource, ArrayList<Chat> chats) {
         super(context, resource, chats);
-        mChats = chats;
         mLayoutInflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
     }
 

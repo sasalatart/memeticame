@@ -1,80 +1,98 @@
 package com.salatart.memeticame.Models;
 
-import android.graphics.Color;
-import android.graphics.Typeface;
+import android.os.Parcel;
+import android.os.Parcelable;
 
 /**
  * Created by Sebastian on 26-10-2016.
  */
 
-public class Meme {
+public class Meme implements Parcelable {
+    public static final Creator<Meme> CREATOR = new Creator<Meme>() {
+        @Override
+        public Meme createFromParcel(Parcel in) {
+            return new Meme(in);
+        }
+
+        @Override
+        public Meme[] newArray(int size) {
+            return new Meme[size];
+        }
+    };
+
     public static String URI_KEY = "memeUri";
-    public static String GALLERY_MODE_KEY = "galleryModeKey";
     public static String SEPARATOR = "-meme-";
     public static String PATH_KEY = "memePath";
 
-    private String mText;
-    private float mPositionX;
-    private float mPositionY;
+    private final int mId;
+    private String mName;
+    private User mOwner;
+    private String mThumbUrl;
+    private String mOriginalUrl;
+    private double mRating;
+    private String mCreatedAt;
 
-    private float mFontSize;
-    private Typeface mFontFamily;
-    private int mPaintColor;
-
-    public Meme(String text, float posX, float posY) {
-        mText = text;
-        mPositionX = posX;
-        mPositionY = posY;
-        mFontSize = 256F;
-        mFontFamily = Typeface.DEFAULT;
-        mPaintColor = Color.BLACK;
+    public Meme(int id, String name, User owner, String thumbUrl, String originalUrl, double rating, String createdAt) {
+        this.mId = id;
+        this.mName = name;
+        this.mOwner = owner;
+        this.mThumbUrl = thumbUrl;
+        this.mOriginalUrl = originalUrl;
+        this.mRating = rating;
+        this.mCreatedAt = createdAt;
     }
 
-    public String getText() {
-        return mText;
+    protected Meme(Parcel in) {
+        mId = in.readInt();
+        mName = in.readString();
+        mOwner = in.readParcelable(User.class.getClassLoader());
+        mThumbUrl = in.readString();
+        mOriginalUrl = in.readString();
+        mRating = in.readDouble();
+        mCreatedAt = in.readString();
     }
 
-    public void setText(String mText) {
-        this.mText = mText;
+    public int getId() {
+        return mId;
     }
 
-    public float getPositionX() {
-        return mPositionX;
+    public String getName() {
+        return mName;
     }
 
-    public void setPositionX(float mPositionX) {
-        this.mPositionX = mPositionX;
+    public User getOwner() {
+        return mOwner;
     }
 
-    public float getPositionY() {
-        return mPositionY;
+    public String getThumbUrl() {
+        return mThumbUrl;
     }
 
-    public void setPositionY(float mPositionY) {
-        this.mPositionY = mPositionY;
+    public String getOriginalUrl() {
+        return mOriginalUrl;
     }
 
-    public float getFontSize() {
-        return mFontSize;
+    public double getRating() {
+        return mRating;
     }
 
-    public void setFontSize(float mFontSize) {
-        this.mFontSize = mFontSize;
+    public String getCreatedAt() {
+        return mCreatedAt;
     }
 
-    public Typeface getFontFamily() {
-        return mFontFamily;
+    @Override
+    public int describeContents() {
+        return 0;
     }
 
-    public void setFontFamily(Typeface mFontFamily) {
-        this.mFontFamily = mFontFamily;
-    }
-
-    public int getPaintColor() {
-        return mPaintColor;
-    }
-
-    public void setPaintColor(int mPaintFillColor) {
-        this.mPaintColor = mPaintFillColor;
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeInt(mId);
+        dest.writeString(mName);
+        dest.writeParcelable(mOwner, flags);
+        dest.writeString(mThumbUrl);
+        dest.writeString(mOriginalUrl);
+        dest.writeDouble(mRating);
+        dest.writeString(mCreatedAt);
     }
 }
