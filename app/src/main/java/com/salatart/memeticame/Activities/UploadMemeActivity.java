@@ -34,15 +34,13 @@ public class UploadMemeActivity extends AppCompatActivity {
     @BindView(R.id.tags_edit_text) mabbas007.tagsedittext.TagsEditText mTagsEditText;
 
     private Uri mMemeUri;
-    private int mChannelId;
     private int mCategoryId;
 
     private ProgressDialog mProgressDialog;
 
-    public static Intent getIntent(Context context, Uri memeUri, int channelId, int categoryId) {
+    public static Intent getIntent(Context context, Uri memeUri, int categoryId) {
         Intent intent = new Intent(context, UploadMemeActivity.class);
         intent.putExtra(Meme.URI_KEY, memeUri);
-        intent.putExtra(MemesFromCategoryActivity.CHANNEL_ID_KEY, channelId);
         intent.putExtra(MemesFromCategoryActivity.CATEGORY_ID_KEY, categoryId);
         return intent;
     }
@@ -56,7 +54,6 @@ public class UploadMemeActivity extends AppCompatActivity {
 
         Bundle data = getIntent().getExtras();
         mMemeUri = data.getParcelable(Meme.URI_KEY);
-        mChannelId = data.getInt(MemesFromCategoryActivity.CHANNEL_ID_KEY);
         mCategoryId = data.getInt(MemesFromCategoryActivity.CATEGORY_ID_KEY);
 
         setTitle("Upload meme");
@@ -111,7 +108,7 @@ public class UploadMemeActivity extends AppCompatActivity {
     }
 
     public void uploadMeme(String memeName) {
-        Request request = Routes.memesCreate(UploadMemeActivity.this, mChannelId, mCategoryId, memeName, mTagsEditText.getText().toString().split(" "), mMemeUri);
+        Request request = Routes.memesCreate(UploadMemeActivity.this, mCategoryId, memeName, mTagsEditText.getText().toString().split(" "), mMemeUri);
         MemeUtils.createRequest(request, new OnRequestShowListener<Meme>() {
             @Override
             public void OnSuccess(Meme meme) {

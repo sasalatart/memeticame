@@ -86,7 +86,7 @@ public class CategoriesActivity extends AppCompatActivity {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 Category category = adapter.getItem(position);
-                startActivity(MemesFromCategoryActivity.getIntent(CategoriesActivity.this, category.getMemes(), category.getName(), category.getChannelId(), category.getId()));
+                startActivity(MemesFromCategoryActivity.getIntent(CategoriesActivity.this, category.getMemes(), category.getName(), category.getId()));
             }
         });
     }

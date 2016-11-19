@@ -8,6 +8,7 @@ import org.json.JSONObject;
 
 import java.io.IOException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 
 import okhttp3.Call;
@@ -36,6 +37,15 @@ public class MemeUtils {
         return fullName.substring(0, indexOfSeparator);
     }
 
+    public static void replaceMeme(ArrayList<Meme> memes, Meme newMeme) {
+        for (Meme meme : memes) {
+            if (meme.getId() == newMeme.getId()) {
+                memes.set(memes.indexOf(meme), newMeme);
+                return;
+            }
+        }
+    }
+
     public static void createRequest(Request request, final OnRequestShowListener<Meme> listener) {
         HttpClient.getInstance().newCall(request).enqueue(new Callback() {
             @Override
@@ -48,6 +58,54 @@ public class MemeUtils {
                 if (response.isSuccessful()) {
                     try {
                         listener.OnSuccess(ParserUtils.memeFromJson(new JSONObject(response.body().string())));
+                    } catch (JSONException e) {
+                        listener.OnFailure(e.toString());
+                    }
+                } else {
+                    listener.OnFailure(HttpClient.parseErrorMessage(response));
+                }
+
+                response.body().close();
+            }
+        });
+    }
+
+    public static void rateRequest(Request request, final OnRequestShowListener<Meme> listener) {
+        HttpClient.getInstance().newCall(request).enqueue(new Callback() {
+            @Override
+            public void onFailure(Call call, IOException e) {
+                listener.OnFailure(e.toString());
+            }
+
+            @Override
+            public void onResponse(Call call, Response response) throws IOException {
+                if (response.isSuccessful()) {
+                    try {
+                        listener.OnSuccess(ParserUtils.memeFromJson(new JSONObject(response.body().string())));
+                    } catch (JSONException e) {
+                        listener.OnFailure(e.toString());
+                    }
+                } else {
+                    listener.OnFailure(HttpClient.parseErrorMessage(response));
+                }
+
+                response.body().close();
+            }
+        });
+    }
+
+    public static void myRatingRequest(Request request, final OnRequestShowListener<Float> listener) {
+        HttpClient.getInstance().newCall(request).enqueue(new Callback() {
+            @Override
+            public void onFailure(Call call, IOException e) {
+                listener.OnFailure(e.toString());
+            }
+
+            @Override
+            public void onResponse(Call call, Response response) throws IOException {
+                if (response.isSuccessful()) {
+                    try {
+                        listener.OnSuccess(Float.parseFloat(new JSONObject(response.body().string()).get("value").toString()));
                     } catch (JSONException e) {
                         listener.OnFailure(e.toString());
                     }

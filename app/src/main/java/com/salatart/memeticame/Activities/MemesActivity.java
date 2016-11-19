@@ -12,6 +12,8 @@ import android.widget.GridView;
 
 import com.salatart.memeticame.Models.Meme;
 import com.salatart.memeticame.R;
+import com.salatart.memeticame.Utils.FilterUtils;
+import com.salatart.memeticame.Utils.MemeUtils;
 import com.salatart.memeticame.Views.MemesAdapter;
 
 import java.util.ArrayList;
@@ -63,8 +65,18 @@ public class MemesActivity extends AppCompatActivity {
         mGridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                startActivity(SeeMemeActivity.getIntent(MemesActivity.this, (Meme) mAdapter.getItem(position)));
+                startActivityForResult(SeeMemeActivity.getIntent(MemesActivity.this, (Meme) mAdapter.getItem(position)), FilterUtils.REQUEST_SEE_MEME);
             }
         });
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (requestCode == FilterUtils.REQUEST_SEE_MEME && resultCode == RESULT_OK && data != null) {
+            MemeUtils.replaceMeme(mMemes, (Meme) data.getParcelableExtra(Meme.PARCELABLE_KEY));
+            mAdapter.notifyDataSetChanged();
+        }
     }
 }

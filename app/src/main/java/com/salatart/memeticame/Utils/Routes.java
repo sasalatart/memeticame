@@ -8,6 +8,7 @@ import com.salatart.memeticame.Models.Attachment;
 import com.salatart.memeticame.Models.Channel;
 import com.salatart.memeticame.Models.Chat;
 import com.salatart.memeticame.Models.ChatInvitation;
+import com.salatart.memeticame.Models.Meme;
 import com.salatart.memeticame.Models.Message;
 import com.salatart.memeticame.Models.User;
 
@@ -242,7 +243,7 @@ public class Routes {
                 .build();
     }
 
-    public static Request memesCreate(Context context, int channelId, int categoryId, String name, String[] tags, Uri memeUri) {
+    public static Request memesCreate(Context context, int categoryId, String name, String[] tags, Uri memeUri) {
         FormBody.Builder formBuilder = new FormBody.Builder();
         for (int i = 0; i < tags.length; i++) {
             formBuilder.add("tags[" + i + "]", tags[i]);
@@ -257,7 +258,27 @@ public class Routes {
         }
 
         return new Request.Builder()
-                .url(DOMAIN + "/channels/" + channelId + "/categories/" + categoryId + "/memes")
+                .url(DOMAIN + "/categories/" + categoryId + "/memes")
+                .addHeader("content-type", "application/json")
+                .addHeader("authorization", "Token token=" + SessionUtils.getToken(context))
+                .post(formBuilder.build())
+                .build();
+    }
+
+    public static Request myRating(Context context, Meme meme) {
+        return new Request.Builder()
+                .url(DOMAIN + "/memes/" + meme.getId() + "/my_rating")
+                .addHeader("content-type", "application/json")
+                .addHeader("authorization", "Token token=" + SessionUtils.getToken(context))
+                .build();
+    }
+
+    public static Request ratingsCreate(Context context, Meme meme, float value) {
+        FormBody.Builder formBuilder = new FormBody.Builder();
+        formBuilder.add("value", value + "");
+
+        return new Request.Builder()
+                .url(DOMAIN + "/memes/" + meme.getId() + "/ratings")
                 .addHeader("content-type", "application/json")
                 .addHeader("authorization", "Token token=" + SessionUtils.getToken(context))
                 .post(formBuilder.build())
