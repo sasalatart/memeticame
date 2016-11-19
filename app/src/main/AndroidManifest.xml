@@ -77,8 +77,15 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".Activities.ChannelsActivity" />
         </activity>
-
         <activity android:name=".Activities.SeeMemeActivity" />
+
+        <activity
+            android:name=".Activities.NewChannelActivity"
+            android:launchMode="singleTop">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".Activities.ChannelsActivity" />
+        </activity>
 
         <provider
             android:name="android.support.v4.content.FileProvider"

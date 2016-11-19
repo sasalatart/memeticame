@@ -25,4 +25,5 @@ public class FilterUtils {
     public static final int REQUEST_EDITED_MEME = 9;
     public static final int REQUEST_UPLOAD_MEME = 10;
     public static final int REQUEST_SEE_MEME = 11;
+    public static final int REQUEST_CREATE_CHANNEL = 12;
 }

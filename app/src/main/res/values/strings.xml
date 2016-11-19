@@ -51,4 +51,6 @@
     <string name="enter_tags">Enter tags</string>
     <string name="rate">Rate</string>
     <string name="download">Download</string>
+    <string name="create_channel">Create channel</string>
+    <string name="add_category">Add category</string>
 </resources>

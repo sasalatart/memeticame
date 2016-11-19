@@ -243,6 +243,21 @@ public class Routes {
                 .build();
     }
 
+    public static Request channelsCreate(Context context, String channelName, ArrayList<String> categories) {
+        FormBody.Builder formBuilder = new FormBody.Builder();
+        formBuilder.add("name", channelName);
+        for (int i = 0; i < categories.size(); i++) {
+            formBuilder.add("categories[" + i + "]", categories.get(i));
+        }
+
+        return new Request.Builder()
+                .url(DOMAIN + "/channels")
+                .addHeader("content-type", "application/json")
+                .addHeader("authorization", "Token token=" + SessionUtils.getToken(context))
+                .post(formBuilder.build())
+                .build();
+    }
+
     public static Request memesCreate(Context context, int categoryId, String name, String[] tags, Uri memeUri) {
         FormBody.Builder formBuilder = new FormBody.Builder();
         for (int i = 0; i < tags.length; i++) {

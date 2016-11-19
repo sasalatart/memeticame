@@ -91,8 +91,6 @@ public class UploadMemeActivity extends AppCompatActivity {
                 }
 
                 mProgressDialog = ProgressDialog.show(UploadMemeActivity.this, "Please wait", "Uploading meme...", true);
-                mProgressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
-                mProgressDialog.setMax(100);
 
                 uploadMeme(memeName);
             }
