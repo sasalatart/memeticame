@@ -75,7 +75,7 @@ public class MainActivity extends AppCompatActivity implements ChatsFragment.OnC
         } else if (id == R.id.action_see_downloads_gallery) {
             startActivity(new Intent(MainActivity.this, DownloadsGalleryActivity.class));
         } else if (id == R.id.action_see_memes_gallery) {
-            startActivity(MemeGalleryActivity.getIntent(MainActivity.this, 0));
+            startActivity(MemeGalleryActivity.getIntent(MainActivity.this, MemeGalleryActivity.Mode.OpenMeme));
         } else if (id == R.id.action_create_meme) {
             startActivity(new Intent(MainActivity.this, NewMemeActivity.class));
         } else if (id == R.id.action_see_channels) {

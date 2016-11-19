@@ -13,6 +13,7 @@ import android.widget.AdapterView;
 import android.widget.GridView;
 
 import com.salatart.memeticame.Models.Attachment;
+import com.salatart.memeticame.Models.Meme;
 import com.salatart.memeticame.R;
 import com.salatart.memeticame.Utils.AttachmentUtils;
 import com.salatart.memeticame.Utils.FileUtils;
@@ -30,9 +31,9 @@ public class MemeGalleryActivity extends AppCompatActivity {
     @BindView(R.id.grid_view_memes) GridView mGridView;
 
     private ArrayList<Attachment> mMemes = new ArrayList<>();
-    private int mMode;
+    private Mode mMode;
 
-    public static Intent getIntent(Context context, int mode) {
+    public static Intent getIntent(Context context, Mode mode) {
         Intent intent = new Intent(context, MemeGalleryActivity.class);
         intent.putExtra(GALLERY_MODE_KEY, mode);
         return intent;
@@ -50,10 +51,13 @@ public class MemeGalleryActivity extends AppCompatActivity {
 
         setTitle("Meme Gallery");
 
-        mMemes.addAll(AttachmentUtils.attachmentsFromDir(MemeGalleryActivity.this, new File(FileUtils.getMemeticameMemeaudiosDirectory())));
+        mMode = (Mode) getIntent().getExtras().getSerializable(GALLERY_MODE_KEY);
+
+        if (mMode == Mode.PickAnyMeme || mMode == Mode.OpenMeme) {
+            mMemes.addAll(AttachmentUtils.attachmentsFromDir(MemeGalleryActivity.this, new File(FileUtils.getMemeticameMemeaudiosDirectory())));
+        }
         mMemes.addAll(AttachmentUtils.attachmentsFromDir(MemeGalleryActivity.this, new File(FileUtils.getMemeticameMemesDirectory())));
 
-        mMode = getIntent().getExtras().getInt(GALLERY_MODE_KEY);
         setAdapter();
     }
 
@@ -70,15 +74,19 @@ public class MemeGalleryActivity extends AppCompatActivity {
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 Attachment attachment = mMemes.get(position);
 
-                if (mMode == 0) {
+                if (mMode == Mode.OpenMeme) {
                     FileUtils.openFile(MemeGalleryActivity.this, attachment);
                 } else {
                     Intent returnIntent = new Intent();
-                    returnIntent.putExtra(Attachment.PARCELABLE_KEY, Uri.parse(attachment.getStringUri()));
+                    returnIntent.putExtra(Meme.URI_KEY, Uri.parse(attachment.getStringUri()));
                     setResult(Activity.RESULT_OK, returnIntent);
                     finish();
                 }
             }
         });
+    }
+
+    public enum Mode {
+        OpenMeme, PickAnyMeme, PickTextMeme;
     }
 }

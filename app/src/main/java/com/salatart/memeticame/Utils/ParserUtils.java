@@ -147,12 +147,21 @@ public class ParserUtils {
     }
 
     public static Meme memeFromJson(JSONObject jsonObject) throws JSONException {
+
+        ArrayList<String> tags = new ArrayList();
+        JSONArray jsonTags = jsonObject.getJSONArray("tags");
+        for (int i = 0; i < jsonTags.length(); i++) {
+            tags.add(jsonTags.getJSONObject(i).getString("text"));
+        }
+
         return new Meme(jsonObject.getInt("id"),
+                jsonObject.getInt("category_id"),
                 jsonObject.getString("name"),
                 userFromJson(jsonObject.getJSONObject("owner")),
                 jsonObject.getString("thumb_url"),
                 jsonObject.getString("original_url"),
                 jsonObject.getDouble("rating"),
+                tags,
                 jsonObject.getString("created_at"));
     }
 
@@ -168,6 +177,7 @@ public class ParserUtils {
 
     public static Category categoryFromJson(JSONObject jsonObject) throws JSONException {
         return new Category(jsonObject.getInt("id"),
+                jsonObject.getInt("channel_id"),
                 jsonObject.getString("name"),
                 memesFromJsonArray(jsonObject.getJSONArray("memes")),
                 jsonObject.getString("created_at"));

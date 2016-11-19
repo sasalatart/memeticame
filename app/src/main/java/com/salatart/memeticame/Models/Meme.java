@@ -3,6 +3,8 @@ package com.salatart.memeticame.Models;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import java.util.ArrayList;
+
 /**
  * Created by Sebastian on 26-10-2016.
  */
@@ -28,35 +30,48 @@ public class Meme implements Parcelable {
     public static String PATH_KEY = "memePath";
 
     private final int mId;
+    private int mCategoryId;
     private String mName;
     private User mOwner;
     private String mThumbUrl;
     private String mOriginalUrl;
     private double mRating;
+    private ArrayList<String> mTags;
     private String mCreatedAt;
 
-    public Meme(int id, String name, User owner, String thumbUrl, String originalUrl, double rating, String createdAt) {
+    public Meme(int id, int categoryId, String name, User owner, String thumbUrl, String originalUrl, double rating, ArrayList<String> tags, String createdAt) {
         this.mId = id;
+        this.mCategoryId = categoryId;
         this.mName = name;
         this.mOwner = owner;
         this.mThumbUrl = thumbUrl;
         this.mOriginalUrl = originalUrl;
         this.mRating = rating;
+        this.mTags = tags;
         this.mCreatedAt = createdAt;
     }
 
     protected Meme(Parcel in) {
-        mId = in.readInt();
-        mName = in.readString();
-        mOwner = in.readParcelable(User.class.getClassLoader());
-        mThumbUrl = in.readString();
-        mOriginalUrl = in.readString();
-        mRating = in.readDouble();
-        mCreatedAt = in.readString();
+        this.mId = in.readInt();
+        this.mCategoryId = in.readInt();
+        this.mName = in.readString();
+        this.mOwner = in.readParcelable(User.class.getClassLoader());
+        this.mThumbUrl = in.readString();
+        this.mOriginalUrl = in.readString();
+        this.mRating = in.readDouble();
+
+        this.mTags = new ArrayList();
+        in.readStringList(this.mTags);
+
+        this.mCreatedAt = in.readString();
     }
 
     public int getId() {
         return mId;
+    }
+
+    public int getCategoryId() {
+        return mCategoryId;
     }
 
     public String getName() {
@@ -79,6 +94,10 @@ public class Meme implements Parcelable {
         return mRating;
     }
 
+    public ArrayList<String> getTags() {
+        return mTags;
+    }
+
     public String getCreatedAt() {
         return mCreatedAt;
     }
@@ -91,11 +110,13 @@ public class Meme implements Parcelable {
     @Override
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeInt(mId);
+        dest.writeInt(mCategoryId);
         dest.writeString(mName);
         dest.writeParcelable(mOwner, flags);
         dest.writeString(mThumbUrl);
         dest.writeString(mOriginalUrl);
         dest.writeDouble(mRating);
+        dest.writeStringList(mTags);
         dest.writeString(mCreatedAt);
     }
 }

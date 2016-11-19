@@ -246,7 +246,7 @@ public class NewMemeActivity extends AppCompatActivity {
 
     public void onCreateMeme(View view) {
         LayoutInflater layoutInflater = LayoutInflater.from(NewMemeActivity.this);
-        View promptView = layoutInflater.inflate(R.layout.prompt_input, null);
+        View promptView = layoutInflater.inflate(R.layout.prompt_meme_name, null);
 
         final EditText memeNameInput = (EditText) promptView.findViewById(R.id.input_meme_name);
 

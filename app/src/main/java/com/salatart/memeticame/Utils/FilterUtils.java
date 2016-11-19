@@ -23,4 +23,5 @@ public class FilterUtils {
     public static final int REQUEST_PICK_MEME = 7;
     public static final int REQUEST_GET_MEME = 8;
     public static final int REQUEST_EDITED_MEME = 9;
+    public static final int REQUEST_UPLOAD_MEME = 10;
 }

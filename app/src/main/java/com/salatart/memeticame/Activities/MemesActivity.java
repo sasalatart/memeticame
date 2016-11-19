@@ -30,10 +30,11 @@ public class MemesActivity extends AppCompatActivity {
 
     public static String TITLE_KEY = "title";
 
-    @BindView(R.id.grid_view_memes) GridView mGridView;
+    protected ArrayList<Meme> mMemes;
+    protected MemesAdapter mAdapter;
+    protected ProgressDialog mProgressDialog;
 
-    private ArrayList<Meme> mMemes;
-    private ProgressDialog mProgressDialog;
+    @BindView(R.id.grid_view_memes) GridView mGridView;
 
     public static Intent getIntent(Context context, ArrayList<Meme> memes, String title) {
         Intent intent = new Intent(context, MemesActivity.class);
@@ -65,12 +66,12 @@ public class MemesActivity extends AppCompatActivity {
     }
 
     public void setAdapter() {
-        final MemesAdapter adapter = new MemesAdapter(MemesActivity.this, R.layout.grid_item_meme, mMemes);
-        mGridView.setAdapter(adapter);
+        mAdapter = new MemesAdapter(MemesActivity.this, R.layout.grid_item_meme, mMemes);
+        mGridView.setAdapter(mAdapter);
         mGridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                Meme meme = (Meme) adapter.getItem(position);
+                Meme meme = (Meme) mAdapter.getItem(position);
 
                 Uri localUri = FileUtils.getUriFromFileName(MemesActivity.this, meme.getName());
                 if (localUri == null) {

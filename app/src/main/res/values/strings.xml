@@ -46,4 +46,7 @@
     <string name="number_of_memes">Number of memes</string>
     <string name="category_name">Category name</string>
     <string name="rating">Rating</string>
+    <string name="upload_meme">Upload Meme</string>
+    <string name="upload">Upload</string>
+    <string name="enter_tags">Enter tags</string>
 </resources>

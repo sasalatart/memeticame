@@ -32,6 +32,7 @@ import android.widget.Toast;
 import com.bumptech.glide.Glide;
 import com.salatart.memeticame.Listeners.OnRequestShowListener;
 import com.salatart.memeticame.Listeners.OnSendMessageListener;
+import com.salatart.memeticame.Managers.AudioRecorderManager;
 import com.salatart.memeticame.Models.Attachment;
 import com.salatart.memeticame.Models.Chat;
 import com.salatart.memeticame.Models.ChatInvitation;
@@ -40,7 +41,6 @@ import com.salatart.memeticame.Models.Message;
 import com.salatart.memeticame.Models.MessageCount;
 import com.salatart.memeticame.Models.User;
 import com.salatart.memeticame.R;
-import com.salatart.memeticame.Managers.AudioRecorderManager;
 import com.salatart.memeticame.Utils.CallbackUtils;
 import com.salatart.memeticame.Utils.ChatUtils;
 import com.salatart.memeticame.Utils.FileUtils;
@@ -380,7 +380,7 @@ public class ChatActivity extends AppCompatActivity {
     }
 
     public void dispatchSelectMemeIntent() {
-        startActivityForResult(MemeGalleryActivity.getIntent(ChatActivity.this, 1), FilterUtils.REQUEST_PICK_MEME);
+        startActivityForResult(MemeGalleryActivity.getIntent(ChatActivity.this, MemeGalleryActivity.Mode.PickAnyMeme), FilterUtils.REQUEST_PICK_MEME);
     }
 
     public void toggleRecording(View view) {
@@ -484,7 +484,7 @@ public class ChatActivity extends AppCompatActivity {
             Uri memeUri = (Uri) data.getExtras().get(Meme.URI_KEY);
             setCurrentAttachmentFromUri(memeUri);
         } else if (requestCode == FilterUtils.REQUEST_PICK_MEME && resultCode == RESULT_OK && data != null) {
-            Uri memeUri = (Uri) data.getExtras().get(Attachment.PARCELABLE_KEY);
+            Uri memeUri = (Uri) data.getExtras().get(Meme.URI_KEY);
             setCurrentAttachmentFromUri(memeUri);
         }
     }

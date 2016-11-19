@@ -1,10 +1,10 @@
 package com.salatart.memeticame.Utils;
 
 import android.content.Context;
+import android.net.Uri;
 import android.util.Log;
 
 import com.salatart.memeticame.Models.Attachment;
-import com.salatart.memeticame.Models.Category;
 import com.salatart.memeticame.Models.Channel;
 import com.salatart.memeticame.Models.Chat;
 import com.salatart.memeticame.Models.ChatInvitation;
@@ -14,6 +14,7 @@ import com.salatart.memeticame.Models.User;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -142,6 +143,7 @@ public class Routes {
         }
 
         RequestBody body = RequestBody.create(JSON, params.toString());
+
         return new Request.Builder()
                 .url(DOMAIN + "/chats/" + message.getChatId() + "/messages")
                 .addHeader("content-type", "application/json")
@@ -240,11 +242,25 @@ public class Routes {
                 .build();
     }
 
-    public static Request categoriesShow(Context context, Category category) {
+    public static Request memesCreate(Context context, int channelId, int categoryId, String name, String[] tags, Uri memeUri) {
+        FormBody.Builder formBuilder = new FormBody.Builder();
+        for (int i = 0; i < tags.length; i++) {
+            formBuilder.add("tags[" + i + "]", tags[i]);
+        }
+
+        try {
+            formBuilder.add("base64", FileUtils.encodeToBase64FromUri(context, memeUri));
+            formBuilder.add("mime_type", FileUtils.getMimeType(context, memeUri));
+            formBuilder.add("name", name);
+        } catch (IOException e) {
+            Log.e("ERROR", e.toString());
+        }
+
         return new Request.Builder()
-                .url(DOMAIN + "/categories/" + category.getId())
+                .url(DOMAIN + "/channels/" + channelId + "/categories/" + categoryId + "/memes")
                 .addHeader("content-type", "application/json")
                 .addHeader("authorization", "Token token=" + SessionUtils.getToken(context))
+                .post(formBuilder.build())
                 .build();
     }
 

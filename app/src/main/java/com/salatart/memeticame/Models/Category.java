@@ -25,25 +25,34 @@ public class Category implements Parcelable {
     public static String PARCELABLE_KEY = "com.salatart.memeticame.Models.Category";
 
     private final int mId;
+    private int mChannelId;
     private String mName;
     private ArrayList<Meme> mMemes;
     private String mCreatedAt;
 
-    public Category(int id, String name, ArrayList<Meme> memes, String createdAt) {
+    public Category(int id, int channelId, String name, ArrayList<Meme> memes, String createdAt) {
         this.mId = id;
+        this.mChannelId = channelId;
         this.mName = name;
         this.mMemes = memes;
         this.mCreatedAt = createdAt;
     }
 
     protected Category(Parcel in) {
-        mId = in.readInt();
-        mName = in.readString();
-        mCreatedAt = in.readString();
+        this.mId = in.readInt();
+        this.mChannelId = in.readInt();
+        this.mName = in.readString();
+        this.mMemes = new ArrayList<>();
+        in.readTypedList(mMemes, Meme.CREATOR);
+        this.mCreatedAt = in.readString();
     }
 
     public int getId() {
         return mId;
+    }
+
+    public int getChannelId() {
+        return mChannelId;
     }
 
     public String getName() {
@@ -66,6 +75,7 @@ public class Category implements Parcelable {
     @Override
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeInt(mId);
+        dest.writeInt(mChannelId);
         dest.writeString(mName);
         dest.writeTypedList(mMemes);
         dest.writeString(mCreatedAt);
