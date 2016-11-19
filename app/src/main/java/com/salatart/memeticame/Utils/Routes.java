@@ -280,6 +280,20 @@ public class Routes {
                 .build();
     }
 
+    public static Request memesSearch(Context context, ArrayList<String> searchTags) {
+        FormBody.Builder formBuilder = new FormBody.Builder();
+        for (int i = 0; i < searchTags.size(); i++) {
+            formBuilder.add("tags[" + i + "]", searchTags.get(i));
+        }
+
+        return new Request.Builder()
+                .url(DOMAIN + "/search_memes")
+                .addHeader("content-type", "application/json")
+                .addHeader("authorization", "Token token=" + SessionUtils.getToken(context))
+                .post(formBuilder.build())
+                .build();
+    }
+
     public static Request myRating(Context context, Meme meme) {
         return new Request.Builder()
                 .url(DOMAIN + "/memes/" + meme.getId() + "/my_rating")

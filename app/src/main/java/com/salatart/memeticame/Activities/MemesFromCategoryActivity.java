@@ -11,6 +11,7 @@ import android.widget.Toast;
 import com.salatart.memeticame.Models.Meme;
 import com.salatart.memeticame.R;
 import com.salatart.memeticame.Utils.FilterUtils;
+import com.salatart.memeticame.Utils.MemeUtils;
 
 import java.util.ArrayList;
 
@@ -46,6 +47,8 @@ public class MemesFromCategoryActivity extends MemesActivity {
 
         if (id == R.id.action_upload_meme) {
             startActivityForResult(MemeGalleryActivity.getIntent(MemesFromCategoryActivity.this, MemeGalleryActivity.Mode.PickTextMeme), FilterUtils.REQUEST_PICK_MEME);
+        } else if (id == R.id.action_search_memes) {
+            MemeUtils.onSearchClick(MemesFromCategoryActivity.this);
         } else {
             finish();
         }

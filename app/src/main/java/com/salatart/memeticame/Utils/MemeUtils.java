@@ -1,14 +1,30 @@
 package com.salatart.memeticame.Utils;
 
-import com.salatart.memeticame.Listeners.OnRequestShowListener;
-import com.salatart.memeticame.Models.Meme;
+import android.app.Activity;
+import android.app.AlertDialog;
+import android.app.ProgressDialog;
+import android.content.Context;
+import android.content.DialogInterface;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.widget.EditText;
+import android.widget.Toast;
 
+import com.salatart.memeticame.Activities.MemesActivity;
+import com.salatart.memeticame.Listeners.OnRequestIndexListener;
+import com.salatart.memeticame.Listeners.OnRequestShowListener;
+import com.salatart.memeticame.Listeners.OnSearchClickListener;
+import com.salatart.memeticame.Models.Meme;
+import com.salatart.memeticame.R;
+
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 
 import okhttp3.Call;
@@ -116,5 +132,85 @@ public class MemeUtils {
                 response.body().close();
             }
         });
+    }
+
+    public static void searchRequest(Request request, final OnRequestIndexListener<Meme> listener) {
+        HttpClient.getInstance().newCall(request).enqueue(new Callback() {
+            @Override
+            public void onFailure(Call call, IOException e) {
+                listener.OnFailure(e.toString());
+            }
+
+            @Override
+            public void onResponse(Call call, Response response) throws IOException {
+                if (response.isSuccessful()) {
+                    try {
+                        listener.OnSuccess(ParserUtils.memesFromJsonArray(new JSONArray(response.body().string())));
+                    } catch (JSONException e) {
+                        listener.OnFailure(e.toString());
+                    }
+                } else {
+                    listener.OnFailure(HttpClient.parseErrorMessage(response));
+                }
+
+                response.body().close();
+            }
+        });
+    }
+
+    public static void onSearchClick(final Activity activity) {
+        MemeUtils.processSearch(activity, new OnSearchClickListener() {
+            @Override
+            public void OnSearchRequested(ArrayList<String> searchTags) {
+                final ProgressDialog progressDialog = ProgressDialog.show(activity, "Please wait", "Searching for memes...", true);
+                Request request = Routes.memesSearch(activity, searchTags);
+                MemeUtils.searchRequest(request, new OnRequestIndexListener<Meme>() {
+                    @Override
+                    public void OnSuccess(ArrayList<Meme> memes) {
+                        activity.startActivity(MemesActivity.getIntent(activity, memes, "Search results"));
+                        progressDialog.dismiss();
+                        activity.finish();
+                    }
+
+                    @Override
+                    public void OnFailure(String message) {
+                        CallbackUtils.onUnsuccessfulRequest(activity, message);
+                        progressDialog.dismiss();
+                    }
+                });
+            }
+        });
+    }
+
+    public static void processSearch(final Context context, final OnSearchClickListener listener) {
+        LayoutInflater layoutInflater = LayoutInflater.from(context);
+        View promptView = layoutInflater.inflate(R.layout.prompt_search_memes, null);
+
+        final EditText memeNameInput = (EditText) promptView.findViewById(R.id.tags_edit_search);
+
+        AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(context);
+        alertDialogBuilder.setView(promptView);
+
+        alertDialogBuilder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                String searchText = memeNameInput.getText().toString();
+                if (searchText.isEmpty()) {
+                    Toast.makeText(context, "You must insert at least one tag.", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+
+                ArrayList<String> searchTags = new ArrayList<String>(Arrays.asList(searchText.split(" ")));
+                listener.OnSearchRequested(searchTags);
+            }
+        }).setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.cancel();
+            }
+        });
+
+        AlertDialog alertDialog = alertDialogBuilder.create();
+        alertDialog.show();
     }
 }

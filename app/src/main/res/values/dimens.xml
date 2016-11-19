@@ -13,4 +13,5 @@
     <dimen name="attachment_button_size">48dp</dimen>
     <dimen name="attachment_button_padding">2dp</dimen>
     <dimen name="list_item_padding">8dp</dimen>
+    <dimen name="prompt_padding">16dp</dimen>
 </resources>

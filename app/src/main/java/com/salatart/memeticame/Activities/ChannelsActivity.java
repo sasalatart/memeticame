@@ -16,6 +16,7 @@ import com.salatart.memeticame.R;
 import com.salatart.memeticame.Utils.CallbackUtils;
 import com.salatart.memeticame.Utils.ChannelsUtils;
 import com.salatart.memeticame.Utils.FilterUtils;
+import com.salatart.memeticame.Utils.MemeUtils;
 import com.salatart.memeticame.Utils.Routes;
 import com.salatart.memeticame.Views.ChannelsAdapter;
 
@@ -64,6 +65,8 @@ public class ChannelsActivity extends AppCompatActivity {
         if (id == R.id.action_create_channel) {
             Intent intent = new Intent(ChannelsActivity.this, NewChannelActivity.class);
             startActivityForResult(intent, FilterUtils.REQUEST_CREATE_CHANNEL);
+        } else if (id == R.id.action_search_memes) {
+            MemeUtils.onSearchClick(ChannelsActivity.this);
         }
 
         return super.onOptionsItemSelected(item);
