@@ -1,9 +1,7 @@
 package com.salatart.memeticame.Activities;
 
-import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
-import android.net.Uri;
 import android.os.Bundle;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
@@ -12,13 +10,8 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.GridView;
 
-import com.salatart.memeticame.Listeners.OnRequestListener;
 import com.salatart.memeticame.Models.Meme;
 import com.salatart.memeticame.R;
-import com.salatart.memeticame.Utils.CallbackUtils;
-import com.salatart.memeticame.Utils.DownloadAsyncTask;
-import com.salatart.memeticame.Utils.FileUtils;
-import com.salatart.memeticame.Utils.Routes;
 import com.salatart.memeticame.Views.MemesAdapter;
 
 import java.util.ArrayList;
@@ -32,7 +25,6 @@ public class MemesActivity extends AppCompatActivity {
 
     protected ArrayList<Meme> mMemes;
     protected MemesAdapter mAdapter;
-    protected ProgressDialog mProgressDialog;
 
     @BindView(R.id.grid_view_memes) GridView mGridView;
 
@@ -71,27 +63,7 @@ public class MemesActivity extends AppCompatActivity {
         mGridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                Meme meme = (Meme) mAdapter.getItem(position);
-
-                Uri localUri = FileUtils.getUriFromFileName(MemesActivity.this, meme.getName());
-                if (localUri == null) {
-                    mProgressDialog = ProgressDialog.show(MemesActivity.this, "Please wait", "Downloading meme...", true);
-                    mProgressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
-                    mProgressDialog.setMax(100);
-
-                    long downloadId = FileUtils.downloadFile(MemesActivity.this, Uri.parse(Routes.DOMAIN + "/" + meme.getOriginalUrl()), meme.getName());
-                    DownloadAsyncTask asyncTask = new DownloadAsyncTask(MemesActivity.this, mProgressDialog, downloadId, new OnRequestListener() {
-                        @Override
-                        public void OnSuccess() {
-                        }
-
-                        @Override
-                        public void OnFailure(String message) {
-                            CallbackUtils.onUnsuccessfulRequest(MemesActivity.this, message);
-                        }
-                    });
-                    asyncTask.execute();
-                }
+                startActivity(SeeMemeActivity.getIntent(MemesActivity.this, (Meme) mAdapter.getItem(position)));
             }
         });
     }

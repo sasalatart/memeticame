@@ -14,7 +14,6 @@ import com.bumptech.glide.Glide;
 import com.iarcuschin.simpleratingbar.SimpleRatingBar;
 import com.salatart.memeticame.Models.Meme;
 import com.salatart.memeticame.R;
-import com.salatart.memeticame.Utils.Routes;
 
 import java.util.ArrayList;
 
@@ -64,9 +63,6 @@ public class MemesAdapter extends ArrayAdapter {
         TextView textMemeName = (TextView) convertView.findViewById(R.id.label_meme_name);
         textMemeName.setText(meme.getName());
 
-        TextView textMemeRating = (TextView) convertView.findViewById(R.id.label_meme_rating);
-        textMemeRating.setText(String.format("%.2f", meme.getRating()));
-
         com.iarcuschin.simpleratingbar.SimpleRatingBar ratingBar = (com.iarcuschin.simpleratingbar.SimpleRatingBar) convertView.findViewById(R.id.label_meme_rating_bar);
         SimpleRatingBar.AnimationBuilder builder = ratingBar.getAnimationBuilder()
                 .setRatingTarget((float) meme.getRating())
@@ -81,7 +77,7 @@ public class MemesAdapter extends ArrayAdapter {
 
     private void setImage(ImageView view, String uri) {
         Glide.with(mContext)
-                .load(Routes.DOMAIN + uri)
+                .load(uri)
                 .placeholder(R.drawable.ic_access_time_black_24dp)
                 .crossFade()
                 .into(view);

@@ -49,4 +49,6 @@
     <string name="upload_meme">Upload Meme</string>
     <string name="upload">Upload</string>
     <string name="enter_tags">Enter tags</string>
+    <string name="rate">Rate</string>
+    <string name="download">Download</string>
 </resources>

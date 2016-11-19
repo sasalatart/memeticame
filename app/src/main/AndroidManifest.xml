@@ -52,7 +52,7 @@
         <activity android:name=".Activities.AddParticipantsActivity" />
         <activity android:name=".Activities.DownloadsGalleryActivity" />
         <activity android:name=".Activities.NewMemeActivity" />
-        <activity android:name=".Activities.MemeaudioActivity" />
+        <activity android:name=".Activities.SeeMemeaudioActivity" />
         <activity android:name=".Activities.PlainMemeGalleryActivity" />
         <activity android:name=".Activities.MemeGalleryActivity" />
         <activity android:name=".Activities.MemeEditorActivity" />
@@ -70,7 +70,6 @@
         </activity>
         <activity android:name=".Activities.MemesActivity" />
         <activity android:name=".Activities.MemesFromCategoryActivity" />
-
         <activity
             android:name=".Activities.UploadMemeActivity"
             android:launchMode="singleTop">
@@ -78,6 +77,8 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".Activities.ChannelsActivity" />
         </activity>
+
+        <activity android:name=".Activities.SeeMemeActivity" />
 
         <provider
             android:name="android.support.v4.content.FileProvider"

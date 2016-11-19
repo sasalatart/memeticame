@@ -3,6 +3,8 @@ package com.salatart.memeticame.Models;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import com.salatart.memeticame.Utils.Routes;
+
 import java.util.ArrayList;
 
 /**
@@ -83,11 +85,11 @@ public class Meme implements Parcelable {
     }
 
     public String getThumbUrl() {
-        return mThumbUrl;
+        return Routes.DOMAIN + mThumbUrl;
     }
 
     public String getOriginalUrl() {
-        return mOriginalUrl;
+        return Routes.DOMAIN + mOriginalUrl;
     }
 
     public double getRating() {

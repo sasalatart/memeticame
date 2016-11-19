@@ -20,7 +20,7 @@ import com.salatart.memeticame.Utils.Touch;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-public class MemeaudioActivity extends AppCompatActivity {
+public class SeeMemeaudioActivity extends AppCompatActivity {
 
     @BindView(R.id.image_memeaudio) ImageView mImage;
     @BindView(R.id.button_play) ImageButton mPlayButton;
@@ -37,7 +37,7 @@ public class MemeaudioActivity extends AppCompatActivity {
             return null;
         }
 
-        Intent intent = new Intent(context, MemeaudioActivity.class);
+        Intent intent = new Intent(context, SeeMemeaudioActivity.class);
         intent.putExtra(Attachment.IMAGE_URI_KEY, attachment.getMemeaudioPartUri(context, true));
         intent.putExtra(Attachment.AUDIO_URI_KEY, attachment.getMemeaudioPartUri(context, false));
         return intent;
@@ -46,7 +46,7 @@ public class MemeaudioActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_memeaudio);
+        setContentView(R.layout.activity_see_memeaudio);
 
         ButterKnife.bind(this);
 
@@ -72,7 +72,7 @@ public class MemeaudioActivity extends AppCompatActivity {
     }
 
     public void setImage() {
-        Glide.with(MemeaudioActivity.this)
+        Glide.with(SeeMemeaudioActivity.this)
                 .load(mImageUri)
                 .placeholder(R.drawable.ic_access_time_black_24dp)
                 .crossFade()
@@ -82,7 +82,7 @@ public class MemeaudioActivity extends AppCompatActivity {
     }
 
     public void setMediaPlayer() {
-        mMediaPlayerManager = new MediaPlayerManager(MemeaudioActivity.this, mAudioUri, mPlayButton, mPauseButton, mStopButton);
+        mMediaPlayerManager = new MediaPlayerManager(SeeMemeaudioActivity.this, mAudioUri, mPlayButton, mPauseButton, mStopButton);
     }
 
     public void onPlay(View view) {

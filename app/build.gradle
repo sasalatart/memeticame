@@ -54,6 +54,7 @@ dependencies {
     compile 'com.facebook.stetho:stetho:1.4.1'
     compile 'com.facebook.stetho:stetho-okhttp3:1.4.1'
     compile 'com.github.mabbas007:TagsEditText:v1.0.2'
+    compile 'co.lujun:androidtagview:1.0.5'
 }
 
 apply plugin: 'com.google.gms.google-services'
