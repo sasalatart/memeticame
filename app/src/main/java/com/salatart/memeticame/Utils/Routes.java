@@ -17,8 +17,6 @@ import org.json.JSONObject;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
 
 import okhttp3.FormBody;
 import okhttp3.MediaType;
@@ -35,32 +33,47 @@ public class Routes {
 
     private static MediaType JSON = MediaType.parse("application/json; charset=utf-8");
 
-    public static Request login(String phoneNumber, String password) {
-        Map<String, String> params = new HashMap<>();
-        params.put("phone_number", phoneNumber);
-        params.put("password", password);
-
-        RequestBody body = RequestBody.create(JSON, new JSONObject(params).toString());
+    public static Request buildGetRequest(Context context, String url) {
         return new Request.Builder()
-                .url(DOMAIN + "/login")
+                .url(DOMAIN + url)
                 .addHeader("content-type", "application/json")
-                .post(body)
+                .addHeader("authorization", "Token token=" + SessionUtils.getToken(context))
                 .build();
     }
 
-    public static Request signup(String name, String phoneNumber, String password, String passwordConfirmation) {
-        Map<String, String> params = new HashMap<>();
-        params.put("name", name);
-        params.put("phone_number", phoneNumber);
-        params.put("password", password);
-        params.put("password_confirmation", passwordConfirmation);
-
-        RequestBody body = RequestBody.create(JSON, new JSONObject(params).toString());
+    public static Request buildPostRequest(Context context, String url, FormBody.Builder formBuilder) {
         return new Request.Builder()
-                .url(DOMAIN + "/signup")
+                .url(DOMAIN + url)
                 .addHeader("content-type", "application/json")
-                .post(body)
+                .addHeader("authorization", "Token token=" + SessionUtils.getToken(context))
+                .post(formBuilder.build())
                 .build();
+    }
+
+    public static Request buildTokenlessPostRequest(String url, FormBody.Builder formBuilder) {
+        return new Request.Builder()
+                .url(DOMAIN + url)
+                .addHeader("content-type", "application/json")
+                .post(formBuilder.build())
+                .build();
+    }
+
+    public static Request login(String phoneNumber, String password) {
+        FormBody.Builder formBuilder = new FormBody.Builder();
+        formBuilder.add("phone_number", phoneNumber);
+        formBuilder.add("password", password);
+
+        return buildTokenlessPostRequest("/login", formBuilder);
+    }
+
+    public static Request signup(String name, String phoneNumber, String password, String passwordConfirmation) {
+        FormBody.Builder formBuilder = new FormBody.Builder();
+        formBuilder.add("name", name);
+        formBuilder.add("phone_number", phoneNumber);
+        formBuilder.add("password", password);
+        formBuilder.add("password_confirmation", passwordConfirmation);
+
+        return buildTokenlessPostRequest("/signup", formBuilder);
     }
 
     public static Request usersIndex(Context context, ArrayList<String> phoneNumbers) {
@@ -69,28 +82,16 @@ public class Routes {
             formBuilder.add("phone_numbers[" + i + "]", phoneNumbers.get(i));
         }
 
-        return new Request.Builder()
-                .url(DOMAIN + "/users")
-                .addHeader("content-type", "application/json")
-                .addHeader("authorization", "Token token=" + SessionUtils.getToken(context))
-                .post(formBuilder.build())
-                .build();
+        return buildPostRequest(context, "/users", formBuilder);
     }
 
-    public static Request userShow(Context context, User user) {
-        return new Request.Builder()
-                .url(DOMAIN + "/users/" + user.getPhoneNumber())
-                .addHeader("content-type", "application/json")
-                .addHeader("authorization", "Token token=" + SessionUtils.getToken(context))
-                .build();
+    public static Request usersShow(Context context, User user) {
+        String path = "/users/" + user.getPhoneNumber();
+        return buildGetRequest(context, path);
     }
 
     public static Request chatsIndex(Context context) {
-        return new Request.Builder()
-                .url(DOMAIN + "/chats")
-                .addHeader("content-type", "application/json")
-                .addHeader("authorization", "Token token=" + SessionUtils.getToken(context))
-                .build();
+        return buildGetRequest(context, "/chats");
     }
 
     public static Request chatsCreate(Context context, String title, ArrayList<User> participants, boolean isGroup) {
@@ -109,20 +110,12 @@ public class Routes {
             formBuilder.add("users[" + i + "]", phoneNumbers.get(i));
         }
 
-        return new Request.Builder()
-                .url(DOMAIN + "/chats")
-                .addHeader("content-type", "application/json")
-                .addHeader("authorization", "Token token=" + SessionUtils.getToken(context))
-                .post(formBuilder.build())
-                .build();
+        return buildPostRequest(context, "/chats", formBuilder);
     }
 
     public static Request chatShow(Context context, Chat chat) {
-        return new Request.Builder()
-                .url(DOMAIN + "/chats/" + chat.getId())
-                .addHeader("content-type", "application/json")
-                .addHeader("authorization", "Token token=" + SessionUtils.getToken(context))
-                .build();
+        String path = "/chats/" + chat.getId();
+        return buildGetRequest(context, path);
     }
 
     public static Request messagesCreate(Context context, Message message) {
@@ -139,36 +132,28 @@ public class Routes {
                 jsonAttachment.put("name", attachment.getName());
                 params.put("attachment", jsonAttachment);
             }
+
+            RequestBody body = RequestBody.create(JSON, params.toString());
+            return new Request.Builder()
+                    .url(DOMAIN + "/chats/" + message.getChatId() + "/messages")
+                    .addHeader("content-type", "application/json")
+                    .addHeader("authorization", "Token token=" + SessionUtils.getToken(context))
+                    .post(body)
+                    .build();
         } catch (JSONException e) {
             Log.e("ERROR", e.toString());
+            return null;
         }
-
-        RequestBody body = RequestBody.create(JSON, params.toString());
-
-        return new Request.Builder()
-                .url(DOMAIN + "/chats/" + message.getChatId() + "/messages")
-                .addHeader("content-type", "application/json")
-                .addHeader("authorization", "Token token=" + SessionUtils.getToken(context))
-                .post(body)
-                .build();
     }
 
     public static Request chatLeave(Context context, int chatId) {
-        return new Request.Builder()
-                .url(DOMAIN + "/chats/" + chatId + "/leave")
-                .addHeader("content-type", "application/json")
-                .addHeader("authorization", "Token token=" + SessionUtils.getToken(context))
-                .post(new FormBody.Builder().build())
-                .build();
+        String path = "/chats/" + chatId + "/leave";
+        return buildPostRequest(context, path, new FormBody.Builder());
     }
 
     public static Request kickUser(Context context, Chat chat, User user) {
-        return new Request.Builder()
-                .url(DOMAIN + "/chats/" + chat.getId() + "/users/" + user.getId() + "/kick")
-                .addHeader("content-type", "application/json")
-                .addHeader("authorization", "Token token=" + SessionUtils.getToken(context))
-                .post(new FormBody.Builder().build())
-                .build();
+        String path = "/chats/" + chat.getId() + "/users/" + user.getId() + "/kick";
+        return buildPostRequest(context, path, new FormBody.Builder());
     }
 
     public static Request inviteUsers(Context context, Chat chat, ArrayList<User> users) {
@@ -177,70 +162,40 @@ public class Routes {
             formBuilder.add("users[" + i + "]", users.get(i).getPhoneNumber());
         }
 
-        return new Request.Builder()
-                .url(DOMAIN + "/chats/" + chat.getId() + "/invite")
-                .addHeader("content-type", "application/json")
-                .addHeader("authorization", "Token token=" + SessionUtils.getToken(context))
-                .post(formBuilder.build())
-                .build();
+        String path = "/chats/" + chat.getId() + "/invite";
+        return buildPostRequest(context, path, formBuilder);
     }
 
     public static Request chatInvitationsIndex(Context context) {
-        return new Request.Builder()
-                .url(DOMAIN + "/chat_invitations")
-                .addHeader("content-type", "application/json")
-                .addHeader("authorization", "Token token=" + SessionUtils.getToken(context))
-                .build();
+        return buildGetRequest(context, "/chat_invitations");
     }
 
     public static Request chatInvitationsFromChat(Context context, Chat chat) {
-        return new Request.Builder()
-                .url(DOMAIN + "/chats/" + chat.getId() + "/invitations")
-                .addHeader("content-type", "application/json")
-                .addHeader("authorization", "Token token=" + SessionUtils.getToken(context))
-                .build();
+        String path = "/chats/" + chat.getId() + "/invitations";
+        return buildGetRequest(context, path);
     }
 
     public static Request rejectChatInvitation(Context context, ChatInvitation chatInvitation) {
-        return new Request.Builder()
-                .url(DOMAIN + "/chat_invitations/" + chatInvitation.getId() + "/reject")
-                .addHeader("content-type", "application/json")
-                .addHeader("authorization", "Token token=" + SessionUtils.getToken(context))
-                .post(new FormBody.Builder().build())
-                .build();
+        String path = "/chat_invitations/" + chatInvitation.getId() + "/reject";
+        return buildPostRequest(context, path, new FormBody.Builder());
     }
 
     public static Request acceptChatInvitation(Context context, ChatInvitation chatInvitation) {
-        return new Request.Builder()
-                .url(DOMAIN + "/chat_invitations/" + chatInvitation.getId() + "/accept")
-                .addHeader("content-type", "application/json")
-                .addHeader("authorization", "Token token=" + SessionUtils.getToken(context))
-                .post(new FormBody.Builder().build())
-                .build();
+        String path = "/chat_invitations/" + chatInvitation.getId() + "/accept";
+        return buildPostRequest(context, path, new FormBody.Builder());
     }
 
     public static Request plainMemesIndex(Context context) {
-        return new Request.Builder()
-                .url(DOMAIN + "/plain_memes")
-                .addHeader("content-type", "application/json")
-                .addHeader("authorization", "Token token=" + SessionUtils.getToken(context))
-                .build();
+        return buildGetRequest(context, "/plain_memes");
     }
 
     public static Request channelsIndex(Context context) {
-        return new Request.Builder()
-                .url(DOMAIN + "/channels")
-                .addHeader("content-type", "application/json")
-                .addHeader("authorization", "Token token=" + SessionUtils.getToken(context))
-                .build();
+        return buildGetRequest(context, "/channels");
     }
 
     public static Request channelsShow(Context context, Channel channel) {
-        return new Request.Builder()
-                .url(DOMAIN + "/channels/" + channel.getId())
-                .addHeader("content-type", "application/json")
-                .addHeader("authorization", "Token token=" + SessionUtils.getToken(context))
-                .build();
+        String path = "/channels/" + channel.getId();
+        return buildGetRequest(context, path);
     }
 
     public static Request channelsCreate(Context context, String channelName, ArrayList<String> categories) {
@@ -250,12 +205,7 @@ public class Routes {
             formBuilder.add("categories[" + i + "]", categories.get(i));
         }
 
-        return new Request.Builder()
-                .url(DOMAIN + "/channels")
-                .addHeader("content-type", "application/json")
-                .addHeader("authorization", "Token token=" + SessionUtils.getToken(context))
-                .post(formBuilder.build())
-                .build();
+        return buildPostRequest(context, "/channels", formBuilder);
     }
 
     public static Request memesCreate(Context context, int categoryId, String name, String[] tags, Uri memeUri) {
@@ -268,16 +218,13 @@ public class Routes {
             formBuilder.add("base64", FileUtils.encodeToBase64FromUri(context, memeUri));
             formBuilder.add("mime_type", FileUtils.getMimeType(context, memeUri));
             formBuilder.add("name", name);
+
+            String path = "/categories/" + categoryId + "/memes";
+            return buildPostRequest(context, path, formBuilder);
         } catch (IOException e) {
             Log.e("ERROR", e.toString());
+            return null;
         }
-
-        return new Request.Builder()
-                .url(DOMAIN + "/categories/" + categoryId + "/memes")
-                .addHeader("content-type", "application/json")
-                .addHeader("authorization", "Token token=" + SessionUtils.getToken(context))
-                .post(formBuilder.build())
-                .build();
     }
 
     public static Request memesSearch(Context context, ArrayList<String> searchTags) {
@@ -286,52 +233,30 @@ public class Routes {
             formBuilder.add("tags[" + i + "]", searchTags.get(i));
         }
 
-        return new Request.Builder()
-                .url(DOMAIN + "/search_memes")
-                .addHeader("content-type", "application/json")
-                .addHeader("authorization", "Token token=" + SessionUtils.getToken(context))
-                .post(formBuilder.build())
-                .build();
+        return buildPostRequest(context, "/search_memes", formBuilder);
     }
 
     public static Request myRating(Context context, Meme meme) {
-        return new Request.Builder()
-                .url(DOMAIN + "/memes/" + meme.getId() + "/my_rating")
-                .addHeader("content-type", "application/json")
-                .addHeader("authorization", "Token token=" + SessionUtils.getToken(context))
-                .build();
+        String path = "/memes/" + meme.getId() + "/my_rating";
+        return buildGetRequest(context, path);
     }
 
     public static Request ratingsCreate(Context context, Meme meme, float value) {
         FormBody.Builder formBuilder = new FormBody.Builder();
         formBuilder.add("value", value + "");
 
-        return new Request.Builder()
-                .url(DOMAIN + "/memes/" + meme.getId() + "/ratings")
-                .addHeader("content-type", "application/json")
-                .addHeader("authorization", "Token token=" + SessionUtils.getToken(context))
-                .post(formBuilder.build())
-                .build();
+        String path = "/memes/" + meme.getId() + "/ratings";
+        return buildPostRequest(context, path, formBuilder);
     }
 
     public static Request logout(Context context) {
-        return new Request.Builder()
-                .url(DOMAIN + "/logout")
-                .addHeader("content-type", "application/json")
-                .addHeader("authorization", "Token token=" + SessionUtils.getToken(context))
-                .build();
+        return buildGetRequest(context, "/logout");
     }
 
     public static Request fcmRegister(Context context, String token) {
-        Map<String, String> params = new HashMap<String, String>();
-        params.put("registration_token", token);
+        FormBody.Builder formBuilder = new FormBody.Builder();
+        formBuilder.add("registration_token", token);
 
-        RequestBody body = RequestBody.create(JSON, new JSONObject(params).toString());
-        return new Request.Builder()
-                .url(DOMAIN + "/fcm_register")
-                .addHeader("content-type", "application/json")
-                .addHeader("authorization", "Token token=" + SessionUtils.getToken(context))
-                .post(body)
-                .build();
+        return buildPostRequest(context, "/fcm_register", formBuilder);
     }
 }

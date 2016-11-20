@@ -53,7 +53,7 @@ public class MemeticameApplication extends Application {
             User newUser = UserUtils.getUserDifference(localContacts, mLocalContacts);
             if (newUser == null) return;
 
-            Request request = Routes.userShow(this, newUser);
+            Request request = Routes.usersShow(this, newUser);
             UserUtils.showRequest(request, new OnRequestShowListener<User>() {
                 @Override
                 public void OnSuccess(User user) {
