@@ -27,8 +27,8 @@ import okhttp3.RequestBody;
  * Created by sasalatart on 8/27/16.
  */
 public class Routes {
-    // public static String DOMAIN = "https://memeticame.salatart.com";
-    public static String DOMAIN = "http://10.0.2.2:3000";
+    public static String DOMAIN = "https://memeticame.salatart.com";
+    // public static String DOMAIN = "http://10.0.2.2:3000";
     public static String UNZIP_ROUTE = DOMAIN + "/system/unzipped";
 
     private static MediaType JSON = MediaType.parse("application/json; charset=utf-8");
