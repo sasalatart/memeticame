@@ -39,6 +39,6 @@
         app:srb_fillColor="@color/colorPrimary"
         app:srb_isIndicator="true"
         app:srb_numberOfStars="5"
-        app:srb_starSize="48dp"
+        app:srb_starSize="@dimen/big_star_size"
         app:srb_stepSize="0.1" />
 </LinearLayout>

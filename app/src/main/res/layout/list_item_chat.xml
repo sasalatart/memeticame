@@ -2,12 +2,15 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="fill_parent"
     android:layout_height="@dimen/list_item_icon_size"
-    android:orientation="horizontal">
+    android:layout_margin="@dimen/list_item_margin"
+    android:orientation="horizontal"
+    android:padding="@dimen/list_item_padding">
 
     <ImageView
         android:id="@+id/chat_icon"
         android:layout_width="@dimen/list_item_icon_size"
         android:layout_height="match_parent"
+        android:layout_marginEnd="@dimen/list_item_margin"
         android:background="@color/iconBackground"
         android:src="@drawable/ic_person_black_24dp" />
 
@@ -16,9 +19,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentEnd="true"
-        android:layout_alignParentRight="true"
-        android:layout_marginEnd="8dp"
-        android:layout_marginRight="8dp"
+        android:layout_alignParentTop="true"
         android:orientation="horizontal">
 
         <TextView
@@ -43,10 +44,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentEnd="true"
-        android:layout_alignParentRight="true"
-        android:layout_below="@id/group_created_at"
-        android:layout_marginEnd="8dp"
-        android:layout_marginRight="8dp"
+        android:layout_centerVertical="true"
         android:orientation="horizontal">
 
         <TextView
@@ -72,10 +70,6 @@
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
         android:layout_alignParentEnd="true"
-        android:layout_alignParentRight="true"
-        android:layout_marginBottom="8dp"
-        android:layout_marginEnd="8dp"
-        android:layout_marginRight="8dp"
         android:background="@color/colorAccent"
         android:paddingEnd="4dp"
         android:paddingStart="4dp"
@@ -87,12 +81,7 @@
         android:id="@+id/label_title"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginLeft="8dp"
-        android:layout_marginStart="8dp"
-        android:layout_marginTop="8dp"
         android:layout_toEndOf="@+id/chat_icon"
-        android:layout_toLeftOf="@id/group_created_at"
-        android:layout_toRightOf="@+id/chat_icon"
         android:layout_toStartOf="@id/group_created_at"
         android:ellipsize="end"
         android:maxLines="1"
@@ -105,12 +94,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
-        android:layout_marginBottom="8dp"
-        android:layout_marginLeft="8dp"
-        android:layout_marginStart="8dp"
         android:layout_toEndOf="@+id/chat_icon"
-        android:layout_toLeftOf="@id/label_unread_count"
-        android:layout_toRightOf="@+id/chat_icon"
         android:layout_toStartOf="@id/label_unread_count"
         android:ellipsize="end"
         android:maxLines="1"

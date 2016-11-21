@@ -1,11 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="64dp">
+    android:layout_height="@dimen/list_item_icon_size"
+    android:layout_margin="@dimen/list_item_margin"
+    android:padding="@dimen/list_item_padding">
 
     <ImageView
         android:id="@+id/attachment_icon"
-        android:layout_width="64dp"
+        android:layout_width="@dimen/list_item_icon_size"
         android:layout_height="match_parent"
         android:src="@drawable/ic_insert_drive_file_black_24dp" />
 
@@ -15,29 +17,24 @@
         android:layout_height="wrap_content"
         android:layout_alignParentTop="true"
         android:layout_toEndOf="@id/attachment_icon"
-        android:layout_toRightOf="@id/attachment_icon"
         android:ellipsize="end"
         android:maxLines="1"
         android:text="@string/attachment_name"
-        android:textAppearance="?android:attr/textAppearanceMedium" />
+        android:textStyle="bold" />
 
     <TextView
         android:id="@+id/label_attachment_mime_type"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@id/label_attachment_name"
+        android:layout_centerInParent="true"
         android:layout_toEndOf="@id/attachment_icon"
-        android:layout_toRightOf="@id/attachment_icon"
-        android:text="@string/mime_type"
-        android:textAppearance="?android:attr/textAppearanceSmall" />
+        android:text="@string/mime_type" />
 
     <TextView
         android:id="@+id/label_attachment_size"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@id/label_attachment_mime_type"
+        android:layout_alignParentBottom="true"
         android:layout_toEndOf="@id/attachment_icon"
-        android:layout_toRightOf="@id/attachment_icon"
-        android:text="@string/attachment_size"
-        android:textAppearance="?android:attr/textAppearanceSmall" />
+        android:text="@string/attachment_size" />
 </RelativeLayout>

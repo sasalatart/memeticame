@@ -2,6 +2,7 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="@dimen/list_item_icon_size"
+    android:layout_margin="@dimen/list_item_margin"
     android:gravity="center"
     android:orientation="horizontal"
     android:padding="@dimen/list_item_padding">
@@ -9,14 +10,16 @@
     <ImageView
         android:id="@+id/label_category_identification"
         android:layout_width="@dimen/list_item_icon_size"
-        android:layout_height="@dimen/list_item_icon_size"
-        android:padding="@dimen/list_item_icon_padding" />
+        android:layout_height="match_parent"
+        android:layout_marginEnd="@dimen/list_item_margin" />
 
     <TextView
         android:id="@+id/label_category_name"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_weight="1"
+        android:ellipsize="end"
+        android:maxLines="1"
         android:text="@string/category_name"
         android:textAppearance="@style/Base.TextAppearance.AppCompat.Large" />
 
