@@ -2,7 +2,6 @@ package com.salatart.memeticame.Views;
 
 import android.content.Context;
 import android.net.Uri;
-import android.support.v4.content.ContextCompat;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -23,8 +22,7 @@ import com.salatart.memeticame.Models.Message;
 import com.salatart.memeticame.R;
 import com.salatart.memeticame.Utils.FileUtils;
 import com.salatart.memeticame.Utils.MessageUtils;
-
-import us.feras.mdv.MarkdownView;
+import com.vanniktech.emoji.EmojiTextView;
 
 /**
  * Created by sasalatart on 9/4/16.
@@ -87,9 +85,8 @@ public class MessagesAdapter extends ArrayAdapter<Message> {
 
         ((TextView) view.findViewById(R.id.label_timestamp)).setText(message.getCreatedAt());
 
-        MarkdownView messageMarkdownView = (MarkdownView) view.findViewById(R.id.message);
-        messageMarkdownView.setBackgroundColor(0);
-        messageMarkdownView.loadMarkdown(message.getContent());
+        EmojiTextView messageEmojiView = (EmojiTextView) view.findViewById(R.id.message);
+        messageEmojiView.setText(message.getContent());
 
         if (message.isMine(getContext())) {
             senderLabel.setText(R.string.me);
@@ -100,14 +97,12 @@ public class MessagesAdapter extends ArrayAdapter<Message> {
             } else {
                 statusImageView.setImageResource(R.drawable.ic_check_black_24dp);
             }
-            messageMarkdownView.setBackgroundColor(ContextCompat.getColor(getContext(), R.color.outWellColor));
         } else {
             String sender = mParentChat.getParticipantsHash().get(message.getSenderPhone());
             if (sender == null) {
                 sender = message.getSenderPhone();
             }
             senderLabel.setText(sender);
-            messageMarkdownView.setBackgroundColor(ContextCompat.getColor(getContext(), R.color.inWellColor));
         }
     }
 

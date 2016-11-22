@@ -16,4 +16,7 @@
     <dimen name="prompt_padding">16dp</dimen>
     <dimen name="small_star_size">16dp</dimen>
     <dimen name="big_star_size">48dp</dimen>
+    <dimen name="input_message_size">48dp</dimen>
+    <dimen name="input_message_button_size">48dp</dimen>
+    <dimen name="input_message_button_padding">2dp</dimen>
 </resources>

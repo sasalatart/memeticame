@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -22,7 +23,6 @@
         android:layout_height="wrap_content"
         android:layout_gravity="end"
         android:layout_marginEnd="@dimen/activity_horizontal_margin"
-        android:layout_marginRight="@dimen/activity_horizontal_margin"
         android:orientation="horizontal"
         android:padding="@dimen/attachment_button_padding">
 
@@ -65,41 +65,51 @@
     <LinearLayout
         android:id="@+id/new_message_form"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="@dimen/input_message_size"
         android:layout_marginEnd="15dp"
         android:layout_marginStart="15dp"
-        android:layout_weight="1"
         android:background="@drawable/rectangle"
+        android:gravity="center"
         android:orientation="horizontal"
         android:padding="1dp">
 
+        <ImageButton
+            android:id="@+id/toggle_emojis_button"
+            android:layout_width="@dimen/input_message_button_size"
+            android:layout_height="@dimen/input_message_button_size"
+            android:onClick="onClickToggleEmojis"
+            android:padding="@dimen/input_message_button_padding"
+            android:src="@drawable/ic_insert_emoticon_black_24dp" />
+
         <ImageView
             android:id="@+id/attachment"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="4"
+            android:layout_width="@dimen/input_message_button_size"
+            android:layout_height="@dimen/input_message_button_size"
             android:visibility="gone" />
 
-        <EditText
+        <com.vanniktech.emoji.EmojiEditText
             android:id="@+id/input_message"
             android:layout_width="0dp"
             android:layout_height="match_parent"
-            android:layout_weight="8"
-            android:inputType="textMultiLine" />
+            android:layout_weight="1"
+            android:imeOptions="actionSend"
+            android:inputType="textCapSentences|textMultiLine"
+            android:maxLines="2"
+            app:emojiSize="26sp" />
 
         <ImageButton
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="3"
+            android:layout_width="@dimen/input_message_button_size"
+            android:layout_height="@dimen/input_message_button_size"
             android:onClick="onClickSendMessage"
+            android:padding="@dimen/input_message_button_padding"
             android:src="@drawable/ic_send_black_24dp" />
 
         <ImageButton
             android:id="@+id/button_cancel_attachment"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="3"
+            android:layout_width="@dimen/input_message_button_size"
+            android:layout_height="@dimen/input_message_button_size"
             android:onClick="cancelAttachment"
+            android:padding="@dimen/input_message_button_padding"
             android:src="@drawable/ic_delete_black_24dp"
             android:visibility="gone" />
     </LinearLayout>

@@ -23,7 +23,6 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AbsListView;
-import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ListView;
@@ -50,6 +49,9 @@ import com.salatart.memeticame.Utils.ParserUtils;
 import com.salatart.memeticame.Utils.Routes;
 import com.salatart.memeticame.Utils.SessionUtils;
 import com.salatart.memeticame.Views.MessagesAdapter;
+import com.vanniktech.emoji.EmojiEditText;
+import com.vanniktech.emoji.EmojiPopup;
+import com.vanniktech.emoji.listeners.OnSoftKeyboardCloseListener;
 
 import java.io.File;
 import java.util.HashMap;
@@ -66,12 +68,15 @@ public class ChatActivity extends AppCompatActivity {
 
     public static boolean sIsActive = false;
 
-    @BindView(R.id.input_message) EditText mMessageInput;
+    @BindView(R.id.input_message) EmojiEditText mMessageInput;
+    @BindView(R.id.toggle_emojis_button) ImageButton mToggleEmojisButton;
     @BindView(R.id.attachment) ImageView mAttachmentImageView;
     @BindView(R.id.button_cancel_attachment) ImageButton mCancelButton;
     @BindView(R.id.take_audio) ImageButton mRecordButton;
     @BindView(R.id.list_view_messages) ListView mMessagesListView;
     @BindView(R.id.meme_options) ImageButton mMemeOptionsButton;
+
+    private EmojiPopup mEmojiPopup;
 
     private int mRetryMultiplier = 5;
     private int mMaximumTries = 5;
@@ -151,6 +156,8 @@ public class ChatActivity extends AppCompatActivity {
         mMessageCount.update(mChat, mChat.getMessages().size(), 0);
 
         setTitle(mChat.getTitle());
+
+        setEmojiPopup();
 
         mAudioRecorderManager = new AudioRecorderManager();
         mCurrentlyRecording = false;
@@ -468,6 +475,29 @@ public class ChatActivity extends AppCompatActivity {
         }
 
         return true;
+    }
+
+    public void onClickToggleEmojis(View view) {
+        if (mEmojiPopup.isShowing()) {
+            mToggleEmojisButton.setImageResource(R.drawable.ic_sentiment_very_satisfied_black_24dp);
+        } else {
+            mToggleEmojisButton.setImageResource(R.drawable.ic_keyboard_black_24dp);
+        }
+
+        mEmojiPopup.toggle();
+    }
+
+    public void setEmojiPopup() {
+        mEmojiPopup = EmojiPopup.Builder
+                .fromRootView(findViewById(android.R.id.content))
+                .setOnSoftKeyboardCloseListener(new OnSoftKeyboardCloseListener() {
+                    @Override
+                    public void onKeyboardClose() {
+                        mEmojiPopup.dismiss();
+                        mToggleEmojisButton.setImageResource(R.drawable.ic_sentiment_very_satisfied_black_24dp);
+                    }
+                })
+                .build(mMessageInput);
     }
 
     @Override
