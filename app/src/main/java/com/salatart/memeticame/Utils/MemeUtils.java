@@ -190,7 +190,7 @@ public class MemeUtils {
 
         AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(context);
         alertDialogBuilder.setView(promptView);
-
+        alertDialogBuilder.setTitle("Search for memes");
         alertDialogBuilder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {

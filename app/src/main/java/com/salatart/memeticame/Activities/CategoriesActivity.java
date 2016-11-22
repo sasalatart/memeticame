@@ -5,6 +5,8 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ListView;
@@ -15,6 +17,8 @@ import com.salatart.memeticame.Models.Channel;
 import com.salatart.memeticame.R;
 import com.salatart.memeticame.Utils.CallbackUtils;
 import com.salatart.memeticame.Utils.ChannelsUtils;
+import com.salatart.memeticame.Utils.FilterUtils;
+import com.salatart.memeticame.Utils.MemeUtils;
 import com.salatart.memeticame.Utils.Routes;
 import com.salatart.memeticame.Views.CategoriesAdapter;
 
@@ -55,6 +59,25 @@ public class CategoriesActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
         getChannel();
+    }
+
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.channels_menu, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+
+        if (id == R.id.action_create_channel) {
+            Intent intent = new Intent(CategoriesActivity.this, NewChannelActivity.class);
+            startActivityForResult(intent, FilterUtils.REQUEST_CREATE_CHANNEL);
+        } else if (id == R.id.action_search_memes) {
+            MemeUtils.onSearchClick(CategoriesActivity.this);
+        }
+
+        return super.onOptionsItemSelected(item);
     }
 
     public void getChannel() {

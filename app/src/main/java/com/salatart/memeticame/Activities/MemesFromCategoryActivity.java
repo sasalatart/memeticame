@@ -38,7 +38,7 @@ public class MemesFromCategoryActivity extends MemesActivity {
     }
 
     public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.memes_from_category_menu, menu);
+        getMenuInflater().inflate(R.menu.category_menu, menu);
         return true;
     }
 

@@ -46,7 +46,6 @@
     <string name="number_of_memes">Number of memes</string>
     <string name="category_name">Category name</string>
     <string name="rating">Rating</string>
-    <string name="upload_meme">Upload Meme</string>
     <string name="upload">Upload</string>
     <string name="enter_tags">Enter tags</string>
     <string name="rate">Rate</string>
@@ -54,5 +53,5 @@
     <string name="create_channel">Create channel</string>
     <string name="add_category">Add category</string>
     <string name="enter_search_key_words">Enter search key words</string>
-    <string name="search_for_memes">Search for memes</string>
+    <string name="search_for_memes">Search</string>
 </resources>
