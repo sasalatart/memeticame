@@ -5,6 +5,8 @@ import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.graphics.Bitmap;
+import android.graphics.Point;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.EditText;
@@ -212,5 +214,24 @@ public class MemeUtils {
 
         AlertDialog alertDialog = alertDialogBuilder.create();
         alertDialog.show();
+    }
+
+    public static Point getBitmapScaledDimensions(View view, Bitmap bitmap) {
+        int maxSize = view.getHeight();
+
+        int outWidth;
+        int outHeight;
+        int inWidth = bitmap.getWidth();
+        int inHeight = bitmap.getHeight();
+
+        if (inWidth > inHeight) {
+            outWidth = maxSize;
+            outHeight = (inHeight * maxSize) / inWidth;
+        } else {
+            outHeight = maxSize;
+            outWidth = (inWidth * maxSize) / inHeight;
+        }
+
+        return new Point(outWidth, outHeight);
     }
 }

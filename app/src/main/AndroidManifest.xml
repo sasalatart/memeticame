@@ -22,16 +22,21 @@
         android:label="@string/app_name"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
+
+        <meta-data android:name="com.google.android.gms.vision.DEPENDENCIES" android:value="face"/>
+
         <service android:name=".Services.MyFcmListenerService">
             <intent-filter>
                 <action android:name="com.google.firebase.MESSAGING_EVENT" />
             </intent-filter>
         </service>
+
         <service android:name=".Services.MyInstanceIDListenerService">
             <intent-filter>
                 <action android:name="com.google.firebase.INSTANCE_ID_EVENT" />
             </intent-filter>
         </service>
+
         <service
             android:name=".Services.ChatInvitationService"
             android:exported="false" />
@@ -56,11 +61,14 @@
         <activity android:name=".Activities.PlainMemeGalleryActivity" />
         <activity android:name=".Activities.MemeGalleryActivity" />
         <activity android:name=".Activities.MemeEditorActivity" />
+        <activity android:name=".Activities.EmojimeActivity" />
+
         <activity android:name=".Activities.ChannelsActivity">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".Activities.MainActivity" />
         </activity>
+
         <activity
             android:name=".Activities.CategoriesActivity"
             android:launchMode="singleTop">
@@ -68,8 +76,10 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".Activities.ChannelsActivity" />
         </activity>
+
         <activity android:name=".Activities.MemesActivity" />
         <activity android:name=".Activities.MemesFromCategoryActivity" />
+
         <activity
             android:name=".Activities.UploadMemeActivity"
             android:launchMode="singleTop">
@@ -77,6 +87,7 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".Activities.ChannelsActivity" />
         </activity>
+
         <activity android:name=".Activities.SeeMemeActivity" />
 
         <activity

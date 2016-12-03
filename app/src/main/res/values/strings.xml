@@ -54,4 +54,7 @@
     <string name="add_category">Add category</string>
     <string name="enter_search_key_words">Enter search key words</string>
     <string name="search_for_memes">Search</string>
+    <string name="emojime">Emojime</string>
+    <string name="turn_into_meme">Turn into meme</string>
+    <string name="take_picture">Take picture</string>
 </resources>

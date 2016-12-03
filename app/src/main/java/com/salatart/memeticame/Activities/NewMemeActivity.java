@@ -92,8 +92,6 @@ public class NewMemeActivity extends AppCompatActivity {
 
         mAudioRecorderManager = new AudioRecorderManager();
         registerForContextMenu(mSelectImageButton);
-
-        mCanvas.setMode(CanvasView.Mode.TEXT);
     }
 
     @Override
@@ -111,25 +109,7 @@ public class NewMemeActivity extends AppCompatActivity {
     }
 
     public void drawBitmap(Bitmap picture) {
-        final int maxSize = mCanvas.getHeight();
-
-        int outWidth;
-        int outHeight;
-        int inWidth = picture.getWidth();
-        int inHeight = picture.getHeight();
-
-        if (inWidth > inHeight) {
-            outWidth = maxSize;
-            outHeight = (inHeight * maxSize) / inWidth;
-        } else {
-            outHeight = maxSize;
-            outWidth = (inWidth * maxSize) / inHeight;
-        }
-
-        int centreX = (mCanvas.getWidth() - outWidth) / 2;
-        int centreY = (mCanvas.getHeight() - outHeight) / 2;
-
-        mCanvas.drawBitmap(Bitmap.createScaledBitmap(picture, outWidth, outHeight, false), centreX, centreY);
+        mCanvas.drawBitmap(picture);
 
         mDeleteButton.setVisibility(View.VISIBLE);
         mCreateButton.setVisibility(View.VISIBLE);

@@ -80,6 +80,8 @@ public class MainActivity extends AppCompatActivity implements ChatsFragment.OnC
             startActivity(new Intent(MainActivity.this, NewMemeActivity.class));
         } else if (id == R.id.action_see_channels) {
             startActivity(new Intent(MainActivity.this, ChannelsActivity.class));
+        } else if (id == R.id.action_emojime) {
+            startActivity(new Intent(MainActivity.this, EmojimeActivity.class));
         }
 
         return super.onOptionsItemSelected(item);
