@@ -52,7 +52,7 @@ public class EmojimeView extends View {
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
 
-        if ((mBitmap != null) && (mFaces != null)) {
+        if ((mBitmap != null) && (mFaceEmotions != null)) {
             double scale = drawBitmap(canvas);
             addEmojis(canvas, scale);
         }
@@ -188,5 +188,15 @@ public class EmojimeView extends View {
                 faceEmotion.getLeft() > face.getPosition().x &&
                 faceEmotion.getTop() + faceEmotion.getHeight() < face.getPosition().y + face.getHeight() &&
                 faceEmotion.getTop() > face.getPosition().y;
+    }
+
+    /**
+     * This method initializes canvas.
+     *
+     * @return
+     */
+    public void reprocess() {
+        mBitmap = mOriginalBitmap.copy(mOriginalBitmap.getConfig(), true);
+        this.invalidate();
     }
 }

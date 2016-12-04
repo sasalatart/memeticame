@@ -9,7 +9,7 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.SparseArray;
 import android.view.View;
-import android.widget.Button;
+import android.widget.ImageButton;
 
 import com.google.android.gms.vision.Frame;
 import com.google.android.gms.vision.face.Face;
@@ -35,9 +35,15 @@ import okhttp3.Request;
 
 public class EmojimeActivity extends AppCompatActivity {
 
+    public static String IMAGE_PATH_STATE = "imagePathState";
+
     @BindView(R.id.emojime_view) EmojimeView mEmojimeView;
-    @BindView(R.id.button_turn_into_meme) Button mTurnIntoMemeButton;
-    @BindView(R.id.button_take_picture) Button mTakePictureButton;
+    @BindView(R.id.button_turn_into_meme) ImageButton mTurnIntoMemeImageButton;
+    @BindView(R.id.button_take_picture) ImageButton mTakePictureImageButton;
+    @BindView(R.id.button_reprocess) ImageButton mReprocessImageButton;
+
+    private String mImagePath;
+    private ArrayList<FaceEmotion> mFaceEmotions;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -45,13 +51,35 @@ public class EmojimeActivity extends AppCompatActivity {
         setContentView(R.layout.activity_emojime);
 
         ButterKnife.bind(this);
+
+        if (savedInstanceState != null) {
+            mFaceEmotions = savedInstanceState.getParcelableArrayList(FaceEmotion.PARCELABLE_ARRAY_KEY);
+            mImagePath = savedInstanceState.getString(IMAGE_PATH_STATE);
+
+            if (mImagePath != null && mFaceEmotions != null) {
+                setImage(BitmapFactory.decodeFile(mImagePath));
+                mTurnIntoMemeImageButton.setVisibility(View.VISIBLE);
+                mReprocessImageButton.setVisibility(View.VISIBLE);
+            }
+        }
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle savedInstanceState) {
+        savedInstanceState.putParcelableArrayList(FaceEmotion.PARCELABLE_ARRAY_KEY, mFaceEmotions);
+        savedInstanceState.putString(IMAGE_PATH_STATE, mImagePath);
+        super.onSaveInstanceState(savedInstanceState);
     }
 
     public void takePicture(View view) {
         startActivityForResult(MemeEditorActivity.getIntent(EmojimeActivity.this, null), FilterUtils.REQUEST_IMAGE_CAPTURE);
     }
 
-    public void setImage(Bitmap bitmap, ArrayList<FaceEmotion> faceEmotions) {
+    public void reprocess(View view) {
+        mEmojimeView.reprocess();
+    }
+
+    public void setImage(Bitmap bitmap) {
         FaceDetector detector = new FaceDetector.Builder(EmojimeActivity.this)
                 .setTrackingEnabled(false)
                 .setLandmarkType(FaceDetector.ALL_LANDMARKS)
@@ -61,13 +89,15 @@ public class EmojimeActivity extends AppCompatActivity {
         Frame frame = new Frame.Builder().setBitmap(bitmap).build();
         SparseArray<Face> faces = detector.detect(frame);
 
-        mEmojimeView.setContent(bitmap, faces, faceEmotions);
+        mEmojimeView.setContent(bitmap, faces, mFaceEmotions);
 
         detector.release();
     }
 
-    public void requestEmotions(final String imagePath) {
+    public void requestEmotions(String imagePath) {
+        mImagePath = imagePath;
         final ProgressDialog progressDialog = ProgressDialog.show(EmojimeActivity.this, "Please wait", "Processing faces...", true);
+
         try {
             Uri uri = Uri.fromFile(new File(imagePath));
             String base64 = FileUtils.encodeToBase64FromUri(EmojimeActivity.this, uri);
@@ -80,9 +110,10 @@ public class EmojimeActivity extends AppCompatActivity {
                     EmojimeActivity.this.runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
-                            setImage(BitmapFactory.decodeFile(imagePath), faceEmotions);
-                            mTurnIntoMemeButton.setVisibility(View.VISIBLE);
-                            mTakePictureButton.setText("Retake picture");
+                            mFaceEmotions = faceEmotions;
+                            setImage(BitmapFactory.decodeFile(mImagePath));
+                            mTurnIntoMemeImageButton.setVisibility(View.VISIBLE);
+                            mReprocessImageButton.setVisibility(View.VISIBLE);
                             progressDialog.dismiss();
                         }
                     });

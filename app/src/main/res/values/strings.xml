@@ -55,6 +55,7 @@
     <string name="enter_search_key_words">Enter search key words</string>
     <string name="search_for_memes">Search</string>
     <string name="emojime">Emojime</string>
-    <string name="turn_into_meme">Turn into meme</string>
+    <string name="into_meme">Into meme</string>
     <string name="take_picture">Take picture</string>
+    <string name="reprocess">Reprocess</string>
 </resources>
