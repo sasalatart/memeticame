@@ -7,5 +7,5 @@ import java.util.ArrayList;
  */
 
 public interface OnSearchClickListener {
-    void OnSearchRequested(ArrayList<String> searchQuery);
+    void OnSearchRequested(String name, ArrayList<String> searchQuery);
 }

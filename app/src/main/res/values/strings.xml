@@ -36,7 +36,6 @@
     <string name="meme_name">Meme name</string>
     <string name="see_memes_gallery">See memes gallery</string>
     <string name="attachment_mime_type">Mime Type</string>
-    <string name="enter_meme_name">Enter meme name</string>
     <string name="delete">Delete</string>
     <string name="save">Save</string>
     <string name="select_image">Select Image</string>
@@ -52,7 +51,7 @@
     <string name="download">Download</string>
     <string name="create_channel">Create channel</string>
     <string name="add_category">Add category</string>
-    <string name="enter_search_key_words">Enter search key words</string>
+    <string name="key_words">Key words</string>
     <string name="search_for_memes">Search</string>
     <string name="emojime">Emojime</string>
     <string name="into_meme">Into meme</string>

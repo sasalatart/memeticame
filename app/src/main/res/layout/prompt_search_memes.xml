@@ -10,11 +10,22 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
+        <android.support.design.widget.TextInputEditText
+            android:id="@+id/meme_name_search"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="@string/meme_name" />
+    </android.support.design.widget.TextInputLayout>
+
+    <android.support.design.widget.TextInputLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
         <mabbas007.tagsedittext.TagsEditText
             android:id="@+id/tags_edit_search"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="@string/enter_search_key_words"
+            android:hint="@string/key_words"
             TagsEditText:tagsBackground="@drawable/square"
             TagsEditText:tagsCloseImagePadding="@dimen/defaultTagsCloseImagePadding"
             TagsEditText:tagsCloseImageRight="@drawable/tag_close"

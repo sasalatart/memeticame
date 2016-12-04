@@ -227,10 +227,17 @@ public class Routes {
         }
     }
 
-    public static Request memesSearch(Context context, ArrayList<String> searchTags) {
+    public static Request memesSearch(Context context, String name, ArrayList<String> searchTags) {
         FormBody.Builder formBuilder = new FormBody.Builder();
-        for (int i = 0; i < searchTags.size(); i++) {
-            formBuilder.add("tags[" + i + "]", searchTags.get(i));
+
+        if (name != null && !name.isEmpty()) {
+            formBuilder.add("name", name);
+        }
+
+        if (searchTags != null && !searchTags.isEmpty()) {
+            for (int i = 0; i < searchTags.size(); i++) {
+                formBuilder.add("tags[" + i + "]", searchTags.get(i));
+            }
         }
 
         return buildPostRequest(context, "/search_memes", formBuilder);

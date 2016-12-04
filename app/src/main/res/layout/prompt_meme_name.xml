@@ -13,6 +13,6 @@
             android:id="@+id/input_meme_name"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="@string/enter_meme_name" />
+            android:hint="@string/meme_name" />
     </android.support.design.widget.TextInputLayout>
 </LinearLayout>

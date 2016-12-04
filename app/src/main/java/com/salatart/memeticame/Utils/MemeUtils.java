@@ -164,9 +164,9 @@ public class MemeUtils {
     public static void onSearchClick(final Activity activity) {
         MemeUtils.processSearch(activity, new OnSearchClickListener() {
             @Override
-            public void OnSearchRequested(ArrayList<String> searchTags) {
+            public void OnSearchRequested(String name, ArrayList<String> searchTags) {
                 final ProgressDialog progressDialog = ProgressDialog.show(activity, "Please wait", "Searching for memes...", true);
-                Request request = Routes.memesSearch(activity, searchTags);
+                Request request = Routes.memesSearch(activity, name, searchTags);
                 MemeUtils.searchRequest(request, new OnRequestIndexListener<Meme>() {
                     @Override
                     public void OnSuccess(ArrayList<Meme> memes) {
@@ -189,7 +189,8 @@ public class MemeUtils {
         LayoutInflater layoutInflater = LayoutInflater.from(context);
         View promptView = layoutInflater.inflate(R.layout.prompt_search_memes, null);
 
-        final EditText memeNameInput = (EditText) promptView.findViewById(R.id.tags_edit_search);
+        final EditText tagsInput = (EditText) promptView.findViewById(R.id.tags_edit_search);
+        final EditText nameInput = (EditText) promptView.findViewById(R.id.meme_name_search);
 
         AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(context);
         alertDialogBuilder.setView(promptView);
@@ -197,14 +198,16 @@ public class MemeUtils {
         alertDialogBuilder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                String searchText = memeNameInput.getText().toString();
-                if (searchText.isEmpty()) {
-                    Toast.makeText(context, "You must insert at least one tag.", Toast.LENGTH_SHORT).show();
+                String nameSearch = nameInput.getText().toString();
+                String tagsSearch = tagsInput.getText().toString();
+
+                if (tagsSearch.isEmpty() && nameSearch.isEmpty()) {
+                    Toast.makeText(context, "You must insert at least a name or a tag.", Toast.LENGTH_SHORT).show();
                     return;
                 }
 
-                ArrayList<String> searchTags = new ArrayList<String>(Arrays.asList(searchText.split(" ")));
-                listener.OnSearchRequested(searchTags);
+                ArrayList<String> searchTags = new ArrayList<String>(Arrays.asList(tagsSearch.split(" ")));
+                listener.OnSearchRequested(nameSearch, searchTags);
             }
         }).setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
             @Override
