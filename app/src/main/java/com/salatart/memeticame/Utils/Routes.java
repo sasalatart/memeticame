@@ -249,6 +249,14 @@ public class Routes {
         return buildPostRequest(context, path, formBuilder);
     }
 
+    public static Request emotionsShow(Context context, String base64, String mimeType) {
+        FormBody.Builder formBuilder = new FormBody.Builder();
+        formBuilder.add("base64", base64);
+        formBuilder.add("mime_type", mimeType);
+
+        return buildPostRequest(context, "/recognize", formBuilder);
+    }
+
     public static Request logout(Context context) {
         return buildGetRequest(context, "/logout");
     }

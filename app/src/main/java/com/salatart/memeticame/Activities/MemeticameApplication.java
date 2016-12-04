@@ -1,7 +1,7 @@
 package com.salatart.memeticame.Activities;
 
-import android.app.Application;
 import android.content.Intent;
+import android.support.multidex.MultiDexApplication;
 import android.util.Log;
 
 import com.facebook.stetho.Stetho;
@@ -21,7 +21,7 @@ import okhttp3.Request;
  * Created by sasalatart on 11/2/16.
  */
 
-public class MemeticameApplication extends Application {
+public class MemeticameApplication extends MultiDexApplication {
 
     private ArrayList<User> mUsers;
     private ArrayList<User> mLocalContacts;

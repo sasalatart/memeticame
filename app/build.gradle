@@ -14,6 +14,7 @@ android {
         versionName "1.0"
         renderscriptTargetApi 23
         renderscriptSupportModeEnabled true
+        multiDexEnabled true
     }
     buildTypes {
         release {
@@ -26,6 +27,10 @@ android {
     }
     dataBinding {
         enabled = true
+    }
+    dexOptions {
+        incremental true
+        javaMaxHeapSize "2048M"
     }
 }
 
@@ -56,6 +61,7 @@ dependencies {
     compile 'com.vanniktech:emoji:0.3.0'
     compile 'com.vanniktech:emoji:0.4.0-SNAPSHOT'
     compile 'com.google.android.gms:play-services:9.8.0'
+    compile 'com.android.support:multidex:1.0.1'
 }
 
 apply plugin: 'com.google.gms.google-services'

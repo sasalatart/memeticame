@@ -5,17 +5,18 @@ import android.content.res.AssetManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
-import android.graphics.Color;
-import android.graphics.Paint;
 import android.graphics.Rect;
 import android.util.AttributeSet;
 import android.util.SparseArray;
 import android.view.View;
 
 import com.google.android.gms.vision.face.Face;
+import com.salatart.memeticame.Models.FaceEmotion;
+import com.salatart.memeticame.Models.FaceEmotion.Emotions;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.Random;
 
 /**
@@ -23,8 +24,10 @@ import java.util.Random;
  */
 
 public class EmojimeView extends View {
+    private Bitmap mOriginalBitmap;
     private Bitmap mBitmap;
     private SparseArray<Face> mFaces;
+    private ArrayList<FaceEmotion> mFaceEmotions;
 
     public EmojimeView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -34,9 +37,11 @@ public class EmojimeView extends View {
     /**
      * Sets the bitmap background and the associated face detections.
      */
-    public void setContent(Bitmap bitmap, SparseArray<Face> faces) {
-        mBitmap = bitmap;
+    public void setContent(Bitmap bitmap, SparseArray<Face> faces, ArrayList<FaceEmotion> faceEmotions) {
+        mOriginalBitmap = bitmap;
+        mBitmap = mOriginalBitmap.copy(mOriginalBitmap.getConfig(), true);
         mFaces = faces;
+        mFaceEmotions = faceEmotions;
         invalidate();
     }
 
@@ -50,7 +55,6 @@ public class EmojimeView extends View {
         if ((mBitmap != null) && (mFaces != null)) {
             double scale = drawBitmap(canvas);
             addEmojis(canvas, scale);
-            detectFaceCharacteristics(canvas, scale);
         }
     }
 
@@ -69,72 +73,94 @@ public class EmojimeView extends View {
      * Adds emojis to each detected face
      */
     private void addEmojis(Canvas canvas, double scale) {
-        for (int i = 0; i < mFaces.size(); ++i) {
-            Face face = mFaces.valueAt(i);
+        for (FaceEmotion faceEmotion : mFaceEmotions) {
 
-            float maxSize = (float) Math.max(face.getWidth() * scale, face.getHeight() * scale);
+            Face correspondingFace = null;
+            for (int i = 0; i < mFaces.size(); i++) {
+                int key = mFaces.keyAt(i);
+                Face face = mFaces.get(key);
 
-            String emojiName = selectEmoji(face) + ".png";
+                if (contains(face, faceEmotion)) {
+                    correspondingFace = face;
+                    break;
+                }
+            }
+
+            float maxSize = (float) Math.max(faceEmotion.getWidth() * scale, faceEmotion.getHeight() * scale);
+            float posX = (float) ((faceEmotion.getLeft() * scale) + (faceEmotion.getWidth() * scale) / 2) - maxSize / 2;
+            float posY = (float) ((faceEmotion.getTop() * scale) + (faceEmotion.getHeight() * scale) / 2) - maxSize / 2;
+            if (correspondingFace != null) {
+                maxSize = (float) Math.max(correspondingFace.getWidth() * scale, correspondingFace.getHeight() * scale);
+                posX = (float) ((correspondingFace.getPosition().x * scale) + (correspondingFace.getWidth() * scale) / 2) - maxSize / 2;
+                posY = (float) ((correspondingFace.getPosition().y * scale) + (correspondingFace.getHeight() * scale) / 2) - maxSize / 2;
+            }
+
+            Emotions emotion = faceEmotion.getEmotion();
+            String emojiName = selectEmoji(emotion, correspondingFace) + ".png";
             Bitmap emoji = getBitmapFromAssets(emojiName);
             Bitmap scaledEmoji = scaleBitmap(emoji, maxSize, true);
 
-            float posX = (float) ((face.getPosition().x * scale) + (face.getWidth() * scale) / 2) - maxSize / 2;
-            float posY = (float) ((face.getPosition().y * scale) + (face.getHeight() * scale) / 2) - maxSize / 2;
             canvas.drawBitmap(scaledEmoji, posX, posY, null);
         }
     }
 
-    private String selectEmoji(Face face) {
+    private String selectEmoji(Emotions emotion, Face faceMatch) {
         Random randomGenerator = new Random();
 
-        boolean leftEyeOpened = face.getIsLeftEyeOpenProbability() > 0.5;
-        boolean rightEyeOpened = face.getIsRightEyeOpenProbability() > 0.5;
-        boolean bigSmile = face.getIsSmilingProbability() > 0.75;
-        boolean normalSmile = face.getIsSmilingProbability() > 0.5;
-        boolean neutralSmile = face.getIsSmilingProbability() > 0.25;
+        boolean leftEyeClosed = (faceMatch != null) && (faceMatch.getIsLeftEyeOpenProbability() < 0.5);
+        boolean rightEyeClosed = (faceMatch != null) && (faceMatch.getIsRightEyeOpenProbability() < 0.5);
+        boolean eyesClosed = faceMatch != null && leftEyeClosed && rightEyeClosed;
+        boolean wink = faceMatch != null && (leftEyeClosed || rightEyeClosed);
 
-        if (bigSmile) {
-            if (leftEyeOpened && rightEyeOpened) {
-                return "big_smile_both_eyes_opened_" + (randomGenerator.nextInt(3) + 1);
-            } else if (leftEyeOpened || rightEyeOpened) {
-                return "big_smile_left_eye_closed";
-            } else {
-                return "big_smile_both_eyes_closed_" + (randomGenerator.nextInt(3) + 1);
-            }
-        } else if (normalSmile) {
-            if (leftEyeOpened && rightEyeOpened) {
-                return "normal_smile_both_eyes_opened";
-            } else if (leftEyeOpened || rightEyeOpened) {
-                return "normal_smile_right_eye_closed";
-            } else {
-                return "normal_smile_both_eyes_closed";
-            }
-        } else if (neutralSmile) {
-            if (leftEyeOpened && rightEyeOpened) {
-                return "neutral_both_eyes_opened";
-            } else {
-                return "neutral_both_eyes_closed";
-            }
-        } else {
-            return "not_smiling_both_eyes_closed";
-        }
-    }
-
-    /**
-     * Detects characteristics of a face
-     */
-    private void detectFaceCharacteristics(Canvas canvas, double scale) {
-        Paint paint = new Paint();
-        paint.setColor(Color.RED);
-        paint.setStyle(Paint.Style.FILL);
-        paint.setStrokeWidth(1);
-        paint.setTextSize(25.0f);
-
-        for (int i = 0; i < mFaces.size(); ++i) {
-            Face face = mFaces.valueAt(i);
-            float cx = (float) (face.getPosition().x * scale);
-            float cy = (float) (face.getPosition().y * scale);
-            canvas.drawText(String.valueOf(face.getIsSmilingProbability()), cx, cy + 10.0f, paint);
+        switch (emotion) {
+            case ANGER:
+                if (eyesClosed) {
+                    return "anger_eyes_closed_" + (randomGenerator.nextInt(1) + 1);
+                } else {
+                    return "anger_" + (randomGenerator.nextInt(2) + 1);
+                }
+            case CONTEMPT:
+                if (eyesClosed) {
+                    return "contempt_eyes_closed_" + (randomGenerator.nextInt(1) + 1);
+                } else {
+                    return "contempt_" + (randomGenerator.nextInt(1) + 1);
+                }
+            case DISGUST:
+                if (eyesClosed) {
+                    return "disgust_eyes_closed_" + (randomGenerator.nextInt(1) + 1);
+                } else {
+                    return "disgust_" + (randomGenerator.nextInt(1) + 1);
+                }
+            case FEAR:
+                return "fear_" + (randomGenerator.nextInt(5) + 1);
+            case HAPPINESS:
+                if (eyesClosed) {
+                    return "happiness_eyes_closed_" + (randomGenerator.nextInt(6) + 1);
+                } else if (wink) {
+                    return "happiness_wink_" + (randomGenerator.nextInt(2) + 1);
+                } else {
+                    return "happiness_" + (randomGenerator.nextInt(4) + 1);
+                }
+            case NEUTRAL:
+                if (eyesClosed) {
+                    return "neutral_" + (randomGenerator.nextInt(1) + 1);
+                } else {
+                    return "neutral_" + (randomGenerator.nextInt(1) + 1);
+                }
+            case SADNESS:
+                if (eyesClosed) {
+                    return "sadness_eyes_closed_" + (randomGenerator.nextInt(1) + 1);
+                } else {
+                    return "sadness_" + (randomGenerator.nextInt(1) + 1);
+                }
+            case SURPRISE:
+                if (eyesClosed) {
+                    return "surprise_" + (randomGenerator.nextInt(2) + 1);
+                } else {
+                    return "surprise_" + (randomGenerator.nextInt(4) + 1);
+                }
+            default:
+                return "happiness_" + (randomGenerator.nextInt(4) + 1);
         }
     }
 
@@ -155,5 +181,12 @@ public class EmojimeView extends View {
         int width = Math.round(ratio * realImage.getWidth());
         int height = Math.round(ratio * realImage.getHeight());
         return Bitmap.createScaledBitmap(realImage, width, height, filter);
+    }
+
+    public boolean contains(Face face, FaceEmotion faceEmotion) {
+        return (faceEmotion.getLeft() + faceEmotion.getWidth() < face.getPosition().x + face.getWidth()) &&
+                faceEmotion.getLeft() > face.getPosition().x &&
+                faceEmotion.getTop() + faceEmotion.getHeight() < face.getPosition().y + face.getHeight() &&
+                faceEmotion.getTop() > face.getPosition().y;
     }
 }

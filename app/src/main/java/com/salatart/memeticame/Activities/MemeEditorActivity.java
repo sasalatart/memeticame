@@ -79,9 +79,9 @@ public class MemeEditorActivity extends AppCompatActivity {
 
         if (resultCode == RESULT_OK && requestCode == FilterUtils.REQUEST_EDITED_MEME) {
             String path = data.getStringExtra(CameraPreviewActivity.RESULT_IMAGE_PATH);
-            final File mMediaFolder = new File(path);
+            File mediaFolder = new File(path);
 
-            MediaScannerConnection.scanFile(MemeEditorActivity.this, new String[]{mMediaFolder.getAbsolutePath()}, null, new MediaScannerConnection.OnScanCompletedListener() {
+            MediaScannerConnection.scanFile(MemeEditorActivity.this, new String[]{mediaFolder.getAbsolutePath()}, null, new MediaScannerConnection.OnScanCompletedListener() {
                 public void onScanCompleted(String path, Uri uri) {
                     Intent returnIntent = new Intent();
                     returnIntent.putExtra(Meme.PATH_KEY, path);

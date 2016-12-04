@@ -10,6 +10,7 @@ import com.salatart.memeticame.Models.Category;
 import com.salatart.memeticame.Models.Channel;
 import com.salatart.memeticame.Models.Chat;
 import com.salatart.memeticame.Models.ChatInvitation;
+import com.salatart.memeticame.Models.FaceEmotion;
 import com.salatart.memeticame.Models.Meme;
 import com.salatart.memeticame.Models.Message;
 import com.salatart.memeticame.Models.User;
@@ -21,6 +22,8 @@ import org.json.JSONObject;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
 
 /**
  * Created by sasalatart on 10/10/16.
@@ -215,5 +218,53 @@ public class ParserUtils {
         }
 
         return channels;
+    }
+
+    public static FaceEmotion faceEmotionFromJson(JSONObject jsonObject) throws JSONException {
+        JSONObject jsonFaceRectangle = jsonObject.getJSONObject("faceRectangle");
+        JSONObject jsonScores = jsonObject.getJSONObject("scores");
+
+        HashMap<FaceEmotion.Emotions, Float> scores = new HashMap();
+
+        Iterator<?> keys = jsonScores.keys();
+
+        while (keys.hasNext()) {
+            String key = (String) keys.next();
+
+            float score = (float) jsonScores.getDouble(key);
+            if (key.equals("neutral")) {
+                scores.put(FaceEmotion.Emotions.NEUTRAL, score);
+            } else if (key.equals("sadness")) {
+                scores.put(FaceEmotion.Emotions.SADNESS, score);
+            } else if (key.equals("happiness")) {
+                scores.put(FaceEmotion.Emotions.HAPPINESS, score);
+            } else if (key.equals("contempt")) {
+                scores.put(FaceEmotion.Emotions.CONTEMPT, score);
+            } else if (key.equals("fear")) {
+                scores.put(FaceEmotion.Emotions.FEAR, score);
+            } else if (key.equals("anger")) {
+                scores.put(FaceEmotion.Emotions.ANGER, score);
+            } else if (key.equals("disgust")) {
+                scores.put(FaceEmotion.Emotions.DISGUST, score);
+            } else if (key.equals("surprise")) {
+                scores.put(FaceEmotion.Emotions.SURPRISE, score);
+            }
+        }
+
+        return new FaceEmotion(jsonFaceRectangle.getInt("height"),
+                jsonFaceRectangle.getInt("width"),
+                jsonFaceRectangle.getInt("top"),
+                jsonFaceRectangle.getInt("left"),
+                scores);
+    }
+
+    public static ArrayList<FaceEmotion> faceEmotionsFromJsonArray(JSONArray jsonArray) throws JSONException {
+        ArrayList<FaceEmotion> faceEmotions = new ArrayList<>();
+
+        for (int i = 0; i < jsonArray.length(); i++) {
+            faceEmotions.add(faceEmotionFromJson(jsonArray.getJSONObject(i)));
+        }
+
+        return faceEmotions;
     }
 }
