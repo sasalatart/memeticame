@@ -9,6 +9,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
+import android.graphics.Bitmap;
 import android.media.MediaMetadataRetriever;
 import android.net.Uri;
 import android.os.Environment;
@@ -290,6 +291,32 @@ public class FileUtils {
 
     public static void deleteFile(String path) {
         File fileToDelete = new File(path);
-        fileToDelete.delete();
+
+        if (fileToDelete.exists()) {
+            fileToDelete.delete();
+        }
+    }
+
+    public static boolean saveBitmapToFile(Bitmap bitmap, File outputFile) {
+        boolean success = false;
+        FileOutputStream os = null;
+        try {
+            os = new FileOutputStream(outputFile);
+            bitmap.compress(Bitmap.CompressFormat.JPEG, 100, os);
+            success = true;
+        } catch (Exception e) {
+            e.printStackTrace();
+            success = false;
+        } finally {
+            try {
+                if (os != null) {
+                    os.close();
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
+        return success;
     }
 }

@@ -6,6 +6,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Rect;
+import android.net.Uri;
 import android.util.AttributeSet;
 import android.util.SparseArray;
 import android.view.View;
@@ -13,7 +14,9 @@ import android.view.View;
 import com.google.android.gms.vision.face.Face;
 import com.salatart.memeticame.Models.FaceEmotion;
 import com.salatart.memeticame.Models.FaceEmotion.Emotions;
+import com.salatart.memeticame.Utils.FileUtils;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -198,5 +201,16 @@ public class EmojimeView extends View {
     public void reprocess() {
         mBitmap = mOriginalBitmap.copy(mOriginalBitmap.getConfig(), true);
         this.invalidate();
+    }
+
+    public Uri saveToTemp() {
+        Bitmap currentBitmap = this.getDrawingCache();
+        File outputFile = FileUtils.createMediaFile(getContext(), "jpeg", FileUtils.getMemeticameTempDirectory());
+
+        if (FileUtils.saveBitmapToFile(currentBitmap, outputFile)) {
+            return Uri.fromFile(outputFile);
+        } else {
+            return null;
+        }
     }
 }

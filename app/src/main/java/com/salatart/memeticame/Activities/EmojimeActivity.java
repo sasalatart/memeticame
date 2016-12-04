@@ -6,8 +6,10 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.util.SparseArray;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageButton;
 
@@ -52,6 +54,11 @@ public class EmojimeActivity extends AppCompatActivity {
 
         ButterKnife.bind(this);
 
+        ActionBar actionBar = getSupportActionBar();
+        actionBar.setDisplayHomeAsUpEnabled(true);
+
+        setTitle("New Emojime");
+
         if (savedInstanceState != null) {
             mFaceEmotions = savedInstanceState.getParcelableArrayList(FaceEmotion.PARCELABLE_ARRAY_KEY);
             mImagePath = savedInstanceState.getString(IMAGE_PATH_STATE);
@@ -71,8 +78,25 @@ public class EmojimeActivity extends AppCompatActivity {
         super.onSaveInstanceState(savedInstanceState);
     }
 
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        FileUtils.deleteFile(mImagePath);
+        finish();
+        return true;
+    }
+
     public void takePicture(View view) {
         startActivityForResult(MemeEditorActivity.getIntent(EmojimeActivity.this, null), FilterUtils.REQUEST_IMAGE_CAPTURE);
+    }
+
+    public void turnIntoMeme(View view) {
+        Uri outputUri = mEmojimeView.saveToTemp();
+
+        Intent intent = new Intent(EmojimeActivity.this, NewMemeActivity.class);
+        intent.putExtra(Meme.URI_KEY, outputUri);
+        startActivity(intent);
+
+        finish();
     }
 
     public void reprocess(View view) {

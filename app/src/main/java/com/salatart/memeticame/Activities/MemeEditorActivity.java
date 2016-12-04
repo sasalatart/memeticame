@@ -37,7 +37,7 @@ public class MemeEditorActivity extends AppCompatActivity {
 
         Bundle data = getIntent().getExtras();
         if (data != null && data.getParcelable(Meme.URI_KEY) != null) {
-            memeEditorWithPlainMeme(((Uri) data.getParcelable(Meme.URI_KEY)).getPath());
+            memeEditorWithSelectedImage(((Uri) data.getParcelable(Meme.URI_KEY)).getPath());
         } else {
             memeEditorWithCamera();
         }
@@ -59,10 +59,10 @@ public class MemeEditorActivity extends AppCompatActivity {
     }
 
 
-    private void memeEditorWithPlainMeme(String myPicturePath) {
+    private void memeEditorWithSelectedImage(String myPicturePath) {
         SettingsList settingsList = new SettingsList();
         settingsList.getSettingsModel(EditorLoadSettings.class)
-                .setImageSourcePath(myPicturePath, true) // Load with delete protection true!
+                .setImageSourcePath(myPicturePath, true)
                 .getSettingsModel(EditorSaveSettings.class)
                 .setExportDir(FileUtils.getMemeticameTempDirectory())
                 .setExportPrefix("result_")

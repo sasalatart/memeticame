@@ -61,7 +61,7 @@ public class NewMemeActivity extends AppCompatActivity {
     private String mImagePath;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_new_meme);
 
@@ -72,26 +72,40 @@ public class NewMemeActivity extends AppCompatActivity {
 
         setTitle("New Meme");
 
-        if (savedInstanceState != null) {
-            mImagePath = savedInstanceState.getString(IMAGE_STATE);
-            mAudioUri = savedInstanceState.getParcelable(AUDIO_STATE);
+        mCanvas.post(new Runnable() {
+            @Override
+            public void run() {
+                if (savedInstanceState != null) {
+                    retrieveSavedInstanceState(savedInstanceState);
+                }
 
-            if (mImagePath != null) {
-                mCanvas.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        drawBitmap(BitmapFactory.decodeFile(mImagePath));
-                    }
-                });
-            }
+                mAudioRecorderManager = new AudioRecorderManager();
+                registerForContextMenu(mSelectImageButton);
 
-            if (mAudioUri != null) {
-                setMediaPlayer();
+                Bundle data = getIntent().getExtras();
+                if (data != null && data.containsKey(Meme.URI_KEY)) {
+                    retrieveExtras(data);
+                }
             }
+        });
+    }
+
+    public void retrieveSavedInstanceState(Bundle savedInstanceState) {
+        mImagePath = savedInstanceState.getString(IMAGE_STATE);
+        mAudioUri = savedInstanceState.getParcelable(AUDIO_STATE);
+
+        if (mImagePath != null) {
+            drawBitmap(BitmapFactory.decodeFile(mImagePath));
         }
 
-        mAudioRecorderManager = new AudioRecorderManager();
-        registerForContextMenu(mSelectImageButton);
+        if (mAudioUri != null) {
+            setMediaPlayer();
+        }
+    }
+
+    public void retrieveExtras(Bundle data) {
+        Uri fileUri = data.getParcelable(Meme.URI_KEY);
+        startActivityForResult(MemeEditorActivity.getIntent(NewMemeActivity.this, fileUri), FilterUtils.REQUEST_GET_MEME);
     }
 
     @Override
