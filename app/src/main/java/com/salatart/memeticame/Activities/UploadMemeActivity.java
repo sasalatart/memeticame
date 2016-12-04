@@ -21,17 +21,19 @@ import com.salatart.memeticame.Listeners.OnRequestShowListener;
 import com.salatart.memeticame.Models.Meme;
 import com.salatart.memeticame.R;
 import com.salatart.memeticame.Utils.CallbackUtils;
+import com.salatart.memeticame.Utils.FileUtils;
 import com.salatart.memeticame.Utils.MemeUtils;
 import com.salatart.memeticame.Utils.Routes;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import mabbas007.tagsedittext.TagsEditText;
 import okhttp3.Request;
 
 public class UploadMemeActivity extends AppCompatActivity {
 
     @BindView(R.id.image_meme) ImageView mMemeImage;
-    @BindView(R.id.tags_edit_text) mabbas007.tagsedittext.TagsEditText mTagsEditText;
+    @BindView(R.id.tags_edit_text) TagsEditText mTagsEditText;
 
     private Uri mMemeUri;
     private int mCategoryId;
@@ -77,6 +79,7 @@ public class UploadMemeActivity extends AppCompatActivity {
         View promptView = layoutInflater.inflate(R.layout.prompt_meme_name, null);
 
         final EditText memeNameInput = (EditText) promptView.findViewById(R.id.input_meme_name);
+        memeNameInput.setText(MemeUtils.cleanName(FileUtils.getName(UploadMemeActivity.this, mMemeUri)));
 
         AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(UploadMemeActivity.this);
         alertDialogBuilder.setView(promptView);

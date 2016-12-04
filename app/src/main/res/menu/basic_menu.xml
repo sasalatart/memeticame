@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<menu xmlns:android="http://schemas.android.com/apk/res/android">
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
     <item
         android:id="@+id/action_create_group_chat"
         android:orderInCategory="100"
@@ -28,7 +29,8 @@
     <item
         android:id="@+id/action_see_channels"
         android:orderInCategory="100"
-        android:title="@string/channels" />
+        android:title="@string/channels"
+        app:showAsAction="ifRoom" />
 
     <item
         android:id="@+id/action_emojime"
