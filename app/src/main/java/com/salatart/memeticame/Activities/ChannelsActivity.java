@@ -27,7 +27,6 @@ import butterknife.ButterKnife;
 import okhttp3.Request;
 
 public class ChannelsActivity extends AppCompatActivity {
-
     @BindView(R.id.list_view_channels) ListView mChannelsListView;
     @BindView(R.id.loading_channels) com.wang.avi.AVLoadingIndicatorView mLoading;
 
@@ -109,7 +108,7 @@ public class ChannelsActivity extends AppCompatActivity {
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
-        if (requestCode == FilterUtils.REQUEST_CREATE_CHANNEL && resultCode == RESULT_OK && data != null) {
+        if (requestCode == FilterUtils.REQUEST_CREATE_CHANNEL && resultCode == RESULT_OK && data != null && mChannels != null) {
             mChannels.add((Channel) data.getParcelableExtra(Channel.PARCELABLE_KEY));
             mAdapter.notifyDataSetChanged();
         }
