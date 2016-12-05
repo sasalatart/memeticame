@@ -23,7 +23,9 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
 
-        <meta-data android:name="com.google.android.gms.vision.DEPENDENCIES" android:value="face"/>
+        <meta-data
+            android:name="com.google.android.gms.vision.DEPENDENCIES"
+            android:value="face" />
 
         <service android:name=".Services.MyFcmListenerService">
             <intent-filter>
@@ -61,7 +63,14 @@
         <activity android:name=".Activities.PlainMemeGalleryActivity" />
         <activity android:name=".Activities.MemeGalleryActivity" />
         <activity android:name=".Activities.MemeEditorActivity" />
-        <activity android:name=".Activities.EmojimeActivity" />
+
+        <activity
+            android:name=".Activities.EmojimeActivity"
+            android:launchMode="singleTop">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".Activities.MainActivity" />
+        </activity>
 
         <activity android:name=".Activities.ChannelsActivity">
             <meta-data

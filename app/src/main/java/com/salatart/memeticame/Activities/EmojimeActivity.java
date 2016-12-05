@@ -9,7 +9,6 @@ import android.os.Bundle;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.util.SparseArray;
-import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageButton;
 
@@ -76,13 +75,6 @@ public class EmojimeActivity extends AppCompatActivity {
         savedInstanceState.putParcelableArrayList(FaceEmotion.PARCELABLE_ARRAY_KEY, mFaceEmotions);
         savedInstanceState.putString(IMAGE_PATH_STATE, mImagePath);
         super.onSaveInstanceState(savedInstanceState);
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        FileUtils.deleteFile(mImagePath);
-        finish();
-        return true;
     }
 
     public void takePicture(View view) {
