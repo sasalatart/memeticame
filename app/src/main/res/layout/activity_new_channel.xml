@@ -11,28 +11,39 @@
     android:paddingTop="@dimen/activity_vertical_margin"
     tools:context="com.salatart.memeticame.Activities.NewChannelActivity">
 
-    <android.support.design.widget.TextInputLayout
-        android:id="@+id/layout_input_channel_name"
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
-        <EditText
-            android:id="@+id/input_channel_name"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
-    </android.support.design.widget.TextInputLayout>
+        <android.support.design.widget.TextInputLayout
+            android:id="@+id/layout_input_channel_name"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1">
 
-    <Button
-        android:id="@+id/button_add_category_input"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:onClick="addCategoryInput"
-        android:text="@string/add_category" />
+            <EditText
+                android:id="@+id/input_channel_name"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="@string/channel_name" />
+        </android.support.design.widget.TextInputLayout>
+
+        <Button
+            android:id="@+id/button_add_category_input"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:onClick="onAddCategoryInput"
+            android:text="@string/add_category" />
+    </LinearLayout>
 
     <LinearLayout
         android:id="@+id/layout_categories"
         android:layout_width="match_parent"
         android:layout_height="0dp"
+        android:layout_marginBottom="@dimen/activity_vertical_margin"
+        android:layout_marginLeft="@dimen/activity_horizontal_margin"
+        android:layout_marginRight="@dimen/activity_horizontal_margin"
+        android:layout_marginTop="@dimen/activity_vertical_margin"
         android:layout_weight="1"
         android:orientation="vertical" />
 
