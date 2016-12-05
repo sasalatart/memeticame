@@ -9,6 +9,7 @@
         android:id="@+id/attachment_icon"
         android:layout_width="@dimen/list_item_icon_size"
         android:layout_height="match_parent"
+        android:layout_marginRight="@dimen/list_item_margin"
         android:src="@drawable/ic_insert_drive_file_black_24dp" />
 
     <TextView
